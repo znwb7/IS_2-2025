@@ -9,6 +9,7 @@
 | Entrega 6 | XP: Incremento 4, Reflexión y Presentación Final | ? /26 |
 
 🛠️ Stack Tecnológico y Herramientas
+
 Este proyecto está desarrollado utilizando las siguientes tecnologías y configuraciones de entorno:
 
 Lenguaje y Frameworks
