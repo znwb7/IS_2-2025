@@ -1,4 +1,4 @@
-package com.ucv.comedor_app;
+package com.ucv.model;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
