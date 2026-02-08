@@ -1,3 +1,4 @@
+package com.ucv.model;
 import javax.swing.*;
 
 public class CalculoCCB extends JFrame {
