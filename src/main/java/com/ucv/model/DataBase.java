@@ -32,16 +32,14 @@ public class DataBase {
         }
     }
     
-
     public static void main(String[] args) {
 
        DataBase miBaseDeDatos = new DataBase();
-
+      
     try {
         // 2. Llamamos al método a través del objeto
         // Como ahora devuelve un String y lanza IOException, lo manejamos así:
-        String resultado = miBaseDeDatos.Registro("Andy", "32983764", "1234");
-        
+        String resultado = miBaseDeDatos.Registro("Valeria", "27444333", "1234");
         System.out.println("Resultado del registro: " + resultado);
 
     } catch (IOException e) {
@@ -49,28 +47,35 @@ public class DataBase {
     }
     }
 
-    public String ComprobarDatos(String ID, String Password) throws IOException {
-       // 1. Usar la ruta dinámica, no el nombre suelto
-        File file = new File(RUTA_ARCHIVO);
-        if (!file.exists()) return "ARCHIVO_NO_EXISTE";
+public String ComprobarDatos(String ID, String Password) throws IOException {
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                // Suponiendo que en DataBase.txt guardas con espacios: Juan 123 clave Rol
-                String[] word = line.split("\\s*\\|\\s*"); 
-                
-                if (word.length >= 3) {
-                    String idEnArchivo = word[1];
-                    if (idEnArchivo.equals(ID)) {
-                        return "Persona_ya_existente";
+    File file = new File(RUTA_ARCHIVO);
+    if (!file.exists()) return "ARCHIVO_NO_EXISTE";
+
+    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            String[] word = line.split("\\s*\\|\\s*");
+
+            if (word.length >= 4) {
+                String idEnArchivo = word[1];
+                String passEnArchivo = word[2];
+
+                if (idEnArchivo.equals(ID)) {
+                    if (passEnArchivo.equals(Password)) {
+                        return "EXITO";
+                    } else {
+                        return "PASSWORD_INCORRECTO";
                     }
                 }
             }
         }
-        return "USUARIO_NO_ENCONTRADO"; // Terminó de leer y no halló el ID
-
     }
+
+    return "USUARIO_NO_ENCONTRADO";
+}
+
 
     public String Registro(String Name, String ID, String Password) throws IOException {
         CrearArchivo(); 
@@ -91,13 +96,6 @@ public class DataBase {
             throw new IOException("Error al escribir en la base de datos local.");
         }
     }
-
-
-
-
-
-
-
 
    /*  public void Registro(String Name, String ID, String Password) {
         CrearArchivo();
