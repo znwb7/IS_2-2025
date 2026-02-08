@@ -3,71 +3,84 @@ import java.io.*;
 
 public class DataBase {
    
-    private static void CrearArchivo() {
-        new File("DataBase.txt");
-    }
+    // Obtenemos la ruta dinámica del proyecto para que funcione en cualquier PC
+    private static final String SEPARATOR = File.separator;
+    private static final String RUTA_ARCHIVO = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "Output" + SEPARATOR + "DataBase.txt";
+    private static final String RUTA_BDSecretaria = System.getProperty("user.dir")+ SEPARATOR + "src" + SEPARATOR + "main" + SEPARATOR + "resources"+ SEPARATOR + "BaseDataSecretaria.txt";
 
-    public static void main(String[] args) {
-    }
-
-    public static void ComprobarDatos(String ID, String Password) {
-        String ArchiveName = "DataBase.txt"; 
-        try (BufferedReader br = new BufferedReader(new FileReader(ArchiveName))) {
-            String Line;
-            boolean DaDaCo1 = false, DaDaCo2 = false;
-            while ((Line = br.readLine()) != null) {
-                String[] Word = Line.split(" ");
-                if (Word[1].equals(ID)){
-                    DaDaCo1= true;                   
-                }
-                if ( Word[2].equals(Password)){
-                    DaDaCo2= true;
-                }
-                if (DaDaCo1 || DaDaCo2) {
-                    break;
-                }
-            }            
-            if (DaDaCo1 == false || DaDaCo2 == false) {
-                System.out.println("Usuario no encontrado en la base de datos.");
+    private void CrearArchivo() throws IOException {
+        File archivo = new File(RUTA_ARCHIVO);
+        try {
+            // Crear carpetas si no existen
+            File directorio = archivo.getParentFile();
+            if (directorio != null && !directorio.exists()) {
+                directorio.mkdirs();
             }
-            if (DaDaCo1 && DaDaCo2 == false){
-                System.out.println("Contraseña Incorrecta");
+            // Crear archivo si no existe
+            if (!archivo.exists()) {
+                archivo.createNewFile();
             }
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            throw new IOException("Error Para Crear el Archivo");
+        }
     }
 
-    public static void Registro(String Name, String ID, String Password, String RutaSecretaria) {
+    public String Registro(String Name, String ID, String Password) throws IOException {
+        CrearArchivo(); 
+        String Rol = FindUser(ID); 
+        if (Rol == null) {
+            return "USUARIO_NO_ENCONTRADO_SECRETARIA"; 
+        }
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
+            
+            // Usamos el formato de pipes para ser consistentes con tu BD
+            String NLine = Name + " | " + ID + " | " + Password + " | " + Rol;
+            escritor.write(NLine);
+            escritor.newLine();
+            
+            return "REGISTRO_EXITOSO"; // Mensaje positivo para el Controlador
+            
+        } catch (IOException e) {
+            throw new IOException("Error al escribir en la base de datos local.");
+        }
+    }
+
+   /*  public void Registro(String Name, String ID, String Password) {
         CrearArchivo();
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("DataBase.txt", true))) {
-            BufferedReader br = new BufferedReader(new FileReader("DataBase.txt"));
-            String Line;           
-            while ((Line = br.readLine()) != null) { //si ya existe en la database
-                String[] Word = Line.split(" ");
-                if (Word[1].equals(ID)){
-                    System.out.println("ya existes en la database");
-                    return;
+        // Abrimos el archivo de la ruta específica para lectura y escritura
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
+            
+            // Verificamos duplicados usando la misma ruta
+             try (BufferedReader br = new BufferedReader(new FileReader(RUTA_ARCHIVO))) {
+                String Line;           
+                while ((Line = br.readLine()) != null) {
+                    String[] Word = Line.split("\"\\\\s*\\\\|\\\\s*\"");
+                    if (Word.length > 1 && Word[1].equals(ID)) {
+                        System.out.println("El ID ya existe en la base de datos.");
+                        return;
+                    }
                 }
             }
-            String Rol = FindUser(ID, RutaSecretaria);            
-            if (Rol == null){
+            String Rol = FindUser(ID);            
+            /*if (Rol == null){
                 System.out.println("no hay vida");
                 return;
-            }else{
+            }else{} 
 
-                String NLine = Name + " " + ID + " " + Password + " " + Rol;
-                escritor.write(NLine);
-                escritor.newLine();
-            }
+            String NLine = Name + " | " + ID + " | " + Password + " | " + Rol;
+            escritor.write(NLine);
+            escritor.newLine();
+            
 
         } 
         catch (IOException e) {}
-    }
+    } */
 
-    private static String FindUser (String ID, String RutaSecretaria){
-        try (BufferedReader br = new BufferedReader(new FileReader(RutaSecretaria))) {
+    private static String FindUser (String ID){
+        try (BufferedReader br = new BufferedReader(new FileReader(RUTA_BDSecretaria))) {
             String Line;
             while ((Line = br.readLine()) != null) {
-                String[] Word = Line.split(" ");
+                String[] Word = Line.split("\\s*\\|\\s*");
                 if (Line.isEmpty()) continue;
                 if (Word[1].equals(ID)) {
                     return Word[3]; 
