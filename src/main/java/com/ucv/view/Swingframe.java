@@ -1,4 +1,4 @@
-package com.ucv.ui;
+package com.ucv.view;
 
 public class Swingframe {
     
