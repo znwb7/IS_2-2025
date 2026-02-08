@@ -5,8 +5,15 @@ public class DataBase {
    
     // Obtenemos la ruta dinámica del proyecto para que funcione en cualquier PC
     private static final String SEPARATOR = File.separator;
-    private static final String RUTA_ARCHIVO = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "Output" + SEPARATOR + "DataBase.txt";
-    private static final String RUTA_BDSecretaria = System.getProperty("user.dir")+ SEPARATOR + "src" + SEPARATOR + "main" + SEPARATOR + "resources"+ SEPARATOR + "BaseDataSecretaria.txt";
+    private static final String RUTA_ARCHIVO = System.getProperty("user.dir") 
+            + SEPARATOR + "target" 
+            + SEPARATOR + "Output" 
+            + SEPARATOR + "DataBase.txt";
+    private static final String RUTA_BDSecretaria = System.getProperty("user.dir") 
+        + SEPARATOR + "src" 
+        + SEPARATOR + "main" 
+        + SEPARATOR + "resources"
+        + SEPARATOR + "BaseDataSecretaria.txt";
 
     private void CrearArchivo() throws IOException {
         File archivo = new File(RUTA_ARCHIVO);
@@ -23,6 +30,46 @@ public class DataBase {
         } catch (IOException e) {
             throw new IOException("Error Para Crear el Archivo");
         }
+    }
+    
+
+    public static void main(String[] args) {
+
+       DataBase miBaseDeDatos = new DataBase();
+
+    try {
+        // 2. Llamamos al método a través del objeto
+        // Como ahora devuelve un String y lanza IOException, lo manejamos así:
+        String resultado = miBaseDeDatos.Registro("Andy", "32983764", "1234");
+        
+        System.out.println("Resultado del registro: " + resultado);
+
+    } catch (IOException e) {
+        System.err.println("Error crítico de archivo: " + e.getMessage());
+    }
+    }
+
+    public String ComprobarDatos(String ID, String Password) throws IOException {
+       // 1. Usar la ruta dinámica, no el nombre suelto
+        File file = new File(RUTA_ARCHIVO);
+        if (!file.exists()) return "ARCHIVO_NO_EXISTE";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                // Suponiendo que en DataBase.txt guardas con espacios: Juan 123 clave Rol
+                String[] word = line.split("\\s*\\|\\s*"); 
+                
+                if (word.length >= 3) {
+                    String idEnArchivo = word[1];
+                    if (idEnArchivo.equals(ID)) {
+                        return "Persona_ya_existente";
+                    }
+                }
+            }
+        }
+        return "USUARIO_NO_ENCONTRADO"; // Terminó de leer y no halló el ID
+
     }
 
     public String Registro(String Name, String ID, String Password) throws IOException {
@@ -44,6 +91,13 @@ public class DataBase {
             throw new IOException("Error al escribir en la base de datos local.");
         }
     }
+
+
+
+
+
+
+
 
    /*  public void Registro(String Name, String ID, String Password) {
         CrearArchivo();
