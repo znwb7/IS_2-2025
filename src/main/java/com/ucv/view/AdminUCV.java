@@ -63,6 +63,8 @@ public class AdminUCV extends JFrame {
 
         contenedorInferior.add(panelCuerpo, BorderLayout.CENTER);
         add(contenedorInferior, BorderLayout.CENTER);
+
+
     }
 
     private JPanel crearEncabezadoDerecho() {
@@ -117,6 +119,29 @@ public class AdminUCV extends JFrame {
         panelEncabezado.add(lblFecha);
         panelEncabezado.add(lblLogo);
 
+        JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelFooter.setOpaque(false);
+        panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
+
+        JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
+        lblCerrar.setForeground(Color.WHITE);
+        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
+        lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                dispose();
+                new LoginUCV().setVisible(true);
+            }
+        });
+
+        panelFooter.add(lblCerrar);
+
+        // Añadir el footer al layout principal
+        add(panelFooter, BorderLayout.SOUTH);
+
+
         return panelEncabezado;
     }
 
@@ -150,7 +175,6 @@ private JPanel crearBarraLateral() {
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // --- LÓGICA DE NAVEGACIÓN ---
         btn.addActionListener(e -> {
             if (texto.equals("Calcular CCB")) {
                 dispose(); // Cierra el panel de administración

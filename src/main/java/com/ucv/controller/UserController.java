@@ -25,9 +25,9 @@ public class UserController {
                 case "USUARIO_NO_ENCONTRADO_SECRETARIA":
                     return new Response(false, "El ID no existe en la base de la secretaría");
 
-                case "Persona_ya_existente":
+                case "PERSONA_YA_EXISTENTE":
                     return new Response(false, "El usuario ya está registrado");
-
+                    
                 default:
                     return new Response(false, "Error desconocido durante el registro");
             }

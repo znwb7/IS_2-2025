@@ -78,7 +78,6 @@ public class PrincipalUCV extends JFrame {
         lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
         lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // CORRECCIÓN: Cierre de sesión redirige al Login
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 dispose();

@@ -76,70 +76,69 @@ public String ComprobarDatos(String ID, String Password) throws IOException {
     return "USUARIO_NO_ENCONTRADO";
 }
 
-    public String Registro(String Name, String ID, String Password) throws IOException {
-        CrearArchivo(); 
-        String Rol = FindUser(ID); 
-        if (Rol == null) {
-            return "USUARIO_NO_ENCONTRADO_SECRETARIA"; 
-        }
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
-            
-            // Usamos el formato de pipes para ser consistentes con la BD
-            String NLine = Name + " | " + ID + " | " + Password + " | " + Rol;
-            escritor.write(NLine);
-            escritor.newLine();
-            
-            return "REGISTRO_EXITOSO"; // Mensaje positivo para el Controlador
-            
-        } catch (IOException e) {
-            throw new IOException("Error al escribir en la base de datos local.");
-        }
+public String Registro(String Name, String ID, String Password) throws IOException {
+    CrearArchivo(); 
+    
+    // ✅ Lanza IOException si archivo secretaría no existe
+    String Rol = FindUser(ID); 
+    if (Rol == null) {
+        return "USUARIO_NO_ENCONTRADO_SECRETARIA"; 
     }
+    
+    // ✅ Verificar duplicados con manejo de error
+    try {
+        if (usuarioYaExiste(ID)) {
+            return "PERSONA_YA_EXISTENTE";
+        }
+    } catch (IOException e) {
+        return "ERROR_LECTURA_DB";
+    }
+    
+    // ✅ Escritura final
+    try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
+        String NLine = Name + " | " + ID + " | " + Password + " | " + Rol;
+        escritor.write(NLine);
+        escritor.newLine();
+        return "REGISTRO_EXITOSO";
+    }
+}
 
-   /*  public void Registro(String Name, String ID, String Password) {
-        CrearArchivo();
-        // Abrimos el archivo de la ruta específica para lectura y escritura
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
-            
-            // Verificamos duplicados usando la misma ruta
-             try (BufferedReader br = new BufferedReader(new FileReader(RUTA_ARCHIVO))) {
-                String Line;           
-                while ((Line = br.readLine()) != null) {
-                    String[] Word = Line.split("\"\\\\s*\\\\|\\\\s*\"");
-                    if (Word.length > 1 && Word[1].equals(ID)) {
-                        System.out.println("El ID ya existe en la base de datos.");
-                        return;
-                    }
-                }
+
+
+private boolean usuarioYaExiste(String id) throws IOException {
+    File file = new File(RUTA_ARCHIVO);
+    if (!file.exists()) return false;
+    
+    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.trim().isEmpty()) continue;
+            String[] partes = line.split("\\s*\\|\\s*");
+            if (partes.length >= 2 && partes[1] != null && partes[1].trim().equals(id)) {
+                return true;
             }
-            String Rol = FindUser(ID);            
-            /*if (Rol == null){
-                System.out.println("no hay vida");
-                return;
-            }else{} 
-
-            String NLine = Name + " | " + ID + " | " + Password + " | " + Rol;
-            escritor.write(NLine);
-            escritor.newLine();
-            
-
-        } 
-        catch (IOException e) {}
-    } */
-
-    private static String FindUser(String ID){
-        try (BufferedReader br = new BufferedReader(new FileReader(RUTA_BDSecretaria))) {
-            String Line;
-            while ((Line = br.readLine()) != null) {
-                String[] Word = Line.split("\\s*\\|\\s*");
-                if (Line.isEmpty()) continue;
-                if (Word[1].equals(ID)) {
-                    return Word[3]; 
-                }
-            } 
-            return null; 
-        } catch (IOException e) { 
-            return null; 
         }
+    } catch (IOException e) {
+        System.err.println("Error leyendo DataBase.txt: " + e.getMessage());
+        return false; 
     }
+    return false;
+}
+
+
+private static String FindUser(String ID) throws IOException {  // ← CAMBIO: Lanza IOException
+    try (BufferedReader br = new BufferedReader(new FileReader(RUTA_BDSecretaria))) {
+        String Line;
+        while ((Line = br.readLine()) != null) {
+            if (Line.trim().isEmpty()) continue;
+            String[] Word = Line.split("\\s*\\|\\s*");
+            if (Word.length >= 4 && Word[1] != null && Word[1].trim().equals(ID)) {
+                return Word[3] != null ? Word[3].trim() : "estudiante";
+            }
+        } 
+        return null; 
+    }
+}
+
+
 }
