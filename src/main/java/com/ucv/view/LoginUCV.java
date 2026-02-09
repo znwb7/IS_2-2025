@@ -11,14 +11,12 @@ public class LoginUCV extends JFrame {
 
     private final UserController controller = new UserController();
 
-    // Colores institucionales
     private static final Color AZUL_UCV = new Color(18, 71, 150);
     private static final Color NARANJA_UCV = new Color(250, 168, 44);
     private static final Color GRIS_INPUT = new Color(235, 235, 235);
 
     public LoginUCV() {
 
-        // Ventana
         setTitle("Login · Comedor UCV");
         setSize(520, 820);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -26,7 +24,6 @@ public class LoginUCV extends JFrame {
         setLayout(new BorderLayout());
         getContentPane().setBackground(Color.WHITE);
 
-        // ================= LOGO =================
         JPanel panelLogo = new JPanel();
         panelLogo.setBackground(Color.WHITE);
         panelLogo.setBorder(BorderFactory.createEmptyBorder(30, 0, 10, 0));
@@ -44,7 +41,6 @@ public class LoginUCV extends JFrame {
         panelLogo.add(logo);
         add(panelLogo, BorderLayout.NORTH);
 
-        // ================= CONTENIDO =================
         JPanel center = new JPanel(new GridBagLayout());
         center.setBackground(Color.WHITE);
 
@@ -57,7 +53,6 @@ public class LoginUCV extends JFrame {
         gbc.insets = new Insets(10, 0, 30, 0);
         center.add(titulo, gbc);
 
-        // ================= TARJETA =================
         RoundedPanel card = new RoundedPanel(35, AZUL_UCV);
         card.setPreferredSize(new Dimension(380, 460));
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
@@ -110,7 +105,7 @@ public class LoginUCV extends JFrame {
 
         add(center, BorderLayout.CENTER);
 
-        // ================= EVENTOS =================
+        // ================= EVENTOS (MODIFICADO) =================
         btnLogin.addActionListener(e -> {
             String id = campoCedula.getText().equals("Cédula") ? "" : campoCedula.getText();
             String pass = new String(campoPass.getPassword()).equals("Contraseña")
@@ -118,10 +113,12 @@ public class LoginUCV extends JFrame {
 
             Response r = controller.login(id, pass);
 
-            lblMensaje.setText(r.getMessage());
-            lblMensaje.setForeground(
-                    r.isSuccess() ? new Color(0, 180, 0) : Color.RED
-            );
+            if (r.isSuccess()) {
+                controller.ejecutarRedireccion(id, this);
+            } else {
+                lblMensaje.setText(r.getMessage());
+                lblMensaje.setForeground(Color.RED);
+            }
         });
 
         linkRegistro.addMouseListener(new MouseAdapter() {
@@ -133,12 +130,9 @@ public class LoginUCV extends JFrame {
         });
     }
 
-    // ================= COMPONENTES =================
     private JTextField crearCampo(String placeholder, boolean password) {
         JTextField campo = password ? new JPasswordField(placeholder) : new JTextField(placeholder);
-
         if (password) ((JPasswordField) campo).setEchoChar((char) 0);
-
         campo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         campo.setBackground(GRIS_INPUT);
         campo.setFont(new Font("Segoe UI", Font.PLAIN, 16));
@@ -155,7 +149,6 @@ public class LoginUCV extends JFrame {
                     if (password) ((JPasswordField) campo).setEchoChar('•');
                 }
             }
-
             @Override
             public void focusLost(FocusEvent e) {
                 if (campo.getText().isEmpty()) {
@@ -164,21 +157,17 @@ public class LoginUCV extends JFrame {
                 }
             }
         });
-
         return campo;
     }
 
-    // ================= PANEL REDONDEADO =================
     static class RoundedPanel extends JPanel {
         private final int radius;
         private final Color color;
-
         public RoundedPanel(int radius, Color color) {
             this.radius = radius;
             this.color = color;
             setOpaque(false);
         }
-
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;

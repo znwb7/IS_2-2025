@@ -76,7 +76,6 @@ public String ComprobarDatos(String ID, String Password) throws IOException {
     return "USUARIO_NO_ENCONTRADO";
 }
 
-
     public String Registro(String Name, String ID, String Password) throws IOException {
         CrearArchivo(); 
         String Rol = FindUser(ID); 
@@ -85,7 +84,7 @@ public String ComprobarDatos(String ID, String Password) throws IOException {
         }
         try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
             
-            // Usamos el formato de pipes para ser consistentes con tu BD
+            // Usamos el formato de pipes para ser consistentes con la BD
             String NLine = Name + " | " + ID + " | " + Password + " | " + Rol;
             escritor.write(NLine);
             escritor.newLine();
@@ -128,7 +127,7 @@ public String ComprobarDatos(String ID, String Password) throws IOException {
         catch (IOException e) {}
     } */
 
-    private static String FindUser (String ID){
+    private static String FindUser(String ID){
         try (BufferedReader br = new BufferedReader(new FileReader(RUTA_BDSecretaria))) {
             String Line;
             while ((Line = br.readLine()) != null) {

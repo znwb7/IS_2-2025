@@ -67,6 +67,39 @@ public class UserController {
     }
 
     // ======================
+    // REDIRECCIÓN (NUEVO)
+    // ======================
+    public void ejecutarRedireccion(String id, javax.swing.JFrame ventanaLogin) {
+        String rol = "estudiante";
+        String separador = java.io.File.separator;
+        String rutaSecretaria = System.getProperty("user.dir")
+                + separador + "src" + separador + "main" + separador + "resources"
+                + separador + "BaseDataSecretaria.txt";
+
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(rutaSecretaria))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] word = line.split("\\s*\\|\\s*");
+                if (word.length >= 4 && word[1].equals(id)) {
+                    rol = word[3].toLowerCase().trim();
+                    break;
+                }
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("Error al determinar rol: " + e.getMessage());
+        }
+
+        ventanaLogin.dispose();
+
+        if (rol.equals("admin")) {
+            new com.ucv.view.AdminUCV("Administrador").setVisible(true);
+        } else {
+            new com.ucv.view.PrincipalUCV(id).setVisible(true);
+        }
+    }
+
+    // ======================
     // RESPONSE (DTO)
     // ======================
     public static class Response {

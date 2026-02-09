@@ -30,7 +30,18 @@ public class RegistroUCV extends JFrame {
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBorder(BorderFactory.createEmptyBorder(40, 0, 10, 0));
 
-        JLabel lblLogo = new JLabel("[Logo UCV]");
+            JLabel lblLogo = new JLabel();
+            try {
+                java.net.URL res = getClass().getResource("/com/ucv/view/logoucv.png");
+                if (res != null) {
+                    Image img = new ImageIcon(res).getImage().getScaledInstance(140, 140, Image.SCALE_SMOOTH);
+                    lblLogo.setIcon(new ImageIcon(img));
+                } else {
+                    lblLogo.setText("[Logo UCV]");
+                }
+            } catch (Exception e) {
+                lblLogo.setText("[Logo UCV]");
+            }
         lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel lblTitulo = new JLabel("Comedor UCV");
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 28));
@@ -103,7 +114,6 @@ if (response.isSuccess()) {
     new LoginUCV().setVisible(true);
     dispose();
 }
-
         });
 
         JLabel lblLoginLink = new JLabel("<html><u>Iniciar Sesión</u></html>", SwingConstants.CENTER);
