@@ -3,8 +3,14 @@ package com.ucv.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class PrincipalUCV extends JFrame {
+
+    LocalDate fechaActual = LocalDate.now(); 
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    String fechaTexto = fechaActual.format(formatter);
 
     private final Color AZUL_FONDO = new Color(18, 71, 150);
     private final Color AZUL_ENCABEZADO = new Color(10, 45, 110);
@@ -20,17 +26,12 @@ public class PrincipalUCV extends JFrame {
         getContentPane().setBackground(AZUL_FONDO);
         setLayout(new BorderLayout());
 
-        // 1. ENCABEZADO EXPANDIDO
         add(crearEncabezadoExpandido(), BorderLayout.NORTH);
 
-        // 2. CONTENEDOR INFERIOR
         JPanel contenedorInferior = new JPanel(new BorderLayout());
         contenedorInferior.setOpaque(false);
-
-        // Barra lateral con 2 iconos (Casa y Billetera)
         contenedorInferior.add(crearBarraLateral(), BorderLayout.WEST);
 
-        // Panel central con Scroll
         JPanel panelDerecho = new JPanel(new BorderLayout());
         panelDerecho.setOpaque(false);
 
@@ -39,16 +40,14 @@ public class PrincipalUCV extends JFrame {
         panelCuerpo.setOpaque(false);
         panelCuerpo.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
-        // Bienvenida
         JLabel lblBienvenida = new JLabel("Bienvenido, " + nombreUsuario);
         lblBienvenida.setForeground(Color.WHITE);
         lblBienvenida.setFont(new Font("Arial", Font.PLAIN, 22));
         lblBienvenida.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelCuerpo.add(lblBienvenida);
-        
+
         panelCuerpo.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Título Menus
         JLabel lblMenus = new JLabel("Menús disponibles");
         lblMenus.setForeground(Color.WHITE);
         lblMenus.setFont(new Font("Arial", Font.BOLD, 60));
@@ -57,22 +56,19 @@ public class PrincipalUCV extends JFrame {
 
         panelCuerpo.add(Box.createRigidArea(new Dimension(0, 25)));
 
-        // Tarjetas de Menú
         panelCuerpo.add(crearTarjetaMenu("Menú 1", 1));
         panelCuerpo.add(Box.createRigidArea(new Dimension(0, 20)));
         panelCuerpo.add(crearTarjetaMenu("Menú 2", 2));
         panelCuerpo.add(Box.createRigidArea(new Dimension(0, 20)));
         panelCuerpo.add(crearTarjetaMenu("Menú 3", 3));
 
-        // --- SCROLL PANE ---
         JScrollPane scroll = new JScrollPane(panelCuerpo);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
-        scroll.getVerticalScrollBar().setUnitIncrement(16); // Scroll más suave
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
         panelDerecho.add(scroll, BorderLayout.CENTER);
 
-        // --- 3. PANEL INFERIOR PARA CERRAR SESIÓN ---
         JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelFooter.setOpaque(false);
         panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
@@ -81,15 +77,17 @@ public class PrincipalUCV extends JFrame {
         lblCerrar.setForeground(Color.WHITE);
         lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
         lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // CORRECCIÓN: Cierre de sesión redirige al Login
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 dispose();
+                new LoginUCV().setVisible(true);
             }
         });
         panelFooter.add(lblCerrar);
 
         panelDerecho.add(panelFooter, BorderLayout.SOUTH);
-
         contenedorInferior.add(panelDerecho, BorderLayout.CENTER);
         add(contenedorInferior, BorderLayout.CENTER);
     }
@@ -103,7 +101,7 @@ public class PrincipalUCV extends JFrame {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(AZUL_ENCABEZADO);
                 int alto = 140;
-                int arc = 60; 
+                int arc = 60;
                 g2.fillRoundRect(-30, 0, getWidth() + 60, alto, arc, arc);
                 g2.fillRect(-30, 0, getWidth() + 60, alto / 2);
                 g2.fillRect(-30, 0, 100, alto);
@@ -117,7 +115,7 @@ public class PrincipalUCV extends JFrame {
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 70));
         lblTitulo.setBounds(40, 15, 600, 80);
 
-        JLabel lblFecha = new JLabel("08/02/2026");
+        JLabel lblFecha = new JLabel(fechaTexto);
         lblFecha.setForeground(new Color(210, 210, 210));
         lblFecha.setFont(new Font("Arial", Font.PLAIN, 22));
         lblFecha.setBounds(45, 85, 200, 30);
@@ -148,17 +146,14 @@ public class PrincipalUCV extends JFrame {
         lateral.setPreferredSize(new Dimension(90, 0));
         lateral.setOpaque(false);
 
-        // Cápsula de 180px de alto para 2 iconos bien centrados
         PanelRedondeado capsula = new PanelRedondeado(30, GRIS_CLARO);
-        capsula.setBounds(15, 300, 60, 180); 
+        capsula.setBounds(15, 300, 60, 180);
         capsula.setLayout(new GridLayout(2, 1, 0, 20));
 
-        // 1. CASA (Página actual)
         JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
         casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
         casa.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 
-        // 2. BILLETERA
         JLabel billetera = new JLabel("", SwingConstants.CENTER);
         try {
             java.net.URL resB = getClass().getResource("/com/ucv/view/billetera.png");
@@ -181,7 +176,6 @@ public class PrincipalUCV extends JFrame {
 
         capsula.add(casa);
         capsula.add(billetera);
-
         lateral.add(capsula);
         return lateral;
     }
@@ -220,10 +214,10 @@ public class PrincipalUCV extends JFrame {
         btn.setBorder(BorderFactory.createEmptyBorder());
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // CORRECCIÓN: Ahora abre la selección de turnos
         btn.addActionListener(e -> {
             dispose();
-            // Asumiendo que existe TurnosUCV
-            // new TurnosUCV(titulo).setVisible(true); 
+            new TurnosUCV(titulo).setVisible(true);
         });
 
         JPanel pBtn = new JPanel(new FlowLayout(FlowLayout.CENTER));

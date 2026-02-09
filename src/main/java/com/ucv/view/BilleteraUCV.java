@@ -3,8 +3,16 @@ package com.ucv.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import com.ucv.controller.RedirectController;
 
 public class BilleteraUCV extends JFrame {
+
+    LocalDate fechaActual = LocalDate.now();  // Obtiene fecha del sistema
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    String fechaTexto = fechaActual.format(formatter);
 
     // Colores institucionales
     private final Color AZUL_FONDO = new Color(18, 71, 150);
@@ -13,7 +21,17 @@ public class BilleteraUCV extends JFrame {
     private final Color GRIS_CLARO = new Color(225, 225, 225);
     private final Color AMARILLO_BOTON = new Color(250, 210, 50);
 
+    // Variable para mantener la sesión sin alterar la lógica original
+    private String idSesion = "Usuario";
+
+    // --- CONSTRUCTOR ORIGINAL (Para evitar errores en otras vistas) ---
     public BilleteraUCV() {
+        this("Usuario");
+    }
+
+    // --- CONSTRUCTOR PARA NAVEGACIÓN ---
+    public BilleteraUCV(String idUsuario) {
+        this.idSesion = idUsuario;
         setTitle("Comedor UCV - Billetera Digital");
         setSize(1100, 850);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -32,17 +50,17 @@ public class BilleteraUCV extends JFrame {
         contenedorInferior.add(crearBarraLateral(), BorderLayout.WEST);
 
         // Panel de Contenido Central
-        JPanel panelCuerpo = new JPanel(null); 
+        JPanel panelCuerpo = new JPanel(null);
         panelCuerpo.setOpaque(false);
 
         // Etiqueta "Saldo Disponible"
         JLabel lblSaldoTitulo = new JLabel("Saldo Disponible");
         lblSaldoTitulo.setForeground(Color.WHITE);
         lblSaldoTitulo.setFont(new Font("Arial", Font.BOLD, 32));
-        lblSaldoTitulo.setBounds(250, 60, 400, 45); 
+        lblSaldoTitulo.setBounds(250, 60, 400, 45);
         panelCuerpo.add(lblSaldoTitulo);
 
-        // TARJETA DE SALDO
+        // TARJETA DE SALDO (MODIFICADA)
         PanelRedondeado tarjetaSaldo = new PanelRedondeado(40, AZUL_TARJETA_SALDO);
         tarjetaSaldo.setBounds(250, 110, 750, 250);
         tarjetaSaldo.setLayout(null);
@@ -53,8 +71,15 @@ public class BilleteraUCV extends JFrame {
         lblBs.setFont(new Font("Arial", Font.BOLD, 48));
         lblBs.setBounds(40, 80, 150, 70);
         tarjetaSaldo.add(lblBs);
-        
-        // Botón Agregar Saldo (Como en la imagen)
+
+        //MONTO DEL SALDO (0,00)
+        JLabel lblMontoSaldo = new JLabel("0,00");
+        lblMontoSaldo.setForeground(Color.WHITE);
+        lblMontoSaldo.setFont(new Font("Arial", Font.BOLD, 72));
+        lblMontoSaldo.setBounds(160, 60, 300, 100);
+        tarjetaSaldo.add(lblMontoSaldo);
+
+        // Botón Agregar Saldo
         JButton btnAgregar = new JButton("Agregar Saldo");
         btnAgregar.setBackground(AMARILLO_BOTON);
         btnAgregar.setForeground(Color.BLACK);
@@ -80,7 +105,7 @@ public class BilleteraUCV extends JFrame {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(AZUL_ENCABEZADO);
                 int alto = 140;
-                int arc = 60; 
+                int arc = 60;
                 g2.fillRoundRect(-30, 0, getWidth() + 60, alto, arc, arc);
                 g2.fillRect(-30, 0, getWidth() + 60, alto / 2);
                 g2.fillRect(-30, 0, 100, alto);
@@ -94,7 +119,7 @@ public class BilleteraUCV extends JFrame {
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 70));
         lblTitulo.setBounds(40, 15, 600, 80);
 
-        JLabel lblFecha = new JLabel("08/02/2026");
+        JLabel lblFecha = new JLabel(fechaTexto);
         lblFecha.setForeground(new Color(210, 210, 210));
         lblFecha.setFont(new Font("Arial", Font.PLAIN, 22));
         lblFecha.setBounds(45, 85, 200, 30);
@@ -125,23 +150,22 @@ public class BilleteraUCV extends JFrame {
         lateral.setPreferredSize(new Dimension(90, 0));
         lateral.setOpaque(false);
 
-        // Cápsula ajustada a 180 de alto para 2 iconos centrados
         PanelRedondeado capsula = new PanelRedondeado(30, GRIS_CLARO);
-        capsula.setBounds(15, 250, 60, 180); 
+        capsula.setBounds(15, 250, 60, 180);
         capsula.setLayout(new GridLayout(2, 1, 0, 20));
 
-        // 1. CASA
+        // 1. CASA 
         JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
         casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
         casa.setCursor(new Cursor(Cursor.HAND_CURSOR));
         casa.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 dispose();
-                // Asumiendo que existe PrincipalUCV
-                // new PrincipalUCV("Usuario").setVisible(true); 
+                // Redirección dinámica basada en la sesión
+                new RedirectController().ejecutarRedireccion(idSesion);
             }
         });
-        
+
         // 2. BILLETERA
         JLabel billetera = new JLabel("", SwingConstants.CENTER);
         try {
@@ -155,11 +179,11 @@ public class BilleteraUCV extends JFrame {
         } catch (Exception e) {
             billetera.setText("💳");
         }
-        billetera.setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); // Ya estamos en billetera
+        billetera.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 
         capsula.add(casa);
         capsula.add(billetera);
-        
+
         lateral.add(capsula);
         return lateral;
     }

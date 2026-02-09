@@ -1,10 +1,17 @@
 package com.ucv.view;
+
 import javax.swing.*;
 import com.ucv.controller.ccbController;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class CalculoCCB extends JFrame {
+
+    LocalDate fechaActual = LocalDate.now();  // Obtiene fecha del sistema
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    String fechaTexto = fechaActual.format(formatter);
 
     // Colores institucionales
     private final Color AZUL_FONDO = new Color(18, 71, 150);
@@ -12,6 +19,7 @@ public class CalculoCCB extends JFrame {
     private final Color AZUL_TARJETA = new Color(32, 86, 172);
     private final Color AMARILLO_BOTON = new Color(250, 210, 50);
     private final Color GRIS_CLARO = new Color(225, 225, 225);
+    private final Color GRIS_LATERAL = new Color(225, 225, 225);
 
     public CalculoCCB() {
         setTitle("Comedor UCV - Calcular CCB");
@@ -21,17 +29,11 @@ public class CalculoCCB extends JFrame {
         getContentPane().setBackground(AZUL_FONDO);
         setLayout(new BorderLayout());
 
-        // 1. ENCABEZADO
         add(crearEncabezadoExpandido(), BorderLayout.NORTH);
 
-        // 2. CONTENEDOR INFERIOR
         JPanel contenedorInferior = new JPanel(new BorderLayout());
         contenedorInferior.setOpaque(false);
-
-        // Barra lateral con navegación (2 iconos: Casa y Billetera)
         contenedorInferior.add(crearBarraLateral(), BorderLayout.WEST);
-
-        // Panel central de contenido (Formulario)
         contenedorInferior.add(crearPanelFormulario(), BorderLayout.CENTER);
 
         add(contenedorInferior, BorderLayout.CENTER);
@@ -46,7 +48,7 @@ public class CalculoCCB extends JFrame {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(AZUL_ENCABEZADO);
                 int alto = 140;
-                int arc = 60; 
+                int arc = 60;
                 g2.fillRoundRect(-30, 0, getWidth() + 60, alto, arc, arc);
                 g2.fillRect(-30, 0, getWidth() + 60, alto / 2);
                 g2.fillRect(-30, 0, 100, alto);
@@ -60,7 +62,7 @@ public class CalculoCCB extends JFrame {
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 70));
         lblTitulo.setBounds(40, 15, 600, 80);
 
-        JLabel lblFecha = new JLabel("08/02/2026");
+        JLabel lblFecha = new JLabel(fechaTexto);
         lblFecha.setForeground(new Color(210, 210, 210));
         lblFecha.setFont(new Font("Arial", Font.PLAIN, 22));
         lblFecha.setBounds(45, 85, 200, 30);
@@ -86,64 +88,38 @@ public class CalculoCCB extends JFrame {
         return panelEncabezado;
     }
 
-    private JPanel crearBarraLateral() {
-        JPanel lateral = new JPanel(null);
-        lateral.setPreferredSize(new Dimension(90, 0));
-        lateral.setOpaque(false);
+private JPanel crearBarraLateral() {
+    JPanel lateral = new JPanel(null);
+    lateral.setPreferredSize(new Dimension(90, 0));
+    lateral.setOpaque(false);
 
-        // Cápsula ajustada a 180px de alto para 2 iconos centrados
-        PanelRedondeado capsula = new PanelRedondeado(30, GRIS_CLARO);
-        capsula.setBounds(15, 250, 60, 180); 
-        capsula.setLayout(new GridLayout(2, 1, 0, 20));
+    PanelRedondeado capsula = new PanelRedondeado(30, GRIS_LATERAL);
+    capsula.setBounds(15, 320, 60, 90); 
+    capsula.setLayout(new GridLayout(1, 1)); 
 
-        // 1. CASA
-        JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
-        casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
-        casa.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        casa.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                dispose();
-                new PrincipalUCV("Usuario").setVisible(true);
-            }
-        });
-
-        // 2. BILLETERA
-        JLabel billetera = new JLabel("", SwingConstants.CENTER);
-        try {
-            java.net.URL resB = getClass().getResource("/com/ucv/view/billetera.png");
-            if (resB != null) {
-                Image imgB = new ImageIcon(resB).getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH);
-                billetera.setIcon(new ImageIcon(imgB));
-            } else {
-                billetera.setText("💳");
-            }
-        } catch (Exception e) { 
-            billetera.setText("💳"); 
+    JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
+    casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
+    casa.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    casa.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseClicked(java.awt.event.MouseEvent e) {
+            dispose();
+            new AdminUCV("Admin").setVisible(true);
         }
-        billetera.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        billetera.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                dispose();
-                new BilleteraUCV().setVisible(true);
-            }
-        });
+    });
 
-        capsula.add(casa);
-        capsula.add(billetera);
-        lateral.add(capsula);
-        return lateral;
-    }
+    capsula.add(casa); 
+    lateral.add(capsula);
+    return lateral;
+}
 
     private JPanel crearPanelFormulario() {
         JPanel panelContenedor = new JPanel(new GridBagLayout());
         panelContenedor.setOpaque(false);
 
-        // Título del formulario
-        JLabel lblTituloForm = new JLabel("Calcular CCB...");
+        JLabel lblTituloForm = new JLabel("Cálculo CCB");
         lblTituloForm.setForeground(Color.WHITE);
         lblTituloForm.setFont(new Font("Arial", Font.PLAIN, 32));
-        
-        // Tarjeta Azul del Formulario
+
         PanelRedondeado tarjetaForm = new PanelRedondeado(30, AZUL_TARJETA);
         tarjetaForm.setPreferredSize(new Dimension(600, 450));
         tarjetaForm.setLayout(new GridBagLayout());
@@ -151,12 +127,8 @@ public class CalculoCCB extends JFrame {
         gbc.insets = new Insets(10, 20, 10, 20);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Estilo de etiquetas
         Font fontLabels = new Font("Arial", Font.PLAIN, 20);
-        
-        // Campos de inputs (se empiezan en la primera fila)
 
-        // Filas de inputs (CF, CV, NB, Merma)
         String[] labels = {"CF:", "CV:", "NB:", "Merma:"};
         JTextField[] fields = new JTextField[4];
 
@@ -175,8 +147,7 @@ public class CalculoCCB extends JFrame {
             tarjetaForm.add(fields[i], gbc);
         }
 
-        // Botón Asignar
-        JButton btnAsignar = new JButton("Asignar a Variables");
+        JButton btnAsignar = new JButton("Calcular CCB");
         btnAsignar.setBackground(AMARILLO_BOTON);
         btnAsignar.setFont(new Font("Arial", Font.BOLD, 22));
         btnAsignar.setPreferredSize(new Dimension(300, 55));
@@ -195,7 +166,6 @@ public class CalculoCCB extends JFrame {
             }
         });
 
-        // Organizar todo en el panel principal
         JPanel layoutFinal = new JPanel();
         layoutFinal.setLayout(new BoxLayout(layoutFinal, BoxLayout.Y_AXIS));
         layoutFinal.setOpaque(false);

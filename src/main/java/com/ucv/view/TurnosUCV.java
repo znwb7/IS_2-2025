@@ -3,8 +3,14 @@ package com.ucv.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class TurnosUCV extends JFrame {
+
+    LocalDate fechaActual = LocalDate.now();  // Obtiene fecha del sistema
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    String fechaTexto = fechaActual.format(formatter);
 
     // Colores institucionales
     private final Color AZUL_FONDO = new Color(18, 71, 150);
@@ -95,7 +101,7 @@ public class TurnosUCV extends JFrame {
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 70));
         lblTitulo.setBounds(40, 15, 600, 80);
 
-        JLabel lblFecha = new JLabel("08/02/2026");
+        JLabel lblFecha = new JLabel(fechaTexto);
         lblFecha.setForeground(new Color(210, 210, 210));
         lblFecha.setFont(new Font("Arial", Font.PLAIN, 22));
         lblFecha.setBounds(45, 85, 200, 30);

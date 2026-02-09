@@ -67,7 +67,7 @@ public class UserController {
     }
 
     // ======================
-    // REDIRECCIÓN (NUEVO)
+    // REDIRECCIÓN
     // ======================
     public void ejecutarRedireccion(String id, javax.swing.JFrame ventanaLogin) {
         String rol = "estudiante";

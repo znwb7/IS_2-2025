@@ -1,10 +1,18 @@
 package com.ucv.view;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class AdminUCV extends JFrame {
+    
+    LocalDate fechaActual = LocalDate.now();  // Obtiene fecha del sistema
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    String fechaTexto = fechaActual.format(formatter);
 
+    // Colores institucionales
     private final Color AZUL_FONDO = new Color(18, 71, 150);
     private final Color AZUL_ENCABEZADO = new Color(10, 45, 110);
     private final Color VERDE_BOTON = new Color(45, 100, 60);
@@ -25,7 +33,7 @@ public class AdminUCV extends JFrame {
         JPanel contenedorInferior = new JPanel(new BorderLayout());
         contenedorInferior.setOpaque(false);
         
-        // BARRA LATERAL (2 iconos: Casa y Billetera)
+        // BARRA LATERAL
         contenedorInferior.add(crearBarraLateral(), BorderLayout.WEST);
 
         // Panel central
@@ -42,7 +50,6 @@ public class AdminUCV extends JFrame {
         
         panelCuerpo.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        // AGREGAR BOTONES
         panelCuerpo.add(crearBotonAdmin("Modificar Menus"));
         panelCuerpo.add(Box.createRigidArea(new Dimension(0, 20)));
         panelCuerpo.add(crearBotonAdmin("Modificar Turnos"));
@@ -52,7 +59,6 @@ public class AdminUCV extends JFrame {
         panelCuerpo.add(crearBotonAdmin("Generar reporte"));
         panelCuerpo.add(Box.createRigidArea(new Dimension(0, 20)));
         
-        // El botón de Calcular CCB ahora tendrá la acción vinculada
         panelCuerpo.add(crearBotonAdmin("Calcular CCB"));
 
         contenedorInferior.add(panelCuerpo, BorderLayout.CENTER);
@@ -83,7 +89,7 @@ public class AdminUCV extends JFrame {
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 70));
         lblTitulo.setBounds(40, 15, 600, 80);
 
-        JLabel lblFecha = new JLabel("08/02/2026");
+        JLabel lblFecha = new JLabel(fechaTexto);
         lblFecha.setForeground(new Color(210, 210, 210));
         lblFecha.setFont(new Font("Arial", Font.PLAIN, 22));
         lblFecha.setBounds(45, 85, 200, 30);
@@ -114,51 +120,21 @@ public class AdminUCV extends JFrame {
         return panelEncabezado;
     }
 
-    private JPanel crearBarraLateral() {
-        JPanel lateral = new JPanel(null);
-        lateral.setPreferredSize(new Dimension(90, 0));
-        lateral.setOpaque(false);
+private JPanel crearBarraLateral() {
+    JPanel lateral = new JPanel(null);
+    lateral.setPreferredSize(new Dimension(90, 0));
+    lateral.setOpaque(false);
 
-        PanelRedondeado capsula = new PanelRedondeado(30, GRIS_LATERAL);
-        capsula.setBounds(15, 250, 60, 180); // Ajustado a 180 de alto y centrado en Y
-        capsula.setLayout(new GridLayout(2, 1, 0, 20));
+    PanelRedondeado capsula = new PanelRedondeado(30, GRIS_LATERAL);
+    capsula.setBounds(15, 320, 60, 90);  
+    capsula.setLayout(new GridLayout(1, 1));  
 
-        JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
-        casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
-        casa.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        casa.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                dispose();
-                new PrincipalUCV("Admin").setVisible(true);
-            }
-        });
-        
-        JLabel billetera = new JLabel("", SwingConstants.CENTER);
-        try {
-            java.net.URL resB = getClass().getResource("/com/ucv/view/billetera.png");
-            if (resB != null) {
-                Image img = new ImageIcon(resB).getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH);
-                billetera.setIcon(new ImageIcon(img));
-            } else {
-                billetera.setText("💳");
-            }
-        } catch (Exception e) {
-            billetera.setText("💳");
-        }
-        billetera.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        billetera.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                dispose();
-                new BilleteraUCV().setVisible(true);
-            }
-        });
-
-        capsula.add(casa);
-        capsula.add(billetera);
-        
-        lateral.add(capsula);
-        return lateral;
-    }
+    JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
+    casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
+    capsula.add(casa); 
+    lateral.add(capsula);
+    return lateral;
+}
 
     private JButton crearBotonAdmin(String texto) {
         JButton btn = new JButton(texto);
@@ -205,6 +181,6 @@ public class AdminUCV extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AdminUCV("Administrador").setVisible(true));
+        SwingUtilities.invokeLater(() -> new AdminUCV("Admin").setVisible(true));
     }
 }

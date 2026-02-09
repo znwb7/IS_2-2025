@@ -17,7 +17,7 @@ public class RedirectController {
     public void ejecutarRedireccion(String id) {
         String rol = "estudiante"; // Valor por defecto
 
-        // Leemos el archivo para buscar el rol del ID [cite: 1]
+        // Leemos el archivo para buscar el rol del ID
         try (BufferedReader br = new BufferedReader(new FileReader(RUTA_BD_SECRETARIA))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -37,7 +37,7 @@ public class RedirectController {
         if (rol.equals("admin")) {
             new AdminUCV("Administrador").setVisible(true);
         } else {
-            // "profesor", "empleado" o "estudiante" van a la vista de comensal [cite: 1, 2]
+            // "profesor", "empleado" o "estudiante" van a la vista de comensal
             new PrincipalUCV(id).setVisible(true);
         }
     }
