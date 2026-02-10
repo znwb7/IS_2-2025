@@ -28,14 +28,14 @@ public class TurnosUCV extends JFrame {
         
         setLayout(new BorderLayout());
 
-        // --- 1. ENCABEZADO ---
+        // ENCABEZADO
         add(crearEncabezadoExpandido(), BorderLayout.NORTH);
 
-        // --- 2. CONTENEDOR INFERIOR ---
+        // CONTENEDOR INFERIOR
         JPanel contenedorInferior = new JPanel(new BorderLayout());
         contenedorInferior.setOpaque(false);
 
-        // Barra lateral unificada (2 iconos: Casa y Billetera)
+        // Barra lateral 
         contenedorInferior.add(crearBarraLateral(), BorderLayout.WEST);
 
         // Panel central de contenido
@@ -132,12 +132,11 @@ public class TurnosUCV extends JFrame {
         lateral.setPreferredSize(new Dimension(90, 0));
         lateral.setOpaque(false);
 
-        // Cápsula ajustada a 180px para 2 iconos centrados
         PanelRedondeado capsula = new PanelRedondeado(30, GRIS_CLARO);
         capsula.setBounds(15, 250, 60, 180); 
         capsula.setLayout(new GridLayout(2, 1, 0, 20));
 
-        // 1. CASA
+        // HOME
         JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
         casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
         casa.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -148,7 +147,7 @@ public class TurnosUCV extends JFrame {
             }
         });
         
-        // 2. BILLETERA
+        // BILLETERA
         JLabel billetera = new JLabel("", SwingConstants.CENTER);
         try {
             java.net.URL resB = getClass().getResource("/com/ucv/view/billetera.png");

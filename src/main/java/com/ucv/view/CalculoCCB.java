@@ -111,7 +111,6 @@ private JPanel crearBarraLateral() {
     lateral.add(capsula);
     return lateral;
 }
-
     private JPanel crearPanelFormulario() {
         JPanel panelContenedor = new JPanel(new GridBagLayout());
         panelContenedor.setOpaque(false);

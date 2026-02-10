@@ -213,7 +213,6 @@ public class PrincipalUCV extends JFrame {
         btn.setBorder(BorderFactory.createEmptyBorder());
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // CORRECCIÓN: Ahora abre la selección de turnos
         btn.addActionListener(e -> {
             dispose();
             new TurnosUCV(titulo).setVisible(true);

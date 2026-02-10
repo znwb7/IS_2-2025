@@ -11,9 +11,7 @@ public class UserController {
         this.dataBase = new DataBase();
     }
 
-    // ======================
     // REGISTRO
-    // ======================
     public Response register(String name, String id, String password) {
         try {
             String resultado = dataBase.Registro(name, id, password);
@@ -37,9 +35,8 @@ public class UserController {
         }
     }
 
-    // ======================
+    
     // LOGIN
-    // ======================
     public Response login(String id, String password) {
         try {
             String resultado = dataBase.ComprobarDatos(id, password);
@@ -66,9 +63,8 @@ public class UserController {
         }
     }
 
-    // ======================
+    
     // REDIRECCIÓN
-    // ======================
     public void ejecutarRedireccion(String id, javax.swing.JFrame ventanaLogin) {
         String rol = "estudiante";
         String separador = java.io.File.separator;
@@ -99,9 +95,7 @@ public class UserController {
         }
     }
 
-    // ======================
     // RESPONSE (DTO)
-    // ======================
     public static class Response {
         private final boolean success;
         private final String message;

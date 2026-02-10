@@ -25,7 +25,7 @@ public class RedirectController {
                 String[] word = line.split("\\s*\\|\\s*");
 
                 if (word.length >= 4 && word[1].equals(id)) {
-                    rol = word[3].toLowerCase().trim(); // Ejemplo: "admin", "profesor" [cite: 1, 2]
+                    rol = word[3].toLowerCase().trim(); 
                     break;
                 }
             }

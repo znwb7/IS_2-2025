@@ -13,7 +13,7 @@ public class ccb {
         if (Merma > 1f) {
             Merma = Merma / 100f;
         }
-        // Cálculo neto del CCB (sin ajustes por rol)
+        // Cálculo neto del CCB
         CCB = ((CF + CV)/NB) * (1 + Merma);
     }
 

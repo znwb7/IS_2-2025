@@ -154,7 +154,7 @@ public class BilleteraUCV extends JFrame {
         capsula.setBounds(15, 250, 60, 180);
         capsula.setLayout(new GridLayout(2, 1, 0, 20));
 
-        // 1. CASA 
+        // HOME 
         JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
         casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
         casa.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -166,7 +166,7 @@ public class BilleteraUCV extends JFrame {
             }
         });
 
-        // 2. BILLETERA
+        // BILLETERA
         JLabel billetera = new JLabel("", SwingConstants.CENTER);
         try {
             java.net.URL resB = getClass().getResource("/com/ucv/view/billetera.png");

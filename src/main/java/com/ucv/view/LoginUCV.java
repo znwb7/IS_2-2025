@@ -105,7 +105,6 @@ public class LoginUCV extends JFrame {
 
         add(center, BorderLayout.CENTER);
 
-        // ================= EVENTOS (MODIFICADO) =================
         btnLogin.addActionListener(e -> {
             String id = campoCedula.getText().equals("Cédula") ? "" : campoCedula.getText();
             String pass = new String(campoPass.getPassword()).equals("Contraseña")

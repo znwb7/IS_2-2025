@@ -25,10 +25,10 @@ public class ConfirmacionUCV extends JFrame {
         getContentPane().setBackground(AZUL_FONDO);
         setLayout(new BorderLayout());
 
-        // --- 1. ENCABEZADO EXPANDIDO ---
+        // ENCABEZADO EXPANDIDO
         add(crearEncabezadoExpandido(), BorderLayout.NORTH);
 
-        // --- 2. CONTENEDOR DE CONTENIDO (Barra lateral + Cuerpo) ---
+        // CONTENEDOR DE CONTENIDO (Barra lateral + Cuerpo)
         JPanel contenedorInferior = new JPanel(new BorderLayout());
         contenedorInferior.setOpaque(false);
 

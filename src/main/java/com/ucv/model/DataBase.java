@@ -35,7 +35,6 @@ public class DataBase {
     public static void main(String[] args) {
 
        DataBase miBaseDeDatos = new DataBase();
-      
     try {
         // 2. Llamamos al método a través del objeto
         // Como ahora devuelve un String y lanza IOException, lo manejamos así:
@@ -79,13 +78,11 @@ public String ComprobarDatos(String ID, String Password) throws IOException {
 public String Registro(String Name, String ID, String Password) throws IOException {
     CrearArchivo(); 
     
-    // ✅ Lanza IOException si archivo secretaría no existe
     String Rol = FindUser(ID); 
     if (Rol == null) {
         return "USUARIO_NO_ENCONTRADO_SECRETARIA"; 
     }
     
-    // ✅ Verificar duplicados con manejo de error
     try {
         if (usuarioYaExiste(ID)) {
             return "PERSONA_YA_EXISTENTE";
@@ -94,7 +91,6 @@ public String Registro(String Name, String ID, String Password) throws IOExcepti
         return "ERROR_LECTURA_DB";
     }
     
-    // ✅ Escritura final
     try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
         String NLine = Name + " | " + ID + " | " + Password + " | " + Rol;
         escritor.write(NLine);
@@ -102,8 +98,6 @@ public String Registro(String Name, String ID, String Password) throws IOExcepti
         return "REGISTRO_EXITOSO";
     }
 }
-
-
 
 private boolean usuarioYaExiste(String id) throws IOException {
     File file = new File(RUTA_ARCHIVO);
@@ -124,7 +118,6 @@ private boolean usuarioYaExiste(String id) throws IOException {
     }
     return false;
 }
-
 
 private static String FindUser(String ID) throws IOException {  // ← CAMBIO: Lanza IOException
     try (BufferedReader br = new BufferedReader(new FileReader(RUTA_BDSecretaria))) {

@@ -12,7 +12,7 @@ public class AdminUCV extends JFrame {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     String fechaTexto = fechaActual.format(formatter);
 
-    // Colores institucionales
+    // Colores
     private final Color AZUL_FONDO = new Color(18, 71, 150);
     private final Color AZUL_ENCABEZADO = new Color(10, 45, 110);
     private final Color VERDE_BOTON = new Color(45, 100, 60);
@@ -26,10 +26,10 @@ public class AdminUCV extends JFrame {
         getContentPane().setBackground(AZUL_FONDO);
         setLayout(new BorderLayout());
 
-        // 1. ENCABEZADO
+        // ENCABEZADO
         add(crearEncabezadoDerecho(), BorderLayout.NORTH);
 
-        // 2. CONTENEDOR INFERIOR
+        // CONTENEDOR INFERIOR
         JPanel contenedorInferior = new JPanel(new BorderLayout());
         contenedorInferior.setOpaque(false);
         
@@ -63,8 +63,6 @@ public class AdminUCV extends JFrame {
 
         contenedorInferior.add(panelCuerpo, BorderLayout.CENTER);
         add(contenedorInferior, BorderLayout.CENTER);
-
-
     }
 
     private JPanel crearEncabezadoDerecho() {
