@@ -21,7 +21,7 @@ public class AdminUCV extends JFrame {
     public AdminUCV(String nombreAdmin) {
         setTitle("Comedor UCV - Panel de Administración");
         setSize(1100, 850);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(AZUL_FONDO);
         setLayout(new BorderLayout());

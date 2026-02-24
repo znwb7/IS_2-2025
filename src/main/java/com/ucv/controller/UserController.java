@@ -1,6 +1,11 @@
 package com.ucv.controller;
 
 import com.ucv.model.DataBase;
+import com.ucv.model.DataBase.LoginStatus;
+import com.ucv.model.DataBase.RegistroStatus;
+import com.ucv.model.DataBase.RolUsuario;
+import com.ucv.view.LoginUCV;
+
 import java.io.IOException;
 
 public class UserController {
@@ -11,23 +16,25 @@ public class UserController {
         this.dataBase = new DataBase();
     }
 
-    // REGISTRO
+    public UserController(DataBase dataBase) {
+        this.dataBase = dataBase;
+    }
+
+    // ------------------- REGISTRO -------------------
     public Response register(String name, String id, String password) {
         try {
-            String resultado = dataBase.Registro(name, id, password);
+            RegistroStatus resultado = dataBase.registrar(name, id, password);
 
             switch (resultado) {
-                case "REGISTRO_EXITOSO":
+                case REGISTRO_EXITOSO:
                     return new Response(true, "Usuario registrado correctamente");
-
-                case "USUARIO_NO_ENCONTRADO_SECRETARIA":
+                case USUARIO_NO_ENCONTRADO_SECRETARIA:
                     return new Response(false, "El ID no existe en la base de la secretaría");
-
-                case "PERSONA_YA_EXISTENTE":
+                case PERSONA_YA_EXISTENTE:
                     return new Response(false, "El usuario ya está registrado");
-                    
+                case ERROR_LECTURA_DB:
                 default:
-                    return new Response(false, "Error desconocido durante el registro");
+                    return new Response(false, "Error crítico de archivo o desconocido durante el registro");
             }
 
         } catch (IOException e) {
@@ -35,25 +42,20 @@ public class UserController {
         }
     }
 
-    
-    // LOGIN
+    // ------------------- LOGIN -------------------
     public Response login(String id, String password) {
         try {
-            String resultado = dataBase.ComprobarDatos(id, password);
+            LoginStatus resultado = dataBase.comprobarDatos(id, password);
 
             switch (resultado) {
-                case "EXITO":
+                case EXITO:
                     return new Response(true, "Login exitoso");
-
-                case "PASSWORD_INCORRECTO":
+                case PASSWORD_INCORRECTO:
                     return new Response(false, "Contraseña incorrecta");
-
-                case "USUARIO_NO_ENCONTRADO":
+                case USUARIO_NO_ENCONTRADO:
                     return new Response(false, "Usuario no encontrado");
-
-                case "ARCHIVO_NO_EXISTE":
+                case ARCHIVO_NO_EXISTE:
                     return new Response(false, "Base de datos no inicializada");
-
                 default:
                     return new Response(false, "Error desconocido en el login");
             }
@@ -63,39 +65,79 @@ public class UserController {
         }
     }
 
-    
-    // REDIRECCIÓN
-    public void ejecutarRedireccion(String id, javax.swing.JFrame ventanaLogin) {
-        String rol = "estudiante";
-        String separador = java.io.File.separator;
-        String rutaSecretaria = System.getProperty("user.dir")
-                + separador + "src" + separador + "main" + separador + "resources"
-                + separador + "BaseDataSecretaria.txt";
+    // ------------------- EVENTOS DESDE LA VISTA -------------------
+public void loginRequested(String id, String password, LoginUCV vista) {
 
-        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(rutaSecretaria))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] word = line.split("\\s*\\|\\s*");
-                if (word.length >= 4 && word[1].equals(id)) {
-                    rol = word[3].toLowerCase().trim();
-                    break;
-                }
-            }
-        } catch (java.io.IOException e) {
-            System.err.println("Error al determinar rol: " + e.getMessage());
-        }
+    // ---------- VALIDACIONES ----------
 
-        ventanaLogin.dispose();
+    if (id.isEmpty() || id.equals("Cédula")) {
+        javax.swing.JOptionPane.showMessageDialog(
+                vista,
+                "Debe ingresar su cédula",
+                "Error de login",
+                javax.swing.JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
 
-        if (rol.equals("admin")) {
+    if (!id.matches("\\d+")) { // solo dígitos
+        javax.swing.JOptionPane.showMessageDialog(
+                vista,
+                "Cédula inválida, solo se permiten números",
+                "Error de login",
+                javax.swing.JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
+
+    if (password.isEmpty() || password.equals("Contraseña")) {
+        javax.swing.JOptionPane.showMessageDialog(
+                vista,
+                "Debe ingresar su contraseña",
+                "Error de login",
+                javax.swing.JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
+
+    // ---------- LLAMADA AL MODELO ----------
+    Response response = login(id, password);
+    if (!response.isSuccess()) {
+        javax.swing.JOptionPane.showMessageDialog(
+                vista,
+                response.getMessage(),
+                "Error de login",
+                javax.swing.JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
+
+    // ---------- REDIRECCIÓN ----------
+    try {
+        RolUsuario rol = dataBase.obtenerRol(id);
+        vista.dispose();
+        if (rol == RolUsuario.ADMIN) {
             new com.ucv.view.AdminUCV("Administrador").setVisible(true);
         } else {
             new com.ucv.view.PrincipalUCV(id).setVisible(true);
         }
+    } catch (IOException e) {
+        javax.swing.JOptionPane.showMessageDialog(
+                vista,
+                "Error al determinar el rol del usuario",
+                "Error crítico",
+                javax.swing.JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+
+    public void registerRequested(String name, String id, String password, LoginUCV vista, javax.swing.JLabel lblMensaje) {
+        Response response = register(name, id, password);
+        lblMensaje.setText(response.getMessage());
+        lblMensaje.setForeground(response.isSuccess() ? java.awt.Color.GREEN : java.awt.Color.RED);
     }
 
-    // RESPONSE (DTO)
+    // RESPONSE (DTO) 
     public static class Response {
         private final boolean success;
         private final String message;

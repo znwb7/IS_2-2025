@@ -1,22 +1,23 @@
 package com.ucv.view;
 
 import com.ucv.controller.UserController;
-import com.ucv.controller.UserController.Response;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
 public class LoginUCV extends JFrame {
 
-    private final UserController controller = new UserController();
-
+    private UserController controller;
+    public void setController(UserController controller) {
+    this.controller = controller;
+    }
+    
     private static final Color AZUL_UCV = new Color(18, 71, 150);
     private static final Color NARANJA_UCV = new Color(250, 168, 44);
     private static final Color GRIS_INPUT = new Color(235, 235, 235);
 
     public LoginUCV() {
-
+        
         setTitle("Login · Comedor UCV");
         setSize(520, 820);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -29,14 +30,17 @@ public class LoginUCV extends JFrame {
         panelLogo.setBorder(BorderFactory.createEmptyBorder(30, 0, 10, 0));
 
         JLabel logo = new JLabel();
-        try {
-            Image img = new ImageIcon("logoucv.png")
-                    .getImage()
-                    .getScaledInstance(170, 170, Image.SCALE_SMOOTH);
-            logo.setIcon(new ImageIcon(img));
-        } catch (Exception e) {
-            logo.setText("LOGO UCV");
-        }
+            try {
+                java.net.URL res = getClass().getResource("/com/ucv/view/logo_comedor.png");
+                if (res != null) {
+                    Image img = new ImageIcon(res).getImage().getScaledInstance(140, 140, Image.SCALE_SMOOTH);
+                    logo.setIcon(new ImageIcon(img));
+                } else {
+                    logo.setText("Comedor UCV");
+                }
+            } catch (Exception e) {
+                logo.setText("Comedor UCV");
+            }
 
         panelLogo.add(logo);
         add(panelLogo, BorderLayout.NORTH);
@@ -106,24 +110,19 @@ public class LoginUCV extends JFrame {
         add(center, BorderLayout.CENTER);
 
         btnLogin.addActionListener(e -> {
-            String id = campoCedula.getText().equals("Cédula") ? "" : campoCedula.getText();
-            String pass = new String(campoPass.getPassword()).equals("Contraseña")
+            if (controller != null) {
+                String id = campoCedula.getText().equals("Cédula") ? "" : campoCedula.getText();
+                String pass = new String(campoPass.getPassword()).equals("Contraseña")
                     ? "" : new String(campoPass.getPassword());
-
-            Response r = controller.login(id, pass);
-
-            if (r.isSuccess()) {
-                controller.ejecutarRedireccion(id, this);
-            } else {
-                lblMensaje.setText(r.getMessage());
-                lblMensaje.setForeground(Color.RED);
+                controller.loginRequested(id, pass, this);
             }
         });
 
         linkRegistro.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new RegistroUCV().setVisible(true);
+                RegistroUCV registro = new RegistroUCV(controller);
+                registro.setVisible(true);
                 dispose();
             }
         });
@@ -174,9 +173,5 @@ public class LoginUCV extends JFrame {
             g2.setColor(color);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginUCV().setVisible(true));
     }
 }

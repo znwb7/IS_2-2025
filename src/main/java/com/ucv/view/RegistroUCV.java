@@ -15,11 +15,12 @@ public class RegistroUCV extends JFrame {
     private final Color NARANJA_UCV = new Color(242, 160, 27);
     private final Color GRIS_FONDO_INPUT = new Color(211, 211, 211);
 
-    private final UserController userController = new UserController(); // <-- controlador
+    private final UserController userController;
 
-    public RegistroUCV() {
+    public RegistroUCV(UserController controller) {
+        this.userController = controller;
         setTitle("Registro - Comedor UCV");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(500, 750);
         setLocationRelativeTo(null);
         getContentPane().setBackground(Color.WHITE);
@@ -32,15 +33,15 @@ public class RegistroUCV extends JFrame {
 
             JLabel lblLogo = new JLabel();
             try {
-                java.net.URL res = getClass().getResource("/com/ucv/view/logoucv.png");
+                java.net.URL res = getClass().getResource("/com/ucv/view/logo_comedor.png");
                 if (res != null) {
                     Image img = new ImageIcon(res).getImage().getScaledInstance(140, 140, Image.SCALE_SMOOTH);
                     lblLogo.setIcon(new ImageIcon(img));
                 } else {
-                    lblLogo.setText("[Logo UCV]");
+                    lblLogo.setText("Comedor UCV");
                 }
             } catch (Exception e) {
-                lblLogo.setText("[Logo UCV]");
+                lblLogo.setText("Comedor UCV");
             }
         lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel lblTitulo = new JLabel("Comedor UCV");
@@ -111,21 +112,25 @@ public class RegistroUCV extends JFrame {
 JOptionPane.showMessageDialog(this, response.getMessage());
 
 if (response.isSuccess()) {
-    new LoginUCV().setVisible(true);
     dispose();
+    LoginUCV login = new LoginUCV();
+    login.setController(userController);
+    login.setVisible(true);
 }
         });
 
         JLabel lblLoginLink = new JLabel("<html><u>Iniciar Sesión</u></html>", SwingConstants.CENTER);
         lblLoginLink.setForeground(Color.WHITE);
         lblLoginLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblLoginLink.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                new LoginUCV().setVisible(true);
-                dispose();
-            }
-        });
+lblLoginLink.addMouseListener(new MouseAdapter() {
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        LoginUCV login = new LoginUCV();
+        login.setController(userController); // ← CLAVE
+        login.setVisible(true);
+        dispose();
+    }
+});
         gbc.gridy = 6;
         gbc.insets = new Insets(5,25,20,25);
         blueCard.add(lblLoginLink, gbc);
@@ -175,9 +180,5 @@ if (response.isSuccess()) {
         gbc.gridy = fila;
         panel.add(campo, gbc);
         return campo;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new RegistroUCV().setVisible(true));
     }
 }
