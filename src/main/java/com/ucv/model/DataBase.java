@@ -164,24 +164,44 @@ public class DataBase {
         return false;
     }
 
-    public RolUsuario obtenerRol(String id) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] partes = line.split("\\s*\\|\\s*");
-                if (partes.length >= 4 && partes[1].trim().equals(id)) {
-                    String rol = partes[3].trim().toLowerCase();
-                    switch (rol) {
-                        case "admin": return RolUsuario.ADMIN;
-                        case "secretaria": return RolUsuario.SECRETARIA;
-                        default: return RolUsuario.ESTUDIANTE;
-                    }
+public RolUsuario obtenerRol(String id) throws IOException {
+    try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.trim().isEmpty()) continue;
+            String[] partes = line.split("\\s*\\|\\s*");
+            if (partes.length >= 3 && partes[1].trim().equals(id)) {
+                String rol = partes[3].trim().toLowerCase();
+                System.out.println("ROL OBTENIDO: " + rol);
+                switch (rol) {
+                    case "admin": return RolUsuario.ADMIN;
+                    case "secretaria": return RolUsuario.SECRETARIA;
+                    default: return RolUsuario.ESTUDIANTE;
                 }
             }
         }
-        return RolUsuario.ESTUDIANTE; // default
     }
+    return RolUsuario.ESTUDIANTE;
+}
+
+public RolUsuario obtenerRolSecretaria(String id) throws IOException {
+    try (BufferedReader br = new BufferedReader(new FileReader(rutaBDSecretaria))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.trim().isEmpty()) continue;
+            String[] partes = line.split("\\s*\\|\\s*");
+            if (partes.length >= 3 && partes[1].trim().equals(id)) {
+                String rol = partes[2].trim().toLowerCase(); // índice 2 en base secretaria
+                switch (rol) {
+                    case "admin": return RolUsuario.ADMIN;
+                    case "secretaria": return RolUsuario.SECRETARIA;
+                    default: return RolUsuario.ESTUDIANTE;
+                }
+            }
+        }
+    }
+    return RolUsuario.ESTUDIANTE;
+}
 
     public String CreateHash(String ruta) {
         try {

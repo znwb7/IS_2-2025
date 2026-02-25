@@ -1,68 +1,74 @@
 package com.ucv.view;
 
+import com.ucv.view.components.SIdeBar2;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class AdminUCV extends JFrame {
-    
-    LocalDate fechaActual = LocalDate.now();  // Obtiene fecha del sistema
+
+    LocalDate fechaActual = LocalDate.now();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     String fechaTexto = fechaActual.format(formatter);
 
-    // Colores
     private final Color AZUL_FONDO = new Color(18, 71, 150);
     private final Color AZUL_ENCABEZADO = new Color(10, 45, 110);
-    private final Color VERDE_BOTON = new Color(45, 100, 60);
-    private final Color GRIS_LATERAL = new Color(225, 225, 225);
+    private final Color VERDE_BOTON_NUEVO = new Color(24, 116, 205);
 
     public AdminUCV(String nombreAdmin) {
         setTitle("Comedor UCV - Panel de Administración");
-        setSize(1100, 850);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setSize(1920, 800);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(AZUL_FONDO);
         setLayout(new BorderLayout());
 
-        // ENCABEZADO
+        // --- 1. ENCABEZADO ---
         add(crearEncabezadoDerecho(), BorderLayout.NORTH);
 
-        // CONTENEDOR INFERIOR
+        // --- 2. CONTENEDOR INFERIOR (SIDEBAR + CUERPO) ---
         JPanel contenedorInferior = new JPanel(new BorderLayout());
         contenedorInferior.setOpaque(false);
-        
-        // BARRA LATERAL
-        contenedorInferior.add(crearBarraLateral(), BorderLayout.WEST);
 
-        // Panel central
-        JPanel panelCuerpo = new JPanel();
-        panelCuerpo.setLayout(new BoxLayout(panelCuerpo, BoxLayout.Y_AXIS));
+        // Usamos SIdeBar2 (la versión de un solo icono que regresa aquí)
+        contenedorInferior.add(new SIdeBar2(this), BorderLayout.WEST);
+
+        // --- 3. PANEL DE CUERPO (CENTRADO TOTAL) ---
+        // Usamos GridBagLayout para centrado vertical y horizontal automático
+        JPanel panelCuerpo = new JPanel(new GridBagLayout());
         panelCuerpo.setOpaque(false);
-        panelCuerpo.setBorder(BorderFactory.createEmptyBorder(40, 50, 20, 50));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 0, 10, 0); // Espaciado entre botones
 
+        // Bienvenida
         JLabel lblBienvenida = new JLabel("Bienvenido, " + nombreAdmin);
         lblBienvenida.setForeground(Color.WHITE);
-        lblBienvenida.setFont(new Font("Arial", Font.BOLD, 24));
-        lblBienvenida.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelCuerpo.add(lblBienvenida);
-        
-        panelCuerpo.add(Box.createRigidArea(new Dimension(0, 50)));
+        lblBienvenida.setFont(new Font("Arial", Font.BOLD, 32));
+        lblBienvenida.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 50, 0); // Más espacio después del título
+        panelCuerpo.add(lblBienvenida, gbc);
 
-        panelCuerpo.add(crearBotonAdmin("Modificar Menus"));
-        panelCuerpo.add(Box.createRigidArea(new Dimension(0, 20)));
-        panelCuerpo.add(crearBotonAdmin("Modificar Turnos"));
-        panelCuerpo.add(Box.createRigidArea(new Dimension(0, 20)));
-        panelCuerpo.add(crearBotonAdmin("Inventario"));
-        panelCuerpo.add(Box.createRigidArea(new Dimension(0, 20)));
-        panelCuerpo.add(crearBotonAdmin("Generar reporte"));
-        panelCuerpo.add(Box.createRigidArea(new Dimension(0, 20)));
-        
-        panelCuerpo.add(crearBotonAdmin("Calcular CCB"));
+        // Botones (Configurar Turnos eliminado)
+        gbc.insets = new Insets(10, 0, 10, 0);
+
+        gbc.gridy = 1;
+        panelCuerpo.add(crearBotonAdmin("Configurar Menus"), gbc);
+
+        gbc.gridy = 2;
+        panelCuerpo.add(crearBotonAdmin("Inventario"), gbc);
+
+        gbc.gridy = 3;
+        panelCuerpo.add(crearBotonAdmin("Generar reporte"), gbc);
 
         contenedorInferior.add(panelCuerpo, BorderLayout.CENTER);
         add(contenedorInferior, BorderLayout.CENTER);
+
+        // --- 4. FOOTER ---
+        add(crearFooter(), BorderLayout.SOUTH);
     }
 
     private JPanel crearEncabezadoDerecho() {
@@ -70,17 +76,16 @@ public class AdminUCV extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g;
+                Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(AZUL_ENCABEZADO);
                 int alto = 140;
-                int arc = 60; 
+                int arc = 60;
                 g2.fillRoundRect(-30, 0, getWidth() + 60, alto, arc, arc);
                 g2.fillRect(-30, 0, getWidth() + 60, alto / 2);
-                g2.fillRect(-30, 0, 100, alto);
+                g2.dispose();
             }
         };
-        
         panelEncabezado.setPreferredSize(new Dimension(0, 150));
         panelEncabezado.setOpaque(false);
 
@@ -94,29 +99,12 @@ public class AdminUCV extends JFrame {
         lblFecha.setFont(new Font("Arial", Font.PLAIN, 22));
         lblFecha.setBounds(45, 85, 200, 30);
 
-        JLabel lblLogo = new JLabel();
-        try {
-            java.net.URL res = getClass().getResource("/com/ucv/view/logoucv.png");
-            if (res != null) {
-                Image img = new ImageIcon(res).getImage().getScaledInstance(110, 110, Image.SCALE_SMOOTH);
-                lblLogo.setIcon(new ImageIcon(img));
-            } else {
-                lblLogo.setText("");
-            }
-        } catch (Exception e) {
-            lblLogo.setText("");
-        }
-
-        panelEncabezado.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent e) {
-                lblLogo.setBounds(panelEncabezado.getWidth() - 140, 15, 110, 110);
-            }
-        });
-
         panelEncabezado.add(lblTitulo);
         panelEncabezado.add(lblFecha);
-        panelEncabezado.add(lblLogo);
+        return panelEncabezado;
+    }
 
+    private JPanel crearFooter() {
         JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelFooter.setOpaque(false);
         panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
@@ -125,58 +113,47 @@ public class AdminUCV extends JFrame {
         lblCerrar.setForeground(Color.WHITE);
         lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
         lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 dispose();
-                new LoginUCV().setVisible(true);
+                com.ucv.ComedorApp.main(null);
             }
         });
-
         panelFooter.add(lblCerrar);
-
-        // Añadir el footer al layout principal
-        add(panelFooter, BorderLayout.SOUTH);
-
-
-        return panelEncabezado;
+        return panelFooter;
     }
 
-private JPanel crearBarraLateral() {
-    JPanel lateral = new JPanel(null);
-    lateral.setPreferredSize(new Dimension(90, 0));
-    lateral.setOpaque(false);
-
-    PanelRedondeado capsula = new PanelRedondeado(30, GRIS_LATERAL);
-    capsula.setBounds(15, 320, 60, 90);  
-    capsula.setLayout(new GridLayout(1, 1));  
-
-    JLabel casa = new JLabel("🏠", SwingConstants.CENTER);
-    casa.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 32));
-    capsula.add(casa); 
-    lateral.add(capsula);
-    return lateral;
-}
-
     private JButton crearBotonAdmin(String texto) {
-        JButton btn = new JButton(texto);
-        btn.setBackground(VERDE_BOTON);
+        JButton btn = new JButton(texto) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
+                g2.setColor(getForeground());
+                FontMetrics fm = g2.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+                g2.drawString(getText(), x, y);
+                g2.dispose();
+            }
+        };
+
+        btn.setBackground(VERDE_BOTON_NUEVO);
         btn.setForeground(Color.WHITE);
         btn.setFont(new Font("Arial", Font.BOLD, 28));
         btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createEmptyBorder());
-        btn.setOpaque(true);
         btn.setBorderPainted(false);
-        btn.setMaximumSize(new Dimension(750, 85)); 
-        btn.setPreferredSize(new Dimension(750, 85));
-        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setContentAreaFilled(false);
+        btn.setPreferredSize(new Dimension(600, 80)); // Tamaño fijo para uniformidad
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn.addActionListener(e -> {
-            if (texto.equals("Calcular CCB")) {
-                dispose(); // Cierra el panel de administración
-                new CalculoCCB().setVisible(true); // Abre la interfaz del CCB
+            if (texto.equals("Configurar Menus")) {
+                dispose();
+                new com.ucv.view.GestionMenuUCV().setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "Función '" + texto + "' en desarrollo.");
             }
@@ -185,24 +162,7 @@ private JPanel crearBarraLateral() {
         return btn;
     }
 
-    class PanelRedondeado extends JPanel {
-        private int r;
-        private Color c;
-        public PanelRedondeado(int radio, Color color) {
-            this.r = radio;
-            this.c = color;
-            setOpaque(false);
-        }
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(c);
-            g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), r, r));
-        }
-    }
-
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AdminUCV("Admin").setVisible(true));
+        SwingUtilities.invokeLater(() -> new AdminUCV("Administrador").setVisible(true));
     }
 }

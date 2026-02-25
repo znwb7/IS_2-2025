@@ -1,7 +1,8 @@
 package com.ucv.controller;
 
 import com.ucv.view.AdminUCV;
-import com.ucv.view.PrincipalUCV;
+import com.ucv.view.PrincipalUsuario;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -38,7 +39,7 @@ public class RedirectController {
             new AdminUCV("Administrador").setVisible(true);
         } else {
             // "profesor", "empleado" o "estudiante" van a la vista de comensal
-            new PrincipalUCV(id).setVisible(true);
+            new PrincipalUsuario(id).setVisible(true);
         }
     }
 }
