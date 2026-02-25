@@ -46,6 +46,10 @@ public class UserController {
                 case PERSONA_YA_EXISTENTE:
                     return new Response(false, "El usuario ya está registrado");
                 case ERROR_LECTURA_DB:
+                    return new Response (false, "Problema en el registro, Dirigirse a Secretaria");
+                case FALTA_HASH_BDSECRETARIA:
+                    return new Response(false, "Problema en el registro, Dirigirse a Secretaria");
+                
                 default:
                     return new Response(false, "Error crítico de archivo o desconocido durante el registro");
             }
