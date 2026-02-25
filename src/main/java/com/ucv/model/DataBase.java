@@ -71,43 +71,29 @@ public class DataBase {
     public static void main(String[] args) {
         DataBase db = new DataBase();
 
+        // ID de prueba (debe existir en BaseDataSecretaria.txt)
+        String idPrueba = "31983764"; 
+
+        System.out.println("=== PRUEBA DE ESTADO LOGED IN ===");
+
         try {
-            System.out.println("=== INICIANDO PRUEBA INTEGRAL DEL SISTEMA ===\n");
-
-            // PASO 1: Simular Base de Datos de Secretaría (Solo para que el registro funcione)
-            // Formato: Nombre | ID | Rol | Hash
-           
-
-            // PASO 2: Simular Base de Datos de Pagos (Para la recarga)
-            // Formato: Referencia | ID | Telefono | Monto | Status | Fecha
-            
-            // PASO 3: Registro de Usuario
-            System.out.println("-> Intentando registrar usuario 'Ale'...");
-            DataBase.RegistroStatus reg = db.registrar("Ale", "31983764", "123");
-            System.out.println("Resultado Registro: " + reg);
-
-            // PASO 4: Recarga de Saldo (UpdateMoney)
-            // Buscamos el pago de 150.75 y lo sumamos a la cuenta de la persona
-            System.out.println("\n-> Procesando recarga de saldo (150.75)...");
-            DataBase.UpdateMoney recarga = db.UpdateMoney("31983764", "2026-02-25");
-            System.out.println("Resultado Recarga: " + recarga);
-
-            // PASO 5: Extracción de Saldo (ExtractMoney)
-            // Simulamos que el estudiante compra un ticket de almuerzo que cuesta 12.50
-            System.out.println("\n-> Extrayendo dinero por compra de ticket (12.50)...");
-            DataBase.UpdateMoney gasto = db.ExtractMoney("31983764", "12.50");
-            System.out.println("Resultado Extracción: " + gasto);
-
-            // PASO 6: Login para verificar persistencia
-            System.out.println("\n-> Verificando acceso con credenciales...");
-            DataBase.LoginStatus login = db.comprobarDatos("31983764", "123");
-            System.out.println("Resultado Login: " + login);
-
-            System.out.println("\n=== PRUEBA FINALIZADA CON ÉXITO ===");
-            System.out.println("Revisa 'target/Output/DataBase.txt' para ver el saldo final (debería ser 138.25)");
+            // 1. Verificamos si el usuario existe en la base de datos de secretaria antes de marcar login
+            if (db.findUser(idPrueba)) {
+                System.out.println("-> Usuario encontrado. Cambiando estado a LogedIn...");
+                
+                // 2. Llamamos al método LogedIn
+                db.LogedIn(idPrueba);
+                
+                System.out.println("-> Proceso completado.");
+                System.out.println("Verifica el archivo 'BaseDataSecretaria.txt'.");
+                System.out.println("La línea del ID " + idPrueba + " ahora debería tener un '1' en la sexta columna.");
+            } else {
+                System.out.println("-> El ID " + idPrueba + " no existe en la Base de Datos de Secretaría.");
+                System.out.println("Asegúrate de que el archivo 'src/main/resources/BaseDataSecretaria.txt' tenga datos.");
+            }
 
         } catch (IOException e) {
-            System.err.println("Error en la prueba: " + e.getMessage());
+            System.err.println("Error durante la prueba: " + e.getMessage());
         }
     }
 
@@ -123,7 +109,7 @@ public class DataBase {
         if (usuarioYaExiste(id)) return RegistroStatus.PERSONA_YA_EXISTENTE;
 
         try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, true))) {
-            String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + "0";
+            String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + "0" + " | " + "0";
             escritor.write(linea);
             escritor.newLine();
             return RegistroStatus.REGISTRO_EXITOSO;
@@ -131,6 +117,104 @@ public class DataBase {
             return RegistroStatus.ERROR_LECTURA_DB;
         }
     }
+
+    public void LogedIn(String ID) {
+        File file = new File(rutaBDSecretaria);
+        if (!file.exists()) return;
+
+        List<String> lineasActualizadas = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    lineasActualizadas.add(line);
+                    continue;
+                }
+
+                // Separar por el carácter '|'
+                String[] partes = line.split("\\s*\\|\\s*");
+
+                // Si el ID coincide (está en la posición partes[1])
+                if (partes.length >= 2 && partes[1].equals(ID)) {
+                    // Modificar la "palabra" número 6 (índice 5) a "1"
+                    // Nota: Asegúrate de que la línea tenga suficientes columnas
+                    if (partes.length >= 6) {
+                        partes[5] = "1";
+                        
+                        // Reconstruir la línea con los cambios
+                        StringBuilder nuevaLinea = new StringBuilder();
+                        for (int i = 0; i < partes.length; i++) {
+                            nuevaLinea.append(partes[i]);
+                            if (i < partes.length - 1) {
+                                nuevaLinea.append(" | ");
+                            }
+                        }
+                        line = nuevaLinea.toString();
+                    }
+                }
+                lineasActualizadas.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer la base de datos: " + e.getMessage());
+            return;
+        }
+
+        // Escribir de vuelta al archivo
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+            for (String l : lineasActualizadas) {
+                bw.write(l);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al escribir en la base de datos: " + e.getMessage());
+        }
+    }
+
+    public void LogedOut(String ID) {
+        File file = new File(rutaBDSecretaria);
+        if (!file.exists()) return;
+
+        List<String> lineasActualizadas = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    lineasActualizadas.add(line);
+                    continue;
+                }
+
+                String[] partes = line.split("\\s*\\|\\s*");
+
+                // Si el ID coincide
+                if (partes.length >= 2 && partes[1].equals(ID)) {
+                    // Cambiar el campo número 6 (índice 5) a "0"
+                    if (partes.length >= 6) {
+                        partes[5] = "0";
+                        
+                        // Reconstruir la línea uniendo los elementos con el separador
+                        line = String.join(" | ", partes);
+                    }
+                }
+                lineasActualizadas.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer: " + e.getMessage());
+            return;
+        }
+
+        // Guardar cambios
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+            for (String l : lineasActualizadas) {
+                bw.write(l);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al escribir: " + e.getMessage());
+        }
+    }
+
 
     private void crearArchivo() throws IOException {
         File archivo = new File(rutaArchivo);
