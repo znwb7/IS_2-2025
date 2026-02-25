@@ -3,19 +3,19 @@ package com.ucv.view.components;
 import javax.swing.*;
 import java.awt.*;
 
-public class PrimaryButton extends JButton {
+public class PrimaryButton2 extends JButton {
 
     // Color por defecto (El naranja del Login)
-    private static final Color COLOR_POR_DEFECTO = new Color(250, 168, 44);
+    private static final Color COLOR_POR_DEFECTO = new Color(255, 255, 0);
 
     // Constructor normal (Usará el color naranja)
-    public PrimaryButton(String texto) {
+    public PrimaryButton2(String texto) {
         super(texto);
         configurar(COLOR_POR_DEFECTO);
     }
 
     // Constructor especial (Por si quieres pasarle otro color, como el de la billetera)
-    public PrimaryButton(String texto, Color colorPersonalizado) {
+    public PrimaryButton2(String texto, Color colorPersonalizado) {
         super(texto);
         configurar(colorPersonalizado);
     }
