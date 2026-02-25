@@ -36,20 +36,6 @@ public class DataBase {
         this.rutaBDSecretaria = rutaBDSecretaria;
     }
 
-    public static void main(String[] args) {
-       DataBase db = new DataBase();
-
-        // 2. Llamamos al método a través de la instancia 'db'.
-        String resultado = db.returnHash("31983764");
-
-        // 3. Verificamos el resultado antes de imprimirlo
-        if (resultado != null) {
-            System.out.println("Hash encontrado: " + resultado);
-        } else {
-            System.out.println("No se encontró el usuario o el archivo no existe.");
-        }
-    }
-
     public LoginStatus comprobarDatos(String id, String password) throws IOException {
         File file = new File(rutaArchivo);
         if (!file.exists()) return LoginStatus.ARCHIVO_NO_EXISTE;
@@ -190,13 +176,13 @@ public class DataBase {
         }
     }
 
-    public String returnHash(String ID){
+    public String returnHash(String Hash){
         try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
             String Line;
             while ((Line = br.readLine()) != null) {
                 String[] Word = Line.split("\\s*\\|\\s*");
                 if (Line.isEmpty()) continue;
-                if (Word[1].equals(ID)) {
+                if (Word[4].equals(Hash)) {
                     return Word[4]; 
                 }
             } 
