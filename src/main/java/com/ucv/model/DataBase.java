@@ -18,7 +18,7 @@ public class DataBase {
     }
 
     public enum UpdateMoney {
-        SALDO_ACTUALIZADO_CON_EXITO, ERROR_AL_RECARGAR, PAGOMOVIL_NO_ENCONTRADO, ARCHIVO_NO_EXISTE
+        SALDO_ACTUALIZADO_CON_EXITO, ERROR_AL_RECARGAR, PAGOMOVIL_NO_ENCONTRADO, ARCHIVO_NO_EXISTE, FONDO_INSUFICIENTE
     }
 
     public enum RegistroStatus {
@@ -72,30 +72,42 @@ public class DataBase {
         DataBase db = new DataBase();
 
         try {
-            System.out.println("--- PRUEBA DE RECARGA DE SALDO (UpdateMoney) ---");
+            System.out.println("=== INICIANDO PRUEBA INTEGRAL DEL SISTEMA ===\n");
 
-            // 1. Datos de prueba
-            String idUsuario = "31983764";
-            String fechaPago = "2026-02-25"; // Debe coincidir con lo que haya en DataBasePagos.txt
+            // PASO 1: Simular Base de Datos de Secretaría (Solo para que el registro funcione)
+            // Formato: Nombre | ID | Rol | Hash
+           
 
-            // 2. Ejecutar la actualización
-            // Esta función buscará en DataBasePagos.txt -> sacará el monto -> lo pondrá en DataBase.txt
-            UpdateMoney resultado = db.UpdateMoney(idUsuario, fechaPago);
+            // PASO 2: Simular Base de Datos de Pagos (Para la recarga)
+            // Formato: Referencia | ID | Telefono | Monto | Status | Fecha
+            
+            // PASO 3: Registro de Usuario
+            System.out.println("-> Intentando registrar usuario 'Ale'...");
+            DataBase.RegistroStatus reg = db.registrar("Ale", "31983764", "123");
+            System.out.println("Resultado Registro: " + reg);
 
-            // 3. Mostrar resultado
-            System.out.println("Estado de la operación: " + resultado);
+            // PASO 4: Recarga de Saldo (UpdateMoney)
+            // Buscamos el pago de 150.75 y lo sumamos a la cuenta de la persona
+            System.out.println("\n-> Procesando recarga de saldo (150.75)...");
+            DataBase.UpdateMoney recarga = db.UpdateMoney("31983764", "2026-02-25");
+            System.out.println("Resultado Recarga: " + recarga);
 
-            if (resultado == UpdateMoney.SALDO_ACTUALIZADO_CON_EXITO) {
-                System.out.println("¡Éxito! El saldo ha sido adjuntado al usuario en la BD Principal.");
-            } else if (resultado == UpdateMoney.PAGOMOVIL_NO_ENCONTRADO) {
-                System.out.println("Error: No se encontró un pago móvil con ese ID y Fecha.");
-            } else if (resultado == UpdateMoney.ARCHIVO_NO_EXISTE) {
-                System.out.println("Error: No se encontró el archivo de base de datos.");
-            }
+            // PASO 5: Extracción de Saldo (ExtractMoney)
+            // Simulamos que el estudiante compra un ticket de almuerzo que cuesta 12.50
+            System.out.println("\n-> Extrayendo dinero por compra de ticket (12.50)...");
+            DataBase.UpdateMoney gasto = db.ExtractMoney("31983764", "12.50");
+            System.out.println("Resultado Extracción: " + gasto);
 
-        } catch (Exception e) {
-            System.err.println("Ocurrió un error inesperado:");
-            e.printStackTrace();
+            // PASO 6: Login para verificar persistencia
+            System.out.println("\n-> Verificando acceso con credenciales...");
+            DataBase.LoginStatus login = db.comprobarDatos("31983764", "123");
+            System.out.println("Resultado Login: " + login);
+
+            System.out.println("\n=== PRUEBA FINALIZADA CON ÉXITO ===");
+            System.out.println("Revisa 'target/Output/DataBase.txt' para ver el saldo final (debería ser 138.25)");
+
+        } catch (IOException e) {
+            System.err.println("Error en la prueba: " + e.getMessage());
         }
     }
 
@@ -164,7 +176,7 @@ public class DataBase {
         return false;
     }
 
-public RolUsuario obtenerRol(String id) throws IOException {
+    public RolUsuario obtenerRol(String id) throws IOException {
     try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
         String line;
         while ((line = br.readLine()) != null) {
@@ -184,7 +196,7 @@ public RolUsuario obtenerRol(String id) throws IOException {
     return RolUsuario.ESTUDIANTE;
 }
 
-public RolUsuario obtenerRolSecretaria(String id) throws IOException {
+    public RolUsuario obtenerRolSecretaria(String id) throws IOException {
     try (BufferedReader br = new BufferedReader(new FileReader(rutaBDSecretaria))) {
         String line;
         while ((line = br.readLine()) != null) {
@@ -346,6 +358,61 @@ public RolUsuario obtenerRolSecretaria(String id) throws IOException {
         }
 
         return UpdateMoney.PAGOMOVIL_NO_ENCONTRADO;
+    }
+
+    public UpdateMoney ExtractMoney(String ID, String montoARestar) {
+        File archivo = new File(rutaArchivo);
+        if (!archivo.exists()) return UpdateMoney.ARCHIVO_NO_EXISTE;
+
+        List<String> lineasPrincipal = new ArrayList<>();
+        boolean usuarioEncontrado = false;
+        boolean saldoSuficiente = true;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) continue;
+                String[] WordP = linea.split("\\s*\\|\\s*");
+
+                if (WordP.length >= 6 && WordP[1].equals(ID)) {
+                    usuarioEncontrado = true;
+                    
+                    // 1. Convertimos montos a double para la operación
+                    double saldoActual = Double.parseDouble(WordP[5].trim());
+                    double cantidadARestar = Double.parseDouble(montoARestar.trim().replace(',', '.'));
+
+                    // 2. Verificación de saldo
+                    if (saldoActual >= cantidadARestar) {
+                        double nuevoSaldo = saldoActual - cantidadARestar;
+
+                        // 3. Redondeo a 2 decimales
+                        nuevoSaldo = Math.round(nuevoSaldo * 100.0) / 100.0;
+
+                        // 4. Reconstruimos la línea con el nuevo saldo
+                        linea = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + nuevoSaldo;
+                    } else {
+                        saldoSuficiente = false;
+                    }
+                }
+                lineasPrincipal.add(linea);
+            }
+        } catch (IOException | NumberFormatException e) {
+            return UpdateMoney.ERROR_AL_RECARGAR;
+        }
+
+        if (!usuarioEncontrado) return UpdateMoney.PAGOMOVIL_NO_ENCONTRADO;
+        if (!saldoSuficiente) return UpdateMoney.FONDO_INSUFICIENTE; // O un estado de "Saldo Insuficiente"
+
+        // 5. Volcamos los datos actualizados al archivo
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, false))) {
+            for (String l : lineasPrincipal) {
+                escritor.write(l);
+                escritor.newLine();
+            }
+            return UpdateMoney.SALDO_ACTUALIZADO_CON_EXITO;
+        } catch (IOException e) {
+            return UpdateMoney.ERROR_AL_RECARGAR;
+        }
     }
 
 
