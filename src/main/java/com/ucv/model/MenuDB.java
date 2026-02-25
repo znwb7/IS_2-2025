@@ -56,7 +56,7 @@ public class MenuDB {
 
         // 3. CAMBIO: De Desayuno a Almuerzo (Viceversa)
         System.out.println("\n[3] Aplicando cambio: de Desayuno -> ALMUERZO...");
-        db.WriteMenu(true, true, fecha, "Desayuno", "Pabellon", "Papelon", "Quesillo", "12", "25", "20");
+        db.WriteMenu(true, true, fecha, "Desayuno", "Pabellon", "Papelon", "Quesillo", "12", "25,5", "20");
         mostrarBD();
 
         System.out.println("\n=== PRUEBA DE ERRORES DE TRANSICIÓN ===");

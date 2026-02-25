@@ -4,6 +4,11 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.time.format.ResolverStyle;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ucv.model.MenuDB.WriteMenuStatus;
 
 // Enums para los estados de login y registro
 public class DataBase {
@@ -12,15 +17,20 @@ public class DataBase {
         EXITO, PASSWORD_INCORRECTO, USUARIO_NO_ENCONTRADO, ARCHIVO_NO_EXISTE
     }
 
+    public enum UpdateMoney {
+        SALDO_ACTUALIZADO_CON_EXITO, ERROR_AL_RECARGAR, PAGOMOVIL_NO_ENCONTRADO, ARCHIVO_NO_EXISTE
+    }
+
     public enum RegistroStatus {
         REGISTRO_EXITOSO, PERSONA_YA_EXISTENTE, USUARIO_NO_ENCONTRADO_SECRETARIA, ERROR_LECTURA_DB, FALTA_HASH_BDSECRETARIA
     }
 
     public enum RolUsuario {
-        ADMIN, SECRETARIA, ESTUDIANTE
+        ADMIN, SECRETARIA, ESTUDIANTE, ERROR
     }
 
     private final String rutaArchivo;
+    private final String rutaPagoMovil;
     private final String rutaBDSecretaria;
     private static final String SEPARATOR = File.separator;
 
@@ -28,12 +38,14 @@ public class DataBase {
     public DataBase() {
         this.rutaArchivo = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "Output" + SEPARATOR + "DataBase.txt";
         this.rutaBDSecretaria = System.getProperty("user.dir") + SEPARATOR + "src" + SEPARATOR + "main" + SEPARATOR + "resources" + SEPARATOR + "BaseDataSecretaria.txt";
+        this.rutaPagoMovil = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "Output" + SEPARATOR + "DataBasePagos.txt";
     }
 
     // Constructor con rutas personalizadas (para testing o flexibilidad)
-    public DataBase(String rutaArchivo, String rutaBDSecretaria) {
+    public DataBase(String rutaArchivo, String rutaBDSecretaria, String rutaPagoMovil) {
         this.rutaArchivo = rutaArchivo;
         this.rutaBDSecretaria = rutaBDSecretaria;
+        this.rutaPagoMovil = rutaPagoMovil;
     }
 
     public LoginStatus comprobarDatos(String id, String password) throws IOException {
@@ -56,18 +68,50 @@ public class DataBase {
         return LoginStatus.USUARIO_NO_ENCONTRADO;
     }
 
+    public static void main(String[] args) {
+        DataBase db = new DataBase();
+
+        try {
+            System.out.println("--- PRUEBA DE RECARGA DE SALDO (UpdateMoney) ---");
+
+            // 1. Datos de prueba
+            String idUsuario = "31983764";
+            String fechaPago = "2026-02-25"; // Debe coincidir con lo que haya en DataBasePagos.txt
+
+            // 2. Ejecutar la actualización
+            // Esta función buscará en DataBasePagos.txt -> sacará el monto -> lo pondrá en DataBase.txt
+            UpdateMoney resultado = db.UpdateMoney(idUsuario, fechaPago);
+
+            // 3. Mostrar resultado
+            System.out.println("Estado de la operación: " + resultado);
+
+            if (resultado == UpdateMoney.SALDO_ACTUALIZADO_CON_EXITO) {
+                System.out.println("¡Éxito! El saldo ha sido adjuntado al usuario en la BD Principal.");
+            } else if (resultado == UpdateMoney.PAGOMOVIL_NO_ENCONTRADO) {
+                System.out.println("Error: No se encontró un pago móvil con ese ID y Fecha.");
+            } else if (resultado == UpdateMoney.ARCHIVO_NO_EXISTE) {
+                System.out.println("Error: No se encontró el archivo de base de datos.");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Ocurrió un error inesperado:");
+            e.printStackTrace();
+        }
+    }
+
     public RegistroStatus registrar(String name, String id, String password) throws IOException {
         crearArchivo(); 
         if (findUser(id) == false) return RegistroStatus.USUARIO_NO_ENCONTRADO_SECRETARIA;
 
-        RolUsuario rol = obtenerRol(id);
+        RolUsuario rol = EncontrarRolEnSecretaria(id);
+        if (rol.name().toLowerCase().equals("error")) return RegistroStatus.ERROR_LECTURA_DB;
         String Hash = FindHash(id);
         if (Hash == null) return RegistroStatus.FALTA_HASH_BDSECRETARIA;
 
         if (usuarioYaExiste(id)) return RegistroStatus.PERSONA_YA_EXISTENTE;
 
         try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, true))) {
-            String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash;
+            String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + "0";
             escritor.write(linea);
             escritor.newLine();
             return RegistroStatus.REGISTRO_EXITOSO;
@@ -192,7 +236,121 @@ public class DataBase {
         }
     }
 
+    private RolUsuario EncontrarRolEnSecretaria(String ID){
 
+        File file = new File(rutaBDSecretaria);
+        if (!file.exists()) return RolUsuario.ERROR;
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                // Separar por el carácter '|' (manejando espacios)
+                String[] Word = line.split("\\s*\\|\\s*");
+                if (Word[1].equals(ID)) {
+                    String rol = Word[2].trim().toLowerCase();
+                    switch (rol) {
+                        case "admin": return RolUsuario.ADMIN;
+                        case "secretaria": return RolUsuario.SECRETARIA;
+                        case "estudiante" : return RolUsuario.ESTUDIANTE;
+                        default: return RolUsuario.ERROR;
+                    }
+                }
+            }
+            return RolUsuario.ERROR;
+
+        }catch( IOException e){
+
+            return RolUsuario.ERROR;
+
+        }
+    }
+    
+    public UpdateMoney UpdateMoney(String ID, String Fecha) {
+
+        File archivo = new File(rutaPagoMovil);
+        if (!archivo.exists()) return UpdateMoney.ARCHIVO_NO_EXISTE;
+        List<String> lineas = new ArrayList<>();
+
+        boolean DaDaCo = false;
+        double MontoEncontrado = 0; // Para guardar el monto del pago
+
+        // 1. Buscamos el monto en la base de datos de Pagos
+        try (BufferedReader lector = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            while ((linea = lector.readLine()) != null) {
+                String[] Word = linea.split("\\s*\\|\\s*");
+                if (Word.length >= 6 && Word[1].equals(ID) && Word[5].equals(Fecha)) {
+                    MontoEncontrado = Double.parseDouble(Word[3]);
+                    DaDaCo = true;
+                }
+                lineas.add(linea);
+            }
+        } catch (IOException e) {
+            return UpdateMoney.ARCHIVO_NO_EXISTE;
+        }
+
+        // 2. Si se encontró el pago, actualizamos la BD principal (rutaArchivo)
+        if (DaDaCo) {
+            List<String> lineasPrincipal = new ArrayList<>();
+            File filePrincipal = new File(rutaArchivo);
+            
+            try (BufferedReader br = new BufferedReader(new FileReader(filePrincipal))) {
+                String lineaP;
+                while ((lineaP = br.readLine()) != null) {
+                    String[] WordP = lineaP.split("\\s*\\|\\s*");
+                    
+                    // Si encontramos al usuario por ID en la BD Principal
+                    if (WordP.length >= 6 && WordP[1].equals(ID)) {
+                        MontoEncontrado = MontoEncontrado + Double.parseDouble(WordP[5]);
+                        MontoEncontrado = Math.round(MontoEncontrado * 100.0) / 100.0;
+                        // Reconstruimos la línea: Nombre | ID | Pass | Rol | Hash | Monto
+                        String Monto = String.valueOf(MontoEncontrado);
+                        lineaP = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + Monto;
+                    }
+                    lineasPrincipal.add(lineaP);
+                }
+            } catch (IOException e) {
+                return UpdateMoney.ERROR_AL_RECARGAR;
+            }
+
+            // 3. Escribimos los cambios de vuelta en la BD Principal
+            try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, false))) {
+                for (String l : lineasPrincipal) {
+                    escritor.write(l);
+                    escritor.newLine();
+                }
+                return UpdateMoney.SALDO_ACTUALIZADO_CON_EXITO;
+            } catch (IOException e) {
+                return UpdateMoney.ERROR_AL_RECARGAR;
+            }
+        }
+
+        return UpdateMoney.PAGOMOVIL_NO_ENCONTRADO;
+    }
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
