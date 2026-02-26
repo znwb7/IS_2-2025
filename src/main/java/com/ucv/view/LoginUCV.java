@@ -1,6 +1,7 @@
 package com.ucv.view;
 
 import com.ucv.controller.UserController;
+import com.ucv.model.DataBase;
 import com.ucv.view.components.PrimaryButton; // Importamos tu componente
 import javax.swing.*;
 import java.awt.*;
@@ -117,6 +118,8 @@ public class LoginUCV extends JFrame {
                 String pass = new String(campoPass.getPassword()).equals("Contraseña")
                         ? "" : new String(campoPass.getPassword());
                 controller.loginRequested(id, pass, this);
+                DataBase dataBase = new DataBase();
+                dataBase.LogedIn(id);
             }
         });
 

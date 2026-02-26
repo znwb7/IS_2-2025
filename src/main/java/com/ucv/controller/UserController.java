@@ -130,21 +130,13 @@ public void loginRequested(String id, String password, LoginUCV vista) {
     }
 
     // ---------- REDIRECCIÓN ----------
-    try {
-        RolUsuario rol = dataBase.obtenerRolSecretaria(id);
-        vista.dispose();
-        if (rol == RolUsuario.ADMIN) {
-            new com.ucv.view.AdminUCV("Administrador").setVisible(true);
-        } else {
-            new com.ucv.view.PrincipalUsuario(id).setVisible(true);
-        }
-    } catch (IOException e) {
-        javax.swing.JOptionPane.showMessageDialog(
-                vista,
-                "Error al determinar el rol del usuario",
-                "Error crítico",
-                javax.swing.JOptionPane.ERROR_MESSAGE
-        );
+    RolUsuario rol = dataBase.obtenerRolSecretaria(id); // Ya no lanza excepción hacia afuera
+    vista.dispose();
+
+    if (rol == RolUsuario.ADMIN) {
+        new com.ucv.view.AdminUCV("Administrador").setVisible(true);
+    } else {
+        new com.ucv.view.PrincipalUsuario(id).setVisible(true);
     }
 }
 

@@ -48,6 +48,35 @@ public class DataBase {
         this.rutaPagoMovil = rutaPagoMovil;
     }
 
+  
+    public static void main(String[] args) {
+        DataBase db = new DataBase();
+        String idPrueba = "31983764";
+
+        System.out.println("=== PRUEBA DE RETURNID (BUSCAR USUARIO ACTIVO) ===");
+
+        try {
+            // PASO 1: Asegurarnos de que el usuario tenga el "1" en la secretaría
+            // Nota: Asegúrate de que tu método LogedIn esté apuntando a rutaBDSecretaria para esta prueba
+            System.out.println("-> Paso 1: Marcando estado activo en Secretaria para ID: " + idPrueba);
+            db.LogedIn(idPrueba); 
+
+            // PASO 2: Ejecutar ReturnID
+            System.out.println("-> Paso 2: Ejecutando ReturnID()...");
+            String idEncontrado = db.ReturnID();
+
+            if (idEncontrado.startsWith("ERROR")) {
+                System.err.println("-> Resultado fallido: " + idEncontrado);
+            } else {
+                System.out.println("-> ¡Éxito! El ID del usuario activo es: " + idEncontrado);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error en la prueba: " + e.getMessage());
+        }
+    }
+
+    //SE USA EN EL LOGIN, ENCARGADA DE BUSCAR LOS DATOS DEL USUARIO PARA ACCEDER AL MENU
     public LoginStatus comprobarDatos(String id, String password) throws IOException {
         File file = new File(rutaArchivo);
         if (!file.exists()) return LoginStatus.ARCHIVO_NO_EXISTE;
@@ -68,291 +97,8 @@ public class DataBase {
         return LoginStatus.USUARIO_NO_ENCONTRADO;
     }
 
-    public static void main(String[] args) {
-        DataBase db = new DataBase();
-
-        // ID de prueba (debe existir en BaseDataSecretaria.txt)
-        String idPrueba = "31983764"; 
-
-        System.out.println("=== PRUEBA DE ESTADO LOGED IN ===");
-
-        try {
-            // 1. Verificamos si el usuario existe en la base de datos de secretaria antes de marcar login
-            if (db.findUser(idPrueba)) {
-                System.out.println("-> Usuario encontrado. Cambiando estado a LogedIn...");
-                
-                // 2. Llamamos al método LogedIn
-                db.LogedIn(idPrueba);
-                
-                System.out.println("-> Proceso completado.");
-                System.out.println("Verifica el archivo 'BaseDataSecretaria.txt'.");
-                System.out.println("La línea del ID " + idPrueba + " ahora debería tener un '1' en la sexta columna.");
-            } else {
-                System.out.println("-> El ID " + idPrueba + " no existe en la Base de Datos de Secretaría.");
-                System.out.println("Asegúrate de que el archivo 'src/main/resources/BaseDataSecretaria.txt' tenga datos.");
-            }
-
-        } catch (IOException e) {
-            System.err.println("Error durante la prueba: " + e.getMessage());
-        }
-    }
-
-    public RegistroStatus registrar(String name, String id, String password) throws IOException {
-        crearArchivo(); 
-        if (findUser(id) == false) return RegistroStatus.USUARIO_NO_ENCONTRADO_SECRETARIA;
-
-        RolUsuario rol = EncontrarRolEnSecretaria(id);
-        if (rol.name().toLowerCase().equals("error")) return RegistroStatus.ERROR_LECTURA_DB;
-        String Hash = FindHash(id);
-        if (Hash == null) return RegistroStatus.FALTA_HASH_BDSECRETARIA;
-
-        if (usuarioYaExiste(id)) return RegistroStatus.PERSONA_YA_EXISTENTE;
-
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, true))) {
-            String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + "0" + " | " + "0";
-            escritor.write(linea);
-            escritor.newLine();
-            return RegistroStatus.REGISTRO_EXITOSO;
-        } catch (IOException e) {
-            return RegistroStatus.ERROR_LECTURA_DB;
-        }
-    }
-
-    public void LogedIn(String ID) {
-        File file = new File(rutaBDSecretaria);
-        if (!file.exists()) return;
-
-        List<String> lineasActualizadas = new ArrayList<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) {
-                    lineasActualizadas.add(line);
-                    continue;
-                }
-
-                // Separar por el carácter '|'
-                String[] partes = line.split("\\s*\\|\\s*");
-
-                // Si el ID coincide (está en la posición partes[1])
-                if (partes.length >= 2 && partes[1].equals(ID)) {
-                    // Modificar la "palabra" número 6 (índice 5) a "1"
-                    // Nota: Asegúrate de que la línea tenga suficientes columnas
-                    if (partes.length >= 6) {
-                        partes[5] = "1";
-                        
-                        // Reconstruir la línea con los cambios
-                        StringBuilder nuevaLinea = new StringBuilder();
-                        for (int i = 0; i < partes.length; i++) {
-                            nuevaLinea.append(partes[i]);
-                            if (i < partes.length - 1) {
-                                nuevaLinea.append(" | ");
-                            }
-                        }
-                        line = nuevaLinea.toString();
-                    }
-                }
-                lineasActualizadas.add(line);
-            }
-        } catch (IOException e) {
-            System.err.println("Error al leer la base de datos: " + e.getMessage());
-            return;
-        }
-
-        // Escribir de vuelta al archivo
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
-            for (String l : lineasActualizadas) {
-                bw.write(l);
-                bw.newLine();
-            }
-        } catch (IOException e) {
-            System.err.println("Error al escribir en la base de datos: " + e.getMessage());
-        }
-    }
-
-    public void LogedOut(String ID) {
-        File file = new File(rutaBDSecretaria);
-        if (!file.exists()) return;
-
-        List<String> lineasActualizadas = new ArrayList<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) {
-                    lineasActualizadas.add(line);
-                    continue;
-                }
-
-                String[] partes = line.split("\\s*\\|\\s*");
-
-                // Si el ID coincide
-                if (partes.length >= 2 && partes[1].equals(ID)) {
-                    // Cambiar el campo número 6 (índice 5) a "0"
-                    if (partes.length >= 6) {
-                        partes[5] = "0";
-                        
-                        // Reconstruir la línea uniendo los elementos con el separador
-                        line = String.join(" | ", partes);
-                    }
-                }
-                lineasActualizadas.add(line);
-            }
-        } catch (IOException e) {
-            System.err.println("Error al leer: " + e.getMessage());
-            return;
-        }
-
-        // Guardar cambios
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
-            for (String l : lineasActualizadas) {
-                bw.write(l);
-                bw.newLine();
-            }
-        } catch (IOException e) {
-            System.err.println("Error al escribir: " + e.getMessage());
-        }
-    }
-
-
-    private void crearArchivo() throws IOException {
-        File archivo = new File(rutaArchivo);
-        File directorio = archivo.getParentFile();
-        if (directorio != null && !directorio.exists()) {
-            directorio.mkdirs();
-        }
-        if (!archivo.exists()) {
-            archivo.createNewFile();
-        }
-    }
-
-    private boolean usuarioYaExiste(String id) throws IOException {
-        File file = new File(rutaArchivo);
-        if (!file.exists()) return false;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] partes = line.split("\\s*\\|\\s*");
-                if (partes.length >= 2 && partes[1].trim().equals(id)) return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean findUser(String id) throws IOException {
-        File file = new File(rutaBDSecretaria);
-        if (!file.exists()) return false;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                // Separar por el carácter '|' (manejando espacios)
-                String[] partes = line.split("\\s*\\|\\s*");
-                if (partes.length >= 2 && id.equals(partes[1].trim())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public RolUsuario obtenerRol(String id) throws IOException {
-    try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            if (line.trim().isEmpty()) continue;
-            String[] partes = line.split("\\s*\\|\\s*");
-            if (partes.length >= 3 && partes[1].trim().equals(id)) {
-                String rol = partes[3].trim().toLowerCase();
-                System.out.println("ROL OBTENIDO: " + rol);
-                switch (rol) {
-                    case "admin": return RolUsuario.ADMIN;
-                    case "secretaria": return RolUsuario.SECRETARIA;
-                    default: return RolUsuario.ESTUDIANTE;
-                }
-            }
-        }
-    }
-    return RolUsuario.ESTUDIANTE;
-}
-
-    public RolUsuario obtenerRolSecretaria(String id) throws IOException {
-    try (BufferedReader br = new BufferedReader(new FileReader(rutaBDSecretaria))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            if (line.trim().isEmpty()) continue;
-            String[] partes = line.split("\\s*\\|\\s*");
-            if (partes.length >= 3 && partes[1].trim().equals(id)) {
-                String rol = partes[2].trim().toLowerCase(); // índice 2 en base secretaria
-                switch (rol) {
-                    case "admin": return RolUsuario.ADMIN;
-                    case "secretaria": return RolUsuario.SECRETARIA;
-                    default: return RolUsuario.ESTUDIANTE;
-                }
-            }
-        }
-    }
-    return RolUsuario.ESTUDIANTE;
-}
-
-    public String CreateHash(String ruta) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            try (InputStream is = Files.newInputStream(Paths.get(ruta))) {
-                byte[] buffer = new byte[1024];
-                int leido;
-                while ((leido = is.read(buffer)) != -1) {
-                    md.update(buffer, 0, leido);
-                }
-            }
-            byte[] digest = md.digest();
-            StringBuilder SBuilder = new StringBuilder();
-            for (byte b : digest) {
-                SBuilder.append(String.format("%02x", b));
-            }
-            return SBuilder.toString(); 
-        } catch (Exception e) {
-            return "Error al procesar la imagen: ";
-        }
-    }
-
-    private String FindHash(String ID){
-        try (BufferedReader br = new BufferedReader(new FileReader(rutaBDSecretaria))) {
-            String Line;
-            while ((Line = br.readLine()) != null) {
-                String[] Word = Line.split("\\s*\\|\\s*");
-                if (Line.isEmpty()) continue;
-                if (Word[1].equals(ID)) {
-                    return Word[3]; 
-                }
-            } 
-            return null; 
-        } catch (IOException e) { 
-            return null; 
-        }
-    }
-
-    public String returnHash(String Hash){
-        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
-            String Line;
-            while ((Line = br.readLine()) != null) {
-                String[] Word = Line.split("\\s*\\|\\s*");
-                if (Line.isEmpty()) continue;
-                if (Word[4].equals(Hash)) {
-                    return Word[4]; 
-                }
-            } 
-            return null; 
-        } catch (IOException e) { 
-            return null; 
-        }
-    }
-
-    private RolUsuario EncontrarRolEnSecretaria(String ID){
+    //SE ENCARGAR DE BUSCAR EL ROL DEL USUARIO EN SECRETARIA
+    public RolUsuario obtenerRolSecretaria(String ID){
 
         File file = new File(rutaBDSecretaria);
         if (!file.exists()) return RolUsuario.ERROR;
@@ -381,6 +127,153 @@ public class DataBase {
         }
     }
     
+    //SE ENCARGA DE REGISTRAR AL USUARIO EN LA BD PRINCIPAL
+    public RegistroStatus registrar(String name, String id, String password) throws IOException {
+        crearArchivo(); 
+        if (findUser(id) == false) return RegistroStatus.USUARIO_NO_ENCONTRADO_SECRETARIA;
+
+        RolUsuario rol = obtenerRolSecretaria(id);
+        if (rol.name().toLowerCase().equals("error")) return RegistroStatus.ERROR_LECTURA_DB;
+        String Hash = FindHash(id);
+        if (Hash == null) return RegistroStatus.FALTA_HASH_BDSECRETARIA;
+
+        if (usuarioYaExiste(id)) return RegistroStatus.PERSONA_YA_EXISTENTE;
+
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, true))) {
+            String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + "0" + " | " + "0" + " | " + "0";
+            escritor.write(linea);                                                                                        //SALDO       LOGUEADO   TURNO ACTIVO
+            escritor.newLine();                                                                                             //5            6            7
+            return RegistroStatus.REGISTRO_EXITOSO;
+        } catch (IOException e) {
+            return RegistroStatus.ERROR_LECTURA_DB;
+        }
+    }
+
+    //CREA LAS CARPETAS Y ARCHIVOS CORRESPONDIENTES PARA LA BD
+    private void crearArchivo() throws IOException {
+        File archivo = new File(rutaArchivo);
+        File directorio = archivo.getParentFile();
+        if (directorio != null && !directorio.exists()) {
+            directorio.mkdirs();
+        }
+        if (!archivo.exists()) {
+            archivo.createNewFile();
+        }
+    }
+
+    //VERIFICA SI EL USUARIO YA EXISTE EN LA BD PRINCIPAL
+    private boolean usuarioYaExiste(String id) throws IOException {
+        File file = new File(rutaArchivo);
+        if (!file.exists()) return false;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] partes = line.split("\\s*\\|\\s*");
+                if (partes.length >= 2 && partes[1].trim().equals(id)) return true;
+            }
+        }
+        return false;
+    }
+
+    //BUSCA AL USUARIO EN LA BD DE SECRETARIA PARA CONFIRMAR EXISTENCIA
+    private boolean findUser(String id) throws IOException {
+        File file = new File(rutaBDSecretaria);
+        if (!file.exists()) return false;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                // Separar por el carácter '|' (manejando espacios)
+                String[] partes = line.split("\\s*\\|\\s*");
+                if (partes.length >= 2 && id.equals(partes[1].trim())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    //ES UN GETROL
+    public RolUsuario obtenerRol(String id) throws IOException {
+    try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.trim().isEmpty()) continue;
+            String[] partes = line.split("\\s*\\|\\s*");
+            if (partes.length >= 3 && partes[1].trim().equals(id)) {
+                String rol = partes[3].trim().toLowerCase();
+                System.out.println("ROL OBTENIDO: " + rol);
+                switch (rol) {
+                    case "admin": return RolUsuario.ADMIN;
+                    case "secretaria": return RolUsuario.SECRETARIA;
+                    default: return RolUsuario.ESTUDIANTE;
+                }
+            }
+        }
+    }
+    return RolUsuario.ESTUDIANTE;
+}
+
+    //CREA EL HASH DE LA IMAGEN QUE SE LE PASE
+    public String CreateHash(String ruta) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            try (InputStream is = Files.newInputStream(Paths.get(ruta))) {
+                byte[] buffer = new byte[1024];
+                int leido;
+                while ((leido = is.read(buffer)) != -1) {
+                    md.update(buffer, 0, leido);
+                }
+            }
+            byte[] digest = md.digest();
+            StringBuilder SBuilder = new StringBuilder();
+            for (byte b : digest) {
+                SBuilder.append(String.format("%02x", b));
+            }
+            return SBuilder.toString(); 
+        } catch (Exception e) {
+            return "Error al procesar la imagen: ";
+        }
+    }
+    
+    //BUSCA EL HASH EN LA BDSECRETARIA PARA ADJUNTARLO A LA BD PRINCIPAL
+    private String FindHash(String ID){
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaBDSecretaria))) {
+            String Line;
+            while ((Line = br.readLine()) != null) {
+                String[] Word = Line.split("\\s*\\|\\s*");
+                if (Line.isEmpty()) continue;
+                if (Word[1].equals(ID)) {
+                    return Word[3]; 
+                }
+            } 
+            return null; 
+        } catch (IOException e) { 
+            return null; 
+        }
+    }
+
+    //RETORNA EL HASH DE LA BD PRINCIPAL
+    public String returnHash(String Hash){
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+            String Line;
+            while ((Line = br.readLine()) != null) {
+                String[] Word = Line.split("\\s*\\|\\s*");
+                if (Line.isEmpty()) continue;
+                if (Word[4].equals(Hash)) {
+                    return Word[4]; 
+                }
+            } 
+            return null; 
+        } catch (IOException e) { 
+            return null; 
+        }
+    }
+
+    //ACTUALIZA EL SALDO DEL USUARIO EN LA BD PRINCIPAL
     public UpdateMoney UpdateMoney(String ID, String Fecha) {
 
         File archivo = new File(rutaPagoMovil);
@@ -444,6 +337,7 @@ public class DataBase {
         return UpdateMoney.PAGOMOVIL_NO_ENCONTRADO;
     }
 
+    //EXTRAE EL SALDO DEL USUARIO EN LA BD PRINCIPAL
     public UpdateMoney ExtractMoney(String ID, String montoARestar) {
         File archivo = new File(rutaArchivo);
         if (!archivo.exists()) return UpdateMoney.ARCHIVO_NO_EXISTE;
@@ -499,29 +393,188 @@ public class DataBase {
         }
     }
 
+    //DEBE CAMBIAR EL ESTADO DE UN BOOLEANO EN LA BD PRINCIPAL PARA IDENTIFICAR EL LOGEO ACTIVO
+    public void LogedIn(String ID) {
+        File file = new File(rutaArchivo);
+        if (!file.exists()) return;
+
+        List<String> lineasActualizadas = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    lineasActualizadas.add(line);
+                    continue;
+                }
+                String[] Word = line.split("\\s*\\|\\s*");
+
+                if (Word[1].equals(ID)) {
+                    // Word[6] es el estado logueado (la palabra 7)
+                    Word[6] = "1";
+                    
+                    // Reconstruir la línea
+                    line = String.join(" | ", Word);
+                    System.out.println("-> ¡ID encontrado! Cambiando estado a 1.");
+                }
+                lineasActualizadas.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer la base de datos: " + e.getMessage());
+            return;
+        }
+
+        // Escribir de vuelta al archivo
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+            for (String l : lineasActualizadas) {
+                bw.write(l);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al escribir: " + e.getMessage());
+        }
+    }
+
+    //CAMBIA EL ESTADO DEL BOOL DE 1 A 0 PARA EL DESLOGEO
+    public void LogedOut() {
+        File file = new File(rutaArchivo);
+        if (!file.exists()) return;
+
+        List<String> lineasActualizadas = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    lineasActualizadas.add(line);
+                    continue;
+                }
+                String[] Word = line.split("\\s*\\|\\s*");
+
+                if (Word[6].equals("1")) {
+                    Word[6] = "0";
+                    
+                    // Reconstruir la línea
+                    line = String.join(" | ", Word);
+                    System.out.println("-> ¡ID encontrado! Cambiando estado a 1.");
+                }
+                lineasActualizadas.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer la base de datos: " + e.getMessage());
+            return;
+        }
+
+        // Escribir de vuelta al archivo
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+            for (String l : lineasActualizadas) {
+                bw.write(l);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al escribir: " + e.getMessage());
+        }
+    }
+  
+    //RETORNA LA CEDULA DEL USUARIO ACTIVO
+    public String ReturnID() {
+        File file = new File(rutaArchivo);
+        if (!file.exists()) return "ERROR_ARCHIVO_NO_EXISTE";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+
+                // Separamos la línea por el delimitador '|'
+                String[] partes = line.split("\\s*\\|\\s*");
+
+                // Verificamos que la línea tenga al menos 6 columnas (índice 5 es la sexta)
+                // y que el valor en el índice 5 sea "1"
+                if (partes[6].equals("1")) {
+                    // Retornamos Word[2] que es la cedula (índice 1)
+                    return partes[1]; 
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("ERROR al leer la base de datos de secretaria: " + e.getMessage());
+            return "ERROR_LECTURA";
+        }
+
+        return "ERROR_NADIE_CONECTADO"; // Si recorre todo el archivo y no hay ningún "1"
+    }
+   
+    //Activa el booleano que dice si posee un menu activo o no
+    public void MenuActive(String ID) {
+        File file = new File(rutaArchivo);
+        if (!file.exists()) return;
+
+        List<String> lineasActualizadas = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    lineasActualizadas.add(line);
+                    continue;
+                }
+                String[] Word = line.split("\\s*\\|\\s*");
+
+                if (Word[1].equals(ID)) {
+                    // Word[6] es el estado logueado (la palabra 7)
+                    Word[7] = "1";
+                    
+                    // Reconstruir la línea
+                    line = String.join(" | ", Word);
+                    System.out.println("-> ¡ID encontrado! Cambiando estado a 1.");
+                }
+                lineasActualizadas.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer la base de datos: " + e.getMessage());
+            return;
+        }
+    }
+
+    //DESACTIVA EL BOOL ENCARGADO DE REVISAR SI TIENE UN TURNO ACTIVO
+    public void MenuOut() {
+        File file = new File(rutaArchivo);
+        if (!file.exists()) return;
+
+        List<String> lineasActualizadas = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    lineasActualizadas.add(line);
+                    continue;
+                }
+                String[] Word = line.split("\\s*\\|\\s*");
+
+                if (Word[7].equals("1")) {
+                    Word[7] = "0";
+                    
+                    // Reconstruir la línea
+                    line = String.join(" | ", Word);
+                    System.out.println("-> ¡ID encontrado! Cambiando estado a 1.");
+                }
+                lineasActualizadas.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer la base de datos: " + e.getMessage());
+            return;
+        }
+
+        // Escribir de vuelta al archivo
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+            for (String l : lineasActualizadas) {
+                bw.write(l);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al escribir: " + e.getMessage());
+        }
+    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

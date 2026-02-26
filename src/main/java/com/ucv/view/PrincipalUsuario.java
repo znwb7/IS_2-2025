@@ -1,5 +1,6 @@
 package com.ucv.view;
 
+import com.ucv.model.DataBase;
 import com.ucv.view.components.SideBar; // Sidebar versión usuario
 
 import javax.swing.*;
@@ -285,7 +286,8 @@ public class PrincipalUsuario extends JFrame {
             @Override
 
             public void mouseClicked(java.awt.event.MouseEvent e) {
-
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
                 dispose();
 
                 com.ucv.ComedorApp.main(null);
