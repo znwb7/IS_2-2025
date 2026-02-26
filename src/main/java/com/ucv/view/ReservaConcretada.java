@@ -1,5 +1,6 @@
 package com.ucv.view;
 
+import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import javax.swing.*;
@@ -15,6 +16,9 @@ public class ReservaConcretada extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        DataBase dataBase = new DataBase();
+        dataBase.MenuActive(dataBase.ReturnID());
 
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);

@@ -11,6 +11,10 @@ public class VerificacionFacialExitosa extends JFrame {
     private static final Color AMARILLO_UCV = new Color(255, 210, 35);
 
     public VerificacionFacialExitosa() {
+        DataBase dataBase = new DataBase();
+        dataBase.MenuOut(dataBase.ReturnID());
+
+
         setTitle("Verificación Exitosa · Comedor UCV");
         setSize(1920, 1080);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
