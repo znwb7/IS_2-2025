@@ -12,8 +12,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class PrincipalUsuario extends JFrame {
-
-     private final String usuarioID;
+    DataBase dataBase = new DataBase();
+    private final String usuarioID;
 
     LocalDate fechaActual = LocalDate.now();
 
@@ -222,14 +222,30 @@ public class PrincipalUsuario extends JFrame {
 
         btn.addActionListener(e -> {
 
-            dispose(); // Cerramos la ventana actual
+            
             if (texto.equals("Ver menus")) {
 
                 new MenusUsuario(usuarioID).setVisible(true);
+                dispose(); // Cerramos la ventana actual
 
             } else if (texto.equals("Entrar al comedor")) {
 
-                new VerificacionFacialUCV(usuarioID).setVisible(true);
+                if (dataBase.GetFoodFlag(dataBase.ReturnID()).equals("1")){
+
+                    new VerificacionFacialUCV(usuarioID).setVisible(true);
+                    dispose(); // Cerramos la ventana actual
+
+                }else{
+
+                    javax.swing.JOptionPane.showMessageDialog(
+                        null, 
+                        "No hay vida", 
+                        "Aviso del Sistema", 
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                    );
+
+                }
+                
 
             }
 

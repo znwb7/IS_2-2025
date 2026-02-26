@@ -530,7 +530,6 @@ public class DataBase {
             return;
         }
 
-        // 2. Fase de Escritura (ESTO ES LO QUE TE FALTABA)
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) { // 'false' para sobrescribir
             for (String l : lineasActualizadas) {
                 bw.write(l);
@@ -541,8 +540,8 @@ public class DataBase {
             System.err.println("Error al escribir en la base de datos: " + e.getMessage());
         }
     }
-
-    //DESACTIVA EL BOOL ENCARGADO DE REVISAR SI TIENE UN TURNO ACTIVO
+    
+    //Desactiva el bool de posesion de menu
     public void MenuOut(String ID) {
         File file = new File(rutaArchivo);
         if (!file.exists()) return;
@@ -571,7 +570,6 @@ public class DataBase {
             return;
         }
 
-        // 2. Fase de Escritura (ESTO ES LO QUE TE FALTABA)
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) { // 'false' para sobrescribir
             for (String l : lineasActualizadas) {
                 bw.write(l);
@@ -581,6 +579,29 @@ public class DataBase {
         } catch (IOException e) {
             System.err.println("Error al escribir en la base de datos: " + e.getMessage());
         }
+    }
+
+
+
+    public String GetFoodFlag(String ID){
+
+         try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+            String Line;
+            while ((Line = br.readLine()) != null) {
+                String[] Word = Line.split("\\s*\\|\\s*");
+                if (Line.isEmpty()) continue;
+                if (Word[1].equals(ID)) {
+                    return Word[7]; 
+                }
+            } 
+            return "0"; 
+        } catch (IOException e) { 
+            return "0"; 
+        }
+
+
+
+
     }
 
 }
