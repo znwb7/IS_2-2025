@@ -6,19 +6,19 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ReservaConcretada extends JFrame {
-
+    DataBase dataBase = new DataBase();
+           
     private static final Color AZUL_FONDO = new Color(18, 71, 150);
     private static final Color AMARILLO_TEXTO = new Color(255, 210, 35);
 
     public ReservaConcretada(String tipoMenuSeleccionado) {
+
+        dataBase.MenuActive(dataBase.ReturnID());
         setTitle("Reserva Concretada · Comedor UCV");
         setSize(1920, 1080);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-
-        DataBase dataBase = new DataBase();
-        dataBase.MenuActive(dataBase.ReturnID());
 
 
         JPanel container = new JPanel(new BorderLayout());

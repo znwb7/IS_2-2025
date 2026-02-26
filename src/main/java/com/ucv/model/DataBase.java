@@ -508,6 +508,7 @@ public class DataBase {
 
         List<String> lineasActualizadas = new ArrayList<>();
 
+        // 1. Fase de Lectura y Modificación
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -518,12 +519,9 @@ public class DataBase {
                 String[] Word = line.split("\\s*\\|\\s*");
 
                 if (Word[1].equals(ID)) {
-                    // Word[6] es el estado logueado (la palabra 7)
-                    Word[7] = "1";
-                    
-                    // Reconstruir la línea
+                    Word[7] = "1"; // Modifica la palabra 8 (índice 7)
                     line = String.join(" | ", Word);
-                    System.out.println("-> ¡ID encontrado! Cambiando estado a 1.");
+                    System.out.println("-> ¡ID encontrado! Cambiando estado de turno a 1.");
                 }
                 lineasActualizadas.add(line);
             }
@@ -531,15 +529,27 @@ public class DataBase {
             System.err.println("Error al leer la base de datos: " + e.getMessage());
             return;
         }
+
+        // 2. Fase de Escritura (ESTO ES LO QUE TE FALTABA)
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) { // 'false' para sobrescribir
+            for (String l : lineasActualizadas) {
+                bw.write(l);
+                bw.newLine();
+            }
+            System.out.println("-> Base de datos actualizada correctamente.");
+        } catch (IOException e) {
+            System.err.println("Error al escribir en la base de datos: " + e.getMessage());
+        }
     }
 
     //DESACTIVA EL BOOL ENCARGADO DE REVISAR SI TIENE UN TURNO ACTIVO
-    public void MenuOut() {
+    public void MenuOut(String ID) {
         File file = new File(rutaArchivo);
         if (!file.exists()) return;
 
         List<String> lineasActualizadas = new ArrayList<>();
 
+        // 1. Fase de Lectura y Modificación
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -549,12 +559,10 @@ public class DataBase {
                 }
                 String[] Word = line.split("\\s*\\|\\s*");
 
-                if (Word[7].equals("1")) {
-                    Word[7] = "0";
-                    
-                    // Reconstruir la línea
+                if (Word[1].equals(ID)) {
+                    Word[7] = "0"; // Modifica la palabra 8 (índice 7)
                     line = String.join(" | ", Word);
-                    System.out.println("-> ¡ID encontrado! Cambiando estado a 1.");
+                    System.out.println("-> ¡ID encontrado! Cambiando estado de turno a 1.");
                 }
                 lineasActualizadas.add(line);
             }
@@ -563,14 +571,15 @@ public class DataBase {
             return;
         }
 
-        // Escribir de vuelta al archivo
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+        // 2. Fase de Escritura (ESTO ES LO QUE TE FALTABA)
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) { // 'false' para sobrescribir
             for (String l : lineasActualizadas) {
                 bw.write(l);
                 bw.newLine();
             }
+            System.out.println("-> Base de datos actualizada correctamente.");
         } catch (IOException e) {
-            System.err.println("Error al escribir: " + e.getMessage());
+            System.err.println("Error al escribir en la base de datos: " + e.getMessage());
         }
     }
 
