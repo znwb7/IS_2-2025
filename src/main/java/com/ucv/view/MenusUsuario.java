@@ -14,9 +14,10 @@ import java.awt.*;
 
 import java.awt.geom.RoundRectangle2D;
 
+
 public class MenusUsuario extends JFrame {
 
-
+    private final String usuarioID;
 
     private static final Color AZUL_FONDO = new Color(18, 71, 150);
 
@@ -26,9 +27,8 @@ public class MenusUsuario extends JFrame {
 
     private static final Color AMARILLO_BOTON = new Color(255, 210, 35);
 
-
-
-    public MenusUsuario() {
+    public MenusUsuario(String usuarioID) {
+        this.usuarioID = usuarioID;
 
         setTitle("Menús Disponibles · Comedor UCV");
 
@@ -50,7 +50,7 @@ public class MenusUsuario extends JFrame {
 
         container.add(new HeaderUCV(), BorderLayout.NORTH);
 
-        container.add(new SideBar(this), BorderLayout.WEST);
+        container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
 
 
@@ -275,11 +275,8 @@ public class MenusUsuario extends JFrame {
 // REDIRECCIONAMIENTO
 
         btnSel.addActionListener(e -> {
-
             dispose();
-
-            new ConfirmacionReserva(tipo).setVisible(true);
-
+            new ConfirmacionReserva(tipo, usuarioID).setVisible(true);
         });
 
 
@@ -359,13 +356,4 @@ public class MenusUsuario extends JFrame {
         }
 
     }
-
-
-
-    public static void main(String[] args) {
-
-        SwingUtilities.invokeLater(() -> new MenusUsuario().setVisible(true));
-
-    }
-
 }

@@ -13,9 +13,12 @@ public class ConfirmacionReserva extends JFrame {
     private final Color AMARILLO_UCV = new Color(255, 210, 35);
     private String tipoSeleccionado;
 
+        private final String usuarioID;
+
     // --- CONSTRUCTOR CORREGIDO ---
-    public ConfirmacionReserva(String tipoSeleccionado) {
+    public ConfirmacionReserva(String tipoSeleccionado, String usuarioID) {
         this.tipoSeleccionado = tipoSeleccionado; // Corregido el nombre de la variable
+        this.usuarioID = usuarioID;
 
         setTitle("Confirmar Reserva · Comedor UCV");
         setSize(1920, 1080);
@@ -28,7 +31,7 @@ public class ConfirmacionReserva extends JFrame {
 
         // Componentes base
         container.add(new HeaderUCV(), BorderLayout.NORTH);
-        container.add(new SideBar(this), BorderLayout.WEST);
+        container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
         // Contenido Central
         JPanel panelCentral = new JPanel(new GridBagLayout());
@@ -62,7 +65,7 @@ public class ConfirmacionReserva extends JFrame {
         btnNo.addActionListener(e -> {
             dispose();
             // Al regresar, suponemos true para que el usuario vuelva a ver las opciones
-            new MenusUsuario().setVisible(true);
+            new MenusUsuario(this.usuarioID).setVisible(true);
         });
 
         // BOTÓN CONFIRMAR: Concreta la acción

@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 
 public class PrincipalUsuario extends JFrame {
 
-
+     private final String usuarioID;
 
     LocalDate fechaActual = LocalDate.now();
 
@@ -20,17 +20,15 @@ public class PrincipalUsuario extends JFrame {
 
     String fechaTexto = fechaActual.format(formatter);
 
-
-
     private final Color AZUL_FONDO = new Color(18, 71, 150);
 
     private final Color AZUL_ENCABEZADO = new Color(10, 45, 110);
 
     private final Color AZUL_BOTON = new Color(24, 116, 205);
 
-
-
-    public PrincipalUsuario(String nombreUsuario) {
+    public PrincipalUsuario(String usuarioID) {
+        this.usuarioID = usuarioID;
+        System.out.println("ID del usuario en PrincipalUsuario: " + usuarioID); // Verificación de ID
 
         setTitle("Comedor UCV - Menú de Usuario");
 
@@ -44,9 +42,7 @@ public class PrincipalUsuario extends JFrame {
 
         setLayout(new BorderLayout());
 
-
-
-// --- 1. ENCABEZADO ---
+        // --- 1. ENCABEZADO ---
 
         add(crearEncabezadoUsuario(), BorderLayout.NORTH);
 
@@ -58,11 +54,7 @@ public class PrincipalUsuario extends JFrame {
 
         contenedorInferior.setOpaque(false);
 
-
-
-        contenedorInferior.add(new SideBar(this), BorderLayout.WEST);
-
-
+        contenedorInferior.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
 // --- 3. PANEL DE CUERPO ---
 
@@ -96,24 +88,17 @@ public class PrincipalUsuario extends JFrame {
 
         gbc.insets = new Insets(10, 0, 10, 0);
 
-
-
         gbc.gridy = 1;
 
         panelCuerpo.add(crearBotonUsuario("Ver menus"), gbc);
-
-
 
         gbc.gridy = 2;
 
         panelCuerpo.add(crearBotonUsuario("Entrar al comedor"), gbc);
 
-
-
         contenedorInferior.add(panelCuerpo, BorderLayout.CENTER);
 
         add(contenedorInferior, BorderLayout.CENTER);
-
 
 
 // --- 4. FOOTER ---
@@ -121,8 +106,6 @@ public class PrincipalUsuario extends JFrame {
         add(crearFooter(), BorderLayout.SOUTH);
 
     }
-
-
 
     private JPanel crearEncabezadoUsuario() {
 
@@ -234,21 +217,18 @@ public class PrincipalUsuario extends JFrame {
 
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-
-
 // --- LÓGICA DE NAVEGACIÓN ACTUALIZADA ---
 
         btn.addActionListener(e -> {
 
             dispose(); // Cerramos la ventana actual
-
             if (texto.equals("Ver menus")) {
 
-                new MenusUsuario().setVisible(true);
+                new MenusUsuario(usuarioID).setVisible(true);
 
             } else if (texto.equals("Entrar al comedor")) {
 
-                new VerificacionFacialUCV().setVisible(true);
+                new VerificacionFacialUCV(usuarioID).setVisible(true);
 
             }
 
@@ -299,13 +279,4 @@ public class PrincipalUsuario extends JFrame {
         return panelFooter;
 
     }
-
-
-
-    public static void main(String[] args) {
-
-        SwingUtilities.invokeLater(() -> new PrincipalUsuario("Estudiante").setVisible(true));
-
-    }
-
 }

@@ -16,7 +16,11 @@ public class VerificacionFacialUCV extends JFrame {
     private final Color GRIS_BOTON = new Color(180, 180, 180);
     private final Color AMARILLO_BOTON = new Color(255, 210, 35);
 
-    public VerificacionFacialUCV() {
+    private final String usuarioID;
+
+    public VerificacionFacialUCV(String usuarioID) {
+        this.usuarioID = usuarioID;
+
         setTitle("Verificación Facial · Comedor UCV");
         setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,7 +32,7 @@ public class VerificacionFacialUCV extends JFrame {
 
         // --- COMPONENTES DE ESTRUCTURA ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
-        container.add(new SideBar(this), BorderLayout.WEST);
+        container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
         // --- PANEL CENTRAL ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
@@ -199,9 +203,5 @@ public class VerificacionFacialUCV extends JFrame {
         });
         f.add(lbl);
         return f;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new VerificacionFacialUCV().setVisible(true));
     }
 }

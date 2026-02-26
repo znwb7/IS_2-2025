@@ -1,7 +1,6 @@
 package com.ucv.view;
 
 import com.ucv.view.components.HeaderUCV;
-import com.ucv.view.components.SideBar;
 import javax.swing.*;
 import java.awt.*;
 
@@ -22,7 +21,6 @@ public class VerificacionFacialExitosa extends JFrame {
 
         // --- COMPONENTES DE ESTRUCTURA ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
-        container.add(new SideBar(this), BorderLayout.WEST);
 
         // --- PANEL CENTRAL (Mensaje de Éxito) ---
         JPanel panelCentral = new JPanel(new GridBagLayout());

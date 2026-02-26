@@ -7,8 +7,7 @@ import java.awt.geom.RoundRectangle2D;
 public class SideBar extends JPanel {
 
     private final Color GRIS_CLARO = new Color(225, 225, 225);
-
-    public SideBar(JFrame ventanaActual) {
+    public SideBar(JFrame ventanaActual, String usuarioID) {
 
         setPreferredSize(new Dimension(90, 0));
         setOpaque(false);
@@ -18,7 +17,7 @@ public class SideBar extends JPanel {
         capsula.setBounds(15, 230, 60, 180);
         capsula.setLayout(new GridLayout(2, 1, 0, 20));
 
-        // ---------- HOME (Redirección a MenuUsuarioPrincipal) ----------
+        // ---------- HOME ----------
         JLabel home = new JLabel("", SwingConstants.CENTER);
         try {
             java.net.URL res = getClass().getResource("/com/ucv/view/home.png");
@@ -34,8 +33,7 @@ public class SideBar extends JPanel {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 ventanaActual.dispose();
-                // CAMBIO AQUÍ: Redirigimos a la nueva interfaz de opciones del usuario
-                new com.ucv.view.PrincipalUsuario("Usuario").setVisible(true);
+                new com.ucv.view.PrincipalUsuario(usuarioID).setVisible(true);
             }
         });
 
@@ -55,7 +53,8 @@ public class SideBar extends JPanel {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 ventanaActual.dispose();
-                new com.ucv.view.BilleteraUCV().setVisible(true);
+                // Redirige a BilleteraUCV con el usuario de sesión
+                new com.ucv.view.BilleteraUCV(usuarioID).setVisible(true);
             }
         });
 
@@ -76,7 +75,7 @@ public class SideBar extends JPanel {
 
         @Override
         protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create(); // Usamos .create() para no afectar otros pinceles
+            Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(color);
             g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), radio, radio));

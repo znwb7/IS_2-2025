@@ -4,11 +4,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.ucv.model.MenuDB.WriteMenuStatus;
 
 // Enums para los estados de login y registro
 public class DataBase {
@@ -38,7 +35,7 @@ public class DataBase {
     public DataBase() {
         this.rutaArchivo = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "Output" + SEPARATOR + "DataBase.txt";
         this.rutaBDSecretaria = System.getProperty("user.dir") + SEPARATOR + "src" + SEPARATOR + "main" + SEPARATOR + "resources" + SEPARATOR + "BaseDataSecretaria.txt";
-        this.rutaPagoMovil = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "Output" + SEPARATOR + "DataBasePagos.txt";
+        this.rutaPagoMovil = System.getProperty("user.dir") + SEPARATOR + "src" + SEPARATOR + "main" + SEPARATOR + "resources" + SEPARATOR + "DataBasePagos.txt";
     }
 
     // Constructor con rutas personalizadas (para testing o flexibilidad)
@@ -66,49 +63,6 @@ public class DataBase {
             }
         }
         return LoginStatus.USUARIO_NO_ENCONTRADO;
-    }
-
-    public static void main(String[] args) {
-        DataBase db = new DataBase();
-
-        try {
-            System.out.println("=== INICIANDO PRUEBA INTEGRAL DEL SISTEMA ===\n");
-
-            // PASO 1: Simular Base de Datos de Secretaría (Solo para que el registro funcione)
-            // Formato: Nombre | ID | Rol | Hash
-           
-
-            // PASO 2: Simular Base de Datos de Pagos (Para la recarga)
-            // Formato: Referencia | ID | Telefono | Monto | Status | Fecha
-            
-            // PASO 3: Registro de Usuario
-            System.out.println("-> Intentando registrar usuario 'Ale'...");
-            DataBase.RegistroStatus reg = db.registrar("Ale", "31983764", "123");
-            System.out.println("Resultado Registro: " + reg);
-
-            // PASO 4: Recarga de Saldo (UpdateMoney)
-            // Buscamos el pago de 150.75 y lo sumamos a la cuenta de la persona
-            System.out.println("\n-> Procesando recarga de saldo (150.75)...");
-            DataBase.UpdateMoney recarga = db.UpdateMoney("31983764", "2026-02-25");
-            System.out.println("Resultado Recarga: " + recarga);
-
-            // PASO 5: Extracción de Saldo (ExtractMoney)
-            // Simulamos que el estudiante compra un ticket de almuerzo que cuesta 12.50
-            System.out.println("\n-> Extrayendo dinero por compra de ticket (12.50)...");
-            DataBase.UpdateMoney gasto = db.ExtractMoney("31983764", "12.50");
-            System.out.println("Resultado Extracción: " + gasto);
-
-            // PASO 6: Login para verificar persistencia
-            System.out.println("\n-> Verificando acceso con credenciales...");
-            DataBase.LoginStatus login = db.comprobarDatos("31983764", "123");
-            System.out.println("Resultado Login: " + login);
-
-            System.out.println("\n=== PRUEBA FINALIZADA CON ÉXITO ===");
-            System.out.println("Revisa 'target/Output/DataBase.txt' para ver el saldo final (debería ser 138.25)");
-
-        } catch (IOException e) {
-            System.err.println("Error en la prueba: " + e.getMessage());
-        }
     }
 
     public RegistroStatus registrar(String name, String id, String password) throws IOException {

@@ -1,7 +1,9 @@
 package com.ucv.view;
 
+import com.ucv.controller.PagoController;
+import com.ucv.model.PagoModel;
 import com.ucv.view.components.HeaderUCV;
-import com.ucv.view.components.SIdeBar2;
+import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
 
 import javax.swing.*;
@@ -18,10 +20,25 @@ public class PagoMovilUCV extends JFrame {
     private static final Color GRIS_CANCELAR = new Color(190, 190, 190);
     private static final Color AZUL_TEXTO = new Color(18, 71, 150);
 
-    // Variables para los campos para poder validarlos
-    private JTextField txtCedula, txtMonto, txtReferencia;
+    private final PagoController controlador;
 
-    public PagoMovilUCV() {
+    private JTextField txtCedula, txtMonto, txtReferencia;
+    private final String usuarioID;
+    private final BilleteraUCV parentFrame;
+
+    public BilleteraUCV getParentFrame() {
+    return parentFrame;
+    }
+
+    public PagoMovilUCV(String usuarioID, BilleteraUCV parentFrame) {
+        this.usuarioID = usuarioID;
+        System.out.println("ID del usuario en PagoMovilUCV: " + usuarioID); // Verificación de ID
+        this.parentFrame = parentFrame;
+
+        // Modelo y controlador
+        PagoModel modelo = new PagoModel();
+        this.controlador = new PagoController(modelo, parentFrame);
+
         setTitle("Pago Móvil · Comedor UCV");
         setSize(1920, 1080);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -30,28 +47,23 @@ public class PagoMovilUCV extends JFrame {
 
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
-
         container.add(new HeaderUCV(), BorderLayout.NORTH);
-        container.add(new SIdeBar2(this), BorderLayout.WEST);
+        container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
+        // Panel central
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
 
-        // Tarjeta Principal
         PanelRedondeado tarjeta = new PanelRedondeado(40, GRIS_TARJETA);
         tarjeta.setPreferredSize(new Dimension(700, 500));
         tarjeta.setLayout(null);
 
-        // --- SECCIÓN SUPERIOR: DATOS BANCARIOS ---
+        // Datos de pago
         JLabel lblTituloPago = new JLabel("Realiza tu pago móvil a:");
         lblTituloPago.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTituloPago.setForeground(AZUL_TEXTO);
         lblTituloPago.setBounds(50, 30, 400, 40);
         tarjeta.add(lblTituloPago);
-
-        PanelRedondeado infoBlanca = new PanelRedondeado(20, Color.WHITE);
-        infoBlanca.setBounds(50, 80, 600, 130);
-        infoBlanca.setLayout(null);
 
         String[][] datos = {
                 {"Banco:", "MERCANTIL"},
@@ -59,93 +71,97 @@ public class PagoMovilUCV extends JFrame {
                 {"Teléfono:", "0412-1234567"}
         };
 
+        int yBase = 80;
         for (int i = 0; i < datos.length; i++) {
-            JLabel k = new JLabel(datos[i][0]);
-            k.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-            k.setBounds(30, 20 + (i * 30), 200, 25);
-            infoBlanca.add(k);
+            JLabel lblKey = new JLabel(datos[i][0]);
+            lblKey.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+            lblKey.setBounds(50, yBase + (i * 30), 200, 25);
+            tarjeta.add(lblKey);
 
-            JLabel v = new JLabel(datos[i][1]);
-            v.setFont(new Font("Segoe UI", Font.BOLD, 18));
-            v.setBounds(250, 20 + (i * 30), 320, 25);
-            v.setHorizontalAlignment(SwingConstants.RIGHT);
-            infoBlanca.add(v);
+            JLabel lblValue = new JLabel(datos[i][1]);
+            lblValue.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            lblValue.setBounds(250, yBase + (i * 30), 320, 25);
+            lblValue.setHorizontalAlignment(SwingConstants.RIGHT);
+            tarjeta.add(lblValue);
         }
-        tarjeta.add(infoBlanca);
 
-        // --- SECCIÓN INFERIOR: FORMULARIO ---
+        // Formulario
         JLabel lblInstruccion = new JLabel("Ingresa los datos de tu Pago Móvil");
         lblInstruccion.setFont(new Font("Segoe UI", Font.BOLD, 20));
         lblInstruccion.setForeground(AZUL_TEXTO);
-        lblInstruccion.setBounds(50, 235, 400, 30);
+        lblInstruccion.setBounds(50, 200, 400, 30);
         tarjeta.add(lblInstruccion);
 
-        int xLabel = 70, xCampo = 200, yBase = 280, gap = 50, alturaInput = 35;
+        int xLabel = 70, xCampo = 200, gap = 50, alturaInput = 35;
 
-        // Cédula
         JLabel lblCed = new JLabel("Cédula:");
-        lblCed.setBounds(xLabel, yBase, 100, 30);
+        lblCed.setBounds(xLabel, 240, 100, 30);
         lblCed.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         tarjeta.add(lblCed);
-        txtCedula = crearCampoEstiloLogin("V-12345678", xCampo, yBase, 400, alturaInput);
+        txtCedula = crearCampoEstiloLogin("V-12345678", xCampo, 240, 400, alturaInput);
         tarjeta.add(txtCedula);
 
-        // Monto
-        JLabel lblMon = new JLabel("Monto:");
-        lblMon.setBounds(xLabel, yBase + gap, 100, 30);
-        lblMon.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        tarjeta.add(lblMon);
-        txtMonto = crearCampoEstiloLogin("Monto en Bs.", xCampo, yBase + gap, 400, alturaInput);
+        JLabel lblMonto = new JLabel("Monto:");
+        lblMonto.setBounds(xLabel, 240 + gap, 100, 30);
+        lblMonto.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        tarjeta.add(lblMonto);
+        txtMonto = crearCampoEstiloLogin("Monto en Bs.", xCampo, 240 + gap, 400, alturaInput);
         tarjeta.add(txtMonto);
 
-        // Referencia
         JLabel lblRef = new JLabel("Referencia:");
-        lblRef.setBounds(xLabel, yBase + (gap * 2), 100, 30);
+        lblRef.setBounds(xLabel, 240 + (2 * gap), 100, 30);
         lblRef.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         tarjeta.add(lblRef);
-        txtReferencia = crearCampoEstiloLogin("Últimos 4 dígitos", xCampo, yBase + (gap * 2), 400, alturaInput);
+        txtReferencia = crearCampoEstiloLogin("Últimos 4 dígitos", xCampo, 240 + (2 * gap), 400, alturaInput);
         tarjeta.add(txtReferencia);
 
-        // --- BOTONES ---
-        // BOTÓN CANCELAR
-        PrimaryButton2 btnCanc = new PrimaryButton2("Cancelar", GRIS_CANCELAR);
-        btnCanc.setBounds(290, 440, 150, 45);
-        btnCanc.addActionListener(e -> {
-            new BilleteraUCV().setVisible(true);
+        // Botones
+        PrimaryButton2 btnCancelar = new PrimaryButton2("Cancelar", GRIS_CANCELAR);
+        btnCancelar.setBounds(290, 440, 150, 45);
+        btnCancelar.addActionListener(e -> {
+            parentFrame.setVisible(true);
             dispose();
         });
-        tarjeta.add(btnCanc);
+        tarjeta.add(btnCancelar);
 
-        // BOTÓN RECARGAR CON LÓGICA DE ÉXITO
-        PrimaryButton2 btnRec = new PrimaryButton2("Recargar", AMARILLO_BOTON);
-        btnRec.setBounds(450, 440, 150, 45);
-        btnRec.setForeground(Color.BLACK);
-
-        btnRec.addActionListener(e -> {
-            // Validación simple: verificar que no estén los placeholders
-            if (txtCedula.getText().equals("V-12345678") || txtMonto.getText().equals("Monto en Bs.") ||
-                    txtReferencia.getText().equals("Últimos 4 dígitos")) {
-
-                JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos correctamente.",
-                        "Error de Validación", JOptionPane.WARNING_MESSAGE);
-            } else {
-                // Mensaje de éxito
-                JOptionPane.showMessageDialog(this, "Recarga Exitosa",
-                        "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-
-                // Redirección al Menú Principal
-                new PrincipalUsuario("Estudiante").setVisible(true);
-                dispose();
-            }
-        });
-
-        tarjeta.add(btnRec);
+        PrimaryButton2 btnRecargar = new PrimaryButton2("Recargar", AMARILLO_BOTON);
+        btnRecargar.setBounds(450, 440, 150, 45);
+        btnRecargar.setForeground(Color.BLACK);
+        btnRecargar.addActionListener(e -> procesarRecarga());
+        tarjeta.add(btnRecargar);
 
         panelCentral.add(tarjeta, new GridBagConstraints());
         container.add(panelCentral, BorderLayout.CENTER);
         container.add(crearFooter(), BorderLayout.SOUTH);
 
         add(container);
+    }
+
+    /** Procesa la recarga usando el controlador y notifica al parentFrame */
+    private void procesarRecarga() {
+        String cedulaInput = txtCedula.getText().trim();
+        String montoInput = txtMonto.getText().trim();
+        String referenciaInput = txtReferencia.getText().trim();
+
+        if (cedulaInput.isEmpty() || montoInput.isEmpty() || referenciaInput.isEmpty() ||
+                cedulaInput.equals("V-12345678") || montoInput.equals("Monto en Bs.") ||
+                referenciaInput.equals("Últimos 4 dígitos")) {
+
+            JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos correctamente.",
+                    "Error de Validación", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Usamos el controlador
+        controlador.procesarPago(cedulaInput, montoInput, referenciaInput, this);
+
+        // Si la recarga fue exitosa, actualizamos la billetera y cerramos
+    if (controlador.getUltimoResultado() == PagoModel.ResultadoValidacion.RECARGA_EXITOSA) {
+    JOptionPane.showMessageDialog(this, "Recarga realizada correctamente. Saldo actualizado.",
+            "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+    parentFrame.recargaExitosa();
+    dispose();
+}
     }
 
     private JTextField crearCampoEstiloLogin(String placeholder, int x, int y, int width, int height) {
@@ -165,12 +181,10 @@ public class PagoMovilUCV extends JFrame {
         campo.setBackground(Color.WHITE);
         campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         campo.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
-
         campo.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) { if(campo.getText().equals(placeholder)) campo.setText(""); }
             public void focusLost(FocusEvent e) { if(campo.getText().isEmpty()) campo.setText(placeholder); }
         });
-
         return campo;
     }
 
@@ -185,7 +199,6 @@ public class PagoMovilUCV extends JFrame {
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 dispose();
-                // Aquí podrías llamar a tu Login inicial si lo tienes
             }
         });
         footer.add(lblCerrar);
@@ -193,12 +206,9 @@ public class PagoMovilUCV extends JFrame {
     }
 
     static class PanelRedondeado extends JPanel {
-        private int radio;
-        private Color color;
-        public PanelRedondeado(int radio, Color color) {
-            this.radio = radio; this.color = color;
-            setOpaque(false);
-        }
+        private final int radio;
+        private final Color color;
+        public PanelRedondeado(int radio, Color color) { this.radio = radio; this.color = color; setOpaque(false); }
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
@@ -207,9 +217,5 @@ public class PagoMovilUCV extends JFrame {
             g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), radio, radio));
             g2.dispose();
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PagoMovilUCV().setVisible(true));
     }
 }

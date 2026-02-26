@@ -97,7 +97,7 @@ public void loginRequested(String id, String password, LoginUCV vista) {
         return;
     }
 
-    if (!id.matches("\\d+")) { 
+    if (!id.matches("\\d+")) { // solo dígitos
         javax.swing.JOptionPane.showMessageDialog(
                 vista,
                 "Cédula inválida, solo se permiten números",
@@ -131,7 +131,7 @@ public void loginRequested(String id, String password, LoginUCV vista) {
 
     // ---------- REDIRECCIÓN ----------
     try {
-        RolUsuario rol = dataBase.obtenerRolSecretaria(id);
+        RolUsuario rol = dataBase.obtenerRol(id);
         vista.dispose();
         if (rol == RolUsuario.ADMIN) {
             new com.ucv.view.AdminUCV("Administrador").setVisible(true);

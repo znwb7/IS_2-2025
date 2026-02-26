@@ -1,7 +1,6 @@
 package com.ucv.view;
 
 import com.ucv.view.components.HeaderUCV;
-import com.ucv.view.components.SideBar;
 import javax.swing.*;
 import java.awt.*;
 
@@ -22,7 +21,6 @@ public class ReservaConcretada extends JFrame {
 
         // Componentes reutilizables
         container.add(new HeaderUCV(), BorderLayout.NORTH);
-        container.add(new SideBar(this), BorderLayout.WEST);
 
         // --- PANEL CENTRAL (Espejo de la imagen) ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
@@ -78,10 +76,5 @@ public class ReservaConcretada extends JFrame {
         cerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
         footer.add(cerrarSesion);
         return footer;
-    }
-
-    public static void main(String[] args) {
-        // Ejemplo: Se abre al confirmar un "Almuerzo"
-        SwingUtilities.invokeLater(() -> new ReservaConcretada("Almuerzo").setVisible(true));
     }
 }

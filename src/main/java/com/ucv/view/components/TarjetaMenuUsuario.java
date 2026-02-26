@@ -9,8 +9,10 @@ public class TarjetaMenuUsuario extends JPanel {
     private static final Color GRIS_TARJETA = new Color(225, 225, 225);
     private static final Color AZUL_DISPONIBLES = new Color(20, 35, 100);
     private static final Color AMARILLO_BOTON = new Color(255, 210, 35);
+    private final String usuarioID;
 
-    public TarjetaMenuUsuario(String tipo, String horario, String maxCupos, String precio, boolean disponible) {
+    public TarjetaMenuUsuario(String tipo, String horario, String maxCupos, String precio, boolean disponible, String usuarioID) {
+        this.usuarioID = usuarioID;
         setPreferredSize(new Dimension(420, 370));
         setOpaque(false);
 
@@ -82,8 +84,8 @@ public class TarjetaMenuUsuario extends JPanel {
             if (ventanaPadre != null) {
                 ventanaPadre.dispose(); // Cerramos la ventana de Menus
             }
-            // Abrimos la confirmación pasando el tipo de menú
-            new ConfirmacionReserva(tipo).setVisible(true);
+            // Abrimos la confirmación pasando el tipo de menú y el ID del usuario
+            new ConfirmacionReserva(tipo, this.usuarioID).setVisible(true);
         });
         add(btnSel);
     }

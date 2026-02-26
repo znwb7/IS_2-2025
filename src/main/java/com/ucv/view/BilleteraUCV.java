@@ -1,12 +1,14 @@
 package com.ucv.view;
 
+import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
-import com.ucv.view.components.SideBar; // Cambiado a SideBar
+import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.io.*;
 
 public class BilleteraUCV extends JFrame {
 
@@ -14,65 +16,98 @@ public class BilleteraUCV extends JFrame {
     private static final Color GRIS_TARJETA = new Color(225, 225, 225);
     private static final Color AMARILLO_BOTON = new Color(255, 210, 35);
 
-    public BilleteraUCV() {
+    private final String usuarioID;
+    private JLabel lblMonto;
+
+    public BilleteraUCV(String usuarioID) {
+        this.usuarioID = usuarioID;
+        System.out.println(usuarioID);
+
         setTitle("Mi Saldo · Comedor UCV");
         setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Contenedor Principal
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
-
-        // Cabecera y Barra Lateral (Actualizada a SideBar)
         container.add(new HeaderUCV(), BorderLayout.NORTH);
-        container.add(new SideBar(this), BorderLayout.WEST);
+        container.add(new SideBar(this,usuarioID), BorderLayout.WEST);
 
-        // Panel Central para posicionar la tarjeta del saldo
         JPanel panelCentral = new JPanel(null);
         panelCentral.setOpaque(false);
 
-        // --- ETIQUETA "Saldo Disponible" ---
         JLabel lblTitulo = new JLabel("Saldo Disponible:");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 28));
         lblTitulo.setForeground(Color.WHITE);
         lblTitulo.setBounds(360, 160, 300, 40);
         panelCentral.add(lblTitulo);
 
-        // --- TARJETA DE SALDO ---
         PanelRedondeado tarjetaSaldo = new PanelRedondeado(30, GRIS_TARJETA);
         tarjetaSaldo.setBounds(350, 200, 700, 220);
         tarjetaSaldo.setLayout(null);
 
-        // Monto del Saldo
-        JLabel lblMonto = new JLabel("Bs 0.00");
+        lblMonto = new JLabel("Bs 0.00");
         lblMonto.setFont(new Font("Segoe UI", Font.BOLD, 48));
         lblMonto.setForeground(Color.BLACK);
         lblMonto.setBounds(50, 70, 400, 60);
         tarjetaSaldo.add(lblMonto);
 
-        // Botón Agregar Saldo
         PrimaryButton2 btnAgregar = new PrimaryButton2("Agregar saldo", AMARILLO_BOTON);
         btnAgregar.setBounds(500, 140, 160, 45);
         btnAgregar.setForeground(Color.BLACK);
         btnAgregar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnAgregar.addActionListener(e -> {
-            new PagoMovilUCV().setVisible(true);
-            dispose();
+            PagoMovilUCV pagoFrame = new PagoMovilUCV(usuarioID, this);
+            pagoFrame.setVisible(true);
+            this.setVisible(false);
         });
         tarjetaSaldo.add(btnAgregar);
 
         panelCentral.add(tarjetaSaldo);
         container.add(panelCentral, BorderLayout.CENTER);
-
-        // Footer con el nuevo código y listener funcional
         container.add(crearFooter(), BorderLayout.SOUTH);
 
         add(container);
 
-        this.revalidate();
-        this.repaint();
+        actualizarSaldo(); // Mostrar saldo actual al abrir
+        revalidate();
+        repaint();
+    }
+
+    /** Actualiza el saldo mostrado desde DataBase.txt */
+    public void actualizarSaldo() {
+        try {
+            DataBase db = new DataBase();
+            double saldo = obtenerSaldo(db);
+            lblMonto.setText("Bs " + String.format("%.2f", saldo));
+        } catch (Exception e) {
+            lblMonto.setText("Bs 0.00");
+        }
+    }
+
+    /** Obtiene el saldo del usuario desde la BD principal */
+    private double obtenerSaldo(DataBase db) throws IOException {
+        File archivo = new File(System.getProperty("user.dir") + File.separator +
+                "target" + File.separator + "Output" + File.separator + "DataBase.txt");
+        if (!archivo.exists()) return 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] partes = line.split("\\s*\\|\\s*");
+                if (partes.length >= 6 && partes[1].trim().equals(usuarioID)) {
+                    return Double.parseDouble(partes[5].trim());
+                }
+            }
+        }
+        return 0;
+    }
+
+    /** Método que notifica que se realizó una recarga exitosa */
+    public void recargaExitosa() {
+        actualizarSaldo();  // Solo actualiza el saldo
+        this.setVisible(true);  // Vuelve a mostrar la ventana
     }
 
     private JPanel crearFooter() {
@@ -96,7 +131,8 @@ public class BilleteraUCV extends JFrame {
         private int radio;
         private Color color;
         public PanelRedondeado(int radio, Color color) {
-            this.radio = radio; this.color = color;
+            this.radio = radio;
+            this.color = color;
             setOpaque(false);
         }
         @Override
@@ -107,9 +143,5 @@ public class BilleteraUCV extends JFrame {
             g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), radio, radio));
             g2.dispose();
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new BilleteraUCV().setVisible(true));
     }
 }
