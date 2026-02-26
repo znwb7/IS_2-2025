@@ -46,7 +46,7 @@ public class DataBase {
     }
 
   
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         DataBase db = new DataBase();
         String idPrueba = "31983764";
 
@@ -71,7 +71,7 @@ public class DataBase {
         } catch (Exception e) {
             System.err.println("Error en la prueba: " + e.getMessage());
         }
-    }
+    }*/
 
     //SE USA EN EL LOGIN, ENCARGADA DE BUSCAR LOS DATOS DEL USUARIO PARA ACCEDER AL MENU
     public LoginStatus comprobarDatos(String id, String password) throws IOException {
