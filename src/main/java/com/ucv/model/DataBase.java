@@ -352,7 +352,7 @@ public class DataBase {
                 if (WordP.length >= 6 && WordP[1].equals(ID)) {
                     usuarioEncontrado = true;
                     
-                    // 1. Convertimos montos a double para la operación
+                    // 1. Conversion montos a double para la operación
                     double saldoActual = Double.parseDouble(WordP[5].trim());
                     double cantidadARestar = Double.parseDouble(montoARestar.trim().replace(',', '.'));
 
@@ -363,7 +363,7 @@ public class DataBase {
                         // 3. Redondeo a 2 decimales
                         nuevoSaldo = Math.round(nuevoSaldo * 100.0) / 100.0;
 
-                        // 4. Reconstruimos la línea con el nuevo saldo
+                        // 4. Reconstruccion de la línea con el nuevo saldo
                         linea = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + nuevoSaldo;
                     } else {
                         saldoSuficiente = false;
@@ -376,7 +376,7 @@ public class DataBase {
         }
 
         if (!usuarioEncontrado) return UpdateMoney.PAGOMOVIL_NO_ENCONTRADO;
-        if (!saldoSuficiente) return UpdateMoney.FONDO_INSUFICIENTE; // O un estado de "Saldo Insuficiente"
+        if (!saldoSuficiente) return UpdateMoney.FONDO_INSUFICIENTE; 
 
         // 5. Volcamos los datos actualizados al archivo
         try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, false))) {

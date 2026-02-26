@@ -239,7 +239,7 @@ public class PrincipalUsuario extends JFrame {
 
                     javax.swing.JOptionPane.showMessageDialog(
                         null, 
-                        "Genere un Turno Primero Dirigiendose a la Seccion De Menu", 
+                        "Antes Debe Generar un Turno", 
                         "Aviso del Sistema", 
                         javax.swing.JOptionPane.WARNING_MESSAGE
                     );
