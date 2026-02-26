@@ -1,5 +1,6 @@
 package com.ucv.view;
 
+import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +16,10 @@ public class ReservaConcretada extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        DataBase dataBase = new DataBase();
+        dataBase.MenuActive(dataBase.ReturnID());
+
 
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
@@ -70,11 +75,20 @@ public class ReservaConcretada extends JFrame {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footer.setOpaque(false);
         footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 40));
-        JLabel cerrarSesion = new JLabel("<html><u>Cerrar Sesión</u></html>");
-        cerrarSesion.setForeground(Color.WHITE);
-        cerrarSesion.setFont(new Font("Arial", Font.PLAIN, 20));
-        cerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        footer.add(cerrarSesion);
+        JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
+        lblCerrar.setForeground(Color.WHITE);
+        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 18));
+        lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
+                dispose();
+                com.ucv.ComedorApp.main(null);
+            }
+        });
+        footer.add(lblCerrar);
         return footer;
     }
 }

@@ -1,5 +1,6 @@
 package com.ucv.view;
 
+import com.ucv.model.DataBase;
 import com.ucv.view.components.SIdeBar2;
 import javax.swing.*;
 import java.awt.*;
@@ -116,6 +117,8 @@ public class AdminUCV extends JFrame {
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
                 dispose();
                 com.ucv.ComedorApp.main(null);
             }

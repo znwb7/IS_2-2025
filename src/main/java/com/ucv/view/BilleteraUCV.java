@@ -120,6 +120,8 @@ public class BilleteraUCV extends JFrame {
         cerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
         cerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
                 dispose();
             }
         });

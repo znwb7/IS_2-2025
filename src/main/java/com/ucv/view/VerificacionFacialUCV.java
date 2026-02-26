@@ -1,12 +1,13 @@
 package com.ucv.view;
 
+import com.ucv.controller.FacialController;
+import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
-import javax.swing.JFileChooser;
 
 public class VerificacionFacialUCV extends JFrame {
 
@@ -125,15 +126,33 @@ public class VerificacionFacialUCV extends JFrame {
         btnPlus.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btnPlus.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
+           @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                JFileChooser chooser = new JFileChooser();
-                chooser.setDialogTitle("Seleccione su foto de perfil");
-                int result = chooser.showOpenDialog(null);
+                // 1. Instanciar el controlador de reconocimiento facial
+                FacialController facialController = new FacialController();
+                
+                // 2. Llamar al método LoadImage y capturar el objeto Response
+                // Importante: Usamos la ruta completa del paquete para evitar conflictos con otras clases "Response"
+                com.ucv.controller.UserController.Response respuesta = facialController.LoadImage();
 
-                // Usamos 0 que es el valor de JFileChooser.APPROVE_OPTION
-                if (result == 0) {
-                    System.out.println("Imagen cargada: " + chooser.getSelectedFile().getPath());
+                // 3. Evaluar el resultado de la verificación
+                if (respuesta.isSuccess()) {
+                    // --- CASO ÉXITO ---
+                    // Cerramos la ventana de carga actual
+                    dispose(); 
+                    
+                    // Abrimos la ventana de éxito (el mensaje azul de "Ingreso permitido")
+                    new VerificacionFacialExitosa().setVisible(true);
+                    
+                } else {
+                    // --- CASO ERROR O CANCELADO ---
+                    // Si el usuario cerró el selector, no es JPG o el rostro no coincide en la DB
+                    JOptionPane.showMessageDialog(
+                        VerificacionFacialUCV.this, 
+                        respuesta.getMessage(), 
+                        "Verificación de Identidad", 
+                        JOptionPane.WARNING_MESSAGE
+                    );
                 }
             }
 
@@ -198,7 +217,10 @@ public class VerificacionFacialUCV extends JFrame {
         lbl.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
                 dispose();
+                com.ucv.ComedorApp.main(null);
             }
         });
         f.add(lbl);

@@ -2,6 +2,7 @@ package com.ucv.view;
 
 import com.ucv.controller.PagoController;
 import com.ucv.model.PagoModel;
+import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
@@ -198,6 +199,8 @@ public class PagoMovilUCV extends JFrame {
         lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
                 dispose();
             }
         });
