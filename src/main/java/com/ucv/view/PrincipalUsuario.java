@@ -239,7 +239,7 @@ public class PrincipalUsuario extends JFrame {
 
                     javax.swing.JOptionPane.showMessageDialog(
                         null, 
-                        "No hay vida", 
+                        "Genere un Turno Primero Dirigiendose a la Seccion De Menu", 
                         "Aviso del Sistema", 
                         javax.swing.JOptionPane.WARNING_MESSAGE
                     );
