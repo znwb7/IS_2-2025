@@ -1,33 +1,31 @@
 package com.ucv.view;
 
-import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
+import com.ucv.view.components.SideBar;
 import javax.swing.*;
 import java.awt.*;
 
 public class ReservaConcretada extends JFrame {
-    DataBase dataBase = new DataBase();
-           
     private static final Color AZUL_FONDO = new Color(18, 71, 150);
     private static final Color AMARILLO_TEXTO = new Color(255, 210, 35);
 
-    public ReservaConcretada(String tipoMenuSeleccionado) {
-
-        dataBase.MenuActive(dataBase.ReturnID());
+    public ReservaConcretada(String tipoMenuSeleccionado, String usuarioID) {
         setTitle("Reserva Concretada · Comedor UCV");
         setSize(1920, 1080);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
-        // Componentes reutilizables
+        // --- COMPONENTES REUTILIZABLES ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
 
-        // --- PANEL CENTRAL (Espejo de la imagen) ---
+        // Se implementa el componente SideBar que proporcionaste
+        container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
+
+        // --- PANEL CENTRAL ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -75,20 +73,25 @@ public class ReservaConcretada extends JFrame {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footer.setOpaque(false);
         footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 40));
-        JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
-        lblCerrar.setForeground(Color.WHITE);
-        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 18));
-        lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
+
+        JLabel cerrarSesion = new JLabel("<html><u>Cerrar Sesión</u></html>");
+        cerrarSesion.setForeground(Color.WHITE);
+        cerrarSesion.setFont(new Font("Arial", Font.PLAIN, 20));
+        cerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Lógica para cerrar sesión y volver al Login
+        cerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
                 dispose();
-                com.ucv.ComedorApp.main(null);
+                LoginUCV login = new LoginUCV();
+                // Asumiendo que el controlador se asocia como en tus otras vistas
+                login.setController(new com.ucv.controller.UserController());
+                login.setVisible(true);
             }
         });
-        footer.add(lblCerrar);
+
+        footer.add(cerrarSesion);
         return footer;
     }
 }

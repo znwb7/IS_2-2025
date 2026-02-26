@@ -75,7 +75,7 @@ public class ConfirmacionReserva extends JFrame {
         btnSi.addActionListener(e -> {
             dispose();
             // Abre la pantalla final de éxito
-            new ReservaConcretada(this.tipoSeleccionado).setVisible(true);
+            new ReservaConcretada(this.tipoSeleccionado, this.usuarioID).setVisible(true);
         });
 
         panelBotones.add(btnNo);
