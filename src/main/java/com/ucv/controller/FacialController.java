@@ -1,7 +1,7 @@
 package com.ucv.controller;
 
 import com.ucv.model.DataBase;
-
+import com.ucv.model.MenuDB;
 import com.ucv.controller.UserController.Response;
 
 public class FacialController {

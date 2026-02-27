@@ -21,6 +21,7 @@ public class MenuDB {
             + SEPARATOR + "Output" 
             + SEPARATOR + "MenuDB.txt";
 
+            //CREAR CARPETAS Y ARCHIVO
     private void MakeArchive() throws IOException {
         File archivo = new File(RUTA_ARCHIVO);
         try {
@@ -37,53 +38,53 @@ public class MenuDB {
     }
 
    public static void main(String[] args) {
-    MenuDB db = new MenuDB();
-    String fecha = "2026-02-25";
+        MenuDB db = new MenuDB();
+        String fecha = "2026-02-25";
 
-    try {
-        System.out.println("=== PRUEBA DE TRANSICIONES DE TIPO (ALMUERZO <-> DESAYUNO) ===");
+        try {
+            System.out.println("=== PRUEBA DE TRANSICIONES DE TIPO (ALMUERZO <-> DESAYUNO) ===");
 
-        // 1. REGISTRO INICIAL: Almuerzo
-        System.out.println("\n[1] Registrando un Almuerzo inicial...");
-        db.WriteMenu(false, false, fecha, "Almuerzo", "Pasta", "Jugo", "Fruta", "10", "20", "15");
-        mostrarBD();
+            // 1. REGISTRO INICIAL: Almuerzo
+            System.out.println("\n[1] Registrando un Almuerzo inicial...");
+            db.WriteMenu(false, false, fecha, "Almuerzo", "Pasta", "Jugo", "Fruta", "10", "20", "15");
+            mostrarBD();
 
-        // 2. CAMBIO: De Almuerzo a Desayuno
-        // Usamos Modify=true y Type=true para disparar el cambio de tipo
-        System.out.println("\n[2] Aplicando cambio: de Almuerzo -> DESAYUNO...");
-        db.WriteMenu(true, true, fecha, "Almuerzo", "Empanadas", "Cafe", "Fruta", "5", "10", "8");
-        mostrarBD();
+            // 2. CAMBIO: De Almuerzo a Desayuno
+            // Usamos Modify=true y Type=true para disparar el cambio de tipo
+            System.out.println("\n[2] Aplicando cambio: de Almuerzo -> DESAYUNO...");
+            db.WriteMenu(true, true, fecha, "Almuerzo", "Empanadas", "Cafe", "Fruta", "5", "10", "8");
+            mostrarBD();
 
-        // 3. CAMBIO: De Desayuno a Almuerzo (Viceversa)
-        System.out.println("\n[3] Aplicando cambio: de Desayuno -> ALMUERZO...");
-        db.WriteMenu(true, true, fecha, "Desayuno", "Pabellon", "Papelon", "Quesillo", "12", "25", "20");
-        mostrarBD();
+            // 3. CAMBIO: De Desayuno a Almuerzo (Viceversa)
+            System.out.println("\n[3] Aplicando cambio: de Desayuno -> ALMUERZO...");
+            db.WriteMenu(true, true, fecha, "Desayuno", "Pabellon", "Papelon", "Quesillo", "12", "25", "20");
+            mostrarBD();
 
-        System.out.println("\n=== PRUEBA DE ERRORES DE TRANSICIÓN ===");
-        
-        // 4. Intento de cambiar un tipo que no existe en esa fecha
-        System.out.println("\n[4] Intentando cambiar 'Cena' a otro tipo (No existe)...");
-        WriteMenuStatus err = db.WriteMenu(true, true, fecha, "Cena", "Nada", "Nada", "Nada", "0", "0", "0");
-        System.out.println("Resultado esperado: " + err);
+            System.out.println("\n=== PRUEBA DE ERRORES DE TRANSICIÓN ===");
+            
+            // 4. Intento de cambiar un tipo que no existe en esa fecha
+            System.out.println("\n[4] Intentando cambiar 'Cena' a otro tipo (No existe)...");
+            WriteMenuStatus err = db.WriteMenu(true, true, fecha, "Cena", "Nada", "Nada", "Nada", "0", "0", "0");
+            System.out.println("Resultado esperado: " + err);
 
-    } catch (IOException e) {
-        System.err.println("Error en la prueba: " + e.getMessage());
-    }
-}
-
-// Método auxiliar para ver los cambios en la BD en tiempo real
-private static void mostrarBD() {
-    System.out.println("--- Contenido actual de MenuDB.txt ---");
-    try (BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir") + File.separator + "target" + File.separator + "Output" + File.separator + "MenuDB.txt"))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            System.out.println("BD -> " + line);
+        } catch (IOException e) {
+            System.err.println("Error en la prueba: " + e.getMessage());
         }
-    } catch (IOException e) {
-        System.out.println("Archivo vacío o no encontrado.");
     }
-    System.out.println("---------------------------------------");
-}
+
+    //cambios en la BD en tiempo real
+    private static void mostrarBD() {
+        System.out.println("--- Contenido actual de MenuDB.txt ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir") + File.separator + "target" + File.separator + "Output" + File.separator + "MenuDB.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println("BD -> " + line);
+            }
+        } catch (IOException e) {
+            System.out.println("Archivo vacío o no encontrado.");
+        }
+        System.out.println("---------------------------------------");
+    }
 
     public WriteMenuStatus WriteMenu(Boolean Modify, Boolean Type, String Fecha, String Tipo, String PlatoFuerte, String Bebida, String Postre, String PEstudiante, String PProfesor, String PEmpleado) throws IOException {
         Tipo = Tipo.toLowerCase();
@@ -92,7 +93,7 @@ private static void mostrarBD() {
         Postre = Postre.toLowerCase();
 
         if (Modify) {
-            return ModifyMenu(Type, Fecha, Tipo, PlatoFuerte, Bebida, Postre, PEstudiante, PProfesor, PEmpleado);
+            return ModifyMenu(Fecha, Tipo, PlatoFuerte, Bebida, Postre, PEstudiante, PProfesor, PEmpleado);
         }
         
         MakeArchive();
@@ -145,7 +146,8 @@ private static void mostrarBD() {
         return ReWriteStatus.NO_ENCONTRADO;
     }
 
-    public WriteMenuStatus ModifyMenu(Boolean Type, String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp) throws IOException {
+    //Modificar Menu
+    public WriteMenuStatus ModifyMenu(String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp) throws IOException {
         Tipo = Tipo.toLowerCase();
         NPlato = NPlato.toLowerCase();
         NBebida = NBebida.toLowerCase();
@@ -165,9 +167,6 @@ private static void mostrarBD() {
                 if (partes.length >= 9 && partes[0].equals(Fecha) && partes[1].equals(Tipo.toLowerCase())) {
                     String contadorActual = partes[8];
                     
-                    if (Type) {
-                        Tipo = Tipo.toLowerCase().equals("almuerzo") ? "desayuno" : "almuerzo";
-                    }
                     
                     linea = Fecha + " | " + Tipo + " | " + NPlato + " | " + NBebida + " | " + NPostre + " | " + NPEst + " | " + NPProf + " | " + NPEmp + " | " + contadorActual;
                     modificado = true;
@@ -187,4 +186,74 @@ private static void mostrarBD() {
         }
         return WriteMenuStatus.MENU_NO_ENCONTRADO;
     }
+
+
+    //Suma 1 persona cada vez que se llama
+    public ReWriteStatus CountMenu(String Fecha, String Tipo) {
+        Tipo = Tipo.toLowerCase();
+        File archivo = new File(RUTA_ARCHIVO);
+        
+        // Verificamos si el archivo existe
+        if (!archivo.exists()) return ReWriteStatus.ARCHIVO_NO_EXISTE;
+
+        List<String> lineas = new ArrayList<>();
+        boolean encontrado = false;
+
+        try (BufferedReader lector = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            while ((linea = lector.readLine()) != null) {
+                // Dividimos la línea usando el separador " | "
+                String[] partes = linea.split("\\s*\\|\\s*");
+
+                // Verificamos que la línea tenga el formato correcto, coincida la fecha y el tipo
+                if (partes.length >= 9 && partes[0].equals(Fecha) && partes[1].equalsIgnoreCase(Tipo)) {
+                    try {
+                        // Obtenemos el valor en el índice 8 (Word[8]), sumamos 1
+                        int contador = Integer.parseInt(partes[8]);
+                        contador++;
+                        partes[8] = String.valueOf(contador);
+                        
+                        // Reconstruimos la línea con el nuevo valor
+                        linea = String.join(" | ", partes);
+                        encontrado = true;
+                    } catch (NumberFormatException e) {
+                        // En caso de que el valor en la posición 8 no sea un número válido
+                        System.err.println("Error: El contador en el archivo no es un número válido.");
+                    }
+                }
+                lineas.add(linea);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+            return ReWriteStatus.NO_ENCONTRADO; // O podrías definir un nuevo status de error
+        }
+
+        // Si se encontró y modificó, volcamos la información de nuevo al archivo
+        if (encontrado) {
+            try (BufferedWriter escritor = new BufferedWriter(new FileWriter(archivo, false))) {
+                for (String l : lineas) {
+                    escritor.write(l);
+                    escritor.newLine();
+                }
+                return ReWriteStatus.REWRITE_EXITOSO;
+            } catch (IOException e) {
+                System.err.println("Error al escribir en el archivo: " + e.getMessage());
+            }
+        }
+
+        return ReWriteStatus.NO_ENCONTRADO;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
