@@ -36,71 +36,14 @@ public class MenuDB {
         }
     }
 
-<<<<<<< HEAD
-   public static void main(String[] args) {
-        MenuDB db = new MenuDB();
-        String fecha = "2026-02-25";
-
-        try {
-            System.out.println("=== PRUEBA DE TRANSICIONES DE TIPO (ALMUERZO <-> DESAYUNO) ===");
-
-            // 1. REGISTRO INICIAL: Almuerzo
-            System.out.println("\n[1] Registrando un Almuerzo inicial...");
-            db.WriteMenu(false, false, fecha, "Almuerzo", "Pasta", "Jugo", "Fruta", "10", "20", "15");
-            mostrarBD();
-
-            // 2. CAMBIO: De Almuerzo a Desayuno
-            // Usamos Modify=true y Type=true para disparar el cambio de tipo
-            System.out.println("\n[2] Aplicando cambio: de Almuerzo -> DESAYUNO...");
-            db.WriteMenu(true, true, fecha, "Almuerzo", "Empanadas", "Cafe", "Fruta", "5", "10", "8");
-            mostrarBD();
-
-            // 3. CAMBIO: De Desayuno a Almuerzo (Viceversa)
-            System.out.println("\n[3] Aplicando cambio: de Desayuno -> ALMUERZO...");
-            db.WriteMenu(true, true, fecha, "Desayuno", "Pabellon", "Papelon", "Quesillo", "12", "25", "20");
-            mostrarBD();
-
-            System.out.println("\n=== PRUEBA DE ERRORES DE TRANSICIÓN ===");
-            
-            // 4. Intento de cambiar un tipo que no existe en esa fecha
-            System.out.println("\n[4] Intentando cambiar 'Cena' a otro tipo (No existe)...");
-            WriteMenuStatus err = db.WriteMenu(true, true, fecha, "Cena", "Nada", "Nada", "Nada", "0", "0", "0");
-            System.out.println("Resultado esperado: " + err);
-
-        } catch (IOException e) {
-            System.err.println("Error en la prueba: " + e.getMessage());
-        }
-    }
-
-    //cambios en la BD en tiempo real
-    private static void mostrarBD() {
-        System.out.println("--- Contenido actual de MenuDB.txt ---");
-        try (BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir") + File.separator + "target" + File.separator + "Output" + File.separator + "MenuDB.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println("BD -> " + line);
-            }
-        } catch (IOException e) {
-            System.out.println("Archivo vacío o no encontrado.");
-        }
-        System.out.println("---------------------------------------");
-    }
-
-    public WriteMenuStatus WriteMenu(Boolean Modify, Boolean Type, String Fecha, String Tipo, String PlatoFuerte, String Bebida, String Postre, String PEstudiante, String PProfesor, String PEmpleado) throws IOException {
-=======
     public WriteMenuStatus WriteMenu(Boolean Modify, Boolean Type, String Fecha, String Tipo, String PlatoFuerte, String Bebida, String Postre, String PEstudiante, String PProfesor, String PEmpleado, String Capacidad, String CCB) throws IOException {
->>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
         Tipo = Tipo.toLowerCase();
         PlatoFuerte = PlatoFuerte.toLowerCase();
         Bebida = Bebida.toLowerCase();
         Postre = Postre.toLowerCase();
 
         if (Modify) {
-<<<<<<< HEAD
-            return ModifyMenu(Fecha, Tipo, PlatoFuerte, Bebida, Postre, PEstudiante, PProfesor, PEmpleado);
-=======
             return ModifyMenu(Type, Fecha, Tipo, PlatoFuerte, Bebida, Postre, PEstudiante, PProfesor, PEmpleado, Capacidad, CCB);
->>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
         }
 
         MakeArchive();
@@ -150,12 +93,7 @@ public class MenuDB {
         return ReWriteStatus.NO_ENCONTRADO;
     }
 
-<<<<<<< HEAD
-    //Modificar Menu
-    public WriteMenuStatus ModifyMenu(String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp) throws IOException {
-=======
     public WriteMenuStatus ModifyMenu(Boolean Type, String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp, String Capacidad, String CCB) throws IOException {
->>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
         Tipo = Tipo.toLowerCase();
         NPlato = NPlato.toLowerCase();
         NBebida = NBebida.toLowerCase();
@@ -174,19 +112,13 @@ public class MenuDB {
 
                 if (partes.length >= 9 && partes[0].equals(Fecha) && partes[1].equals(Tipo.toLowerCase())) {
                     String contadorActual = partes[8];
-<<<<<<< HEAD
-                    
-                    
-                    linea = Fecha + " | " + Tipo + " | " + NPlato + " | " + NBebida + " | " + NPostre + " | " + NPEst + " | " + NPProf + " | " + NPEmp + " | " + contadorActual;
-=======
 
                     if (Type) {
                         Tipo = Tipo.toLowerCase().equals("almuerzo") ? "desayuno" : "almuerzo";
                     }
 
                     linea = Fecha + " | " + Tipo + " | " + NPlato + " | " + NBebida + " | " + NPostre + " | " + NPEst + " | " + NPProf + " | " + NPEmp + " | " + contadorActual + " | " + Capacidad + " | " + CCB;
->>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
-                    modificado = true;
+                    modificado = true;                                                                                                                              //8                           9             10
                 }
                 lineas.add(linea);
             }
@@ -204,9 +136,29 @@ public class MenuDB {
         return WriteMenuStatus.MENU_NO_ENCONTRADO;
     }
 
-<<<<<<< HEAD
+    public boolean consultarExistencia(String fecha, String tipo) {
+        return obtenerMenu(fecha, tipo) != null;
+    }
 
-    //Suma 1 persona cada vez que se llama
+    public String[] obtenerMenu(String fecha, String tipo) {
+        File archivo = new File(RUTA_ARCHIVO);
+        if (!archivo.exists()) return null;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) continue;
+                String[] partes = linea.split("\\s*\\|\\s*");
+                if (partes.length >= 9 && partes[0].equals(fecha) && partes[1].equalsIgnoreCase(tipo)) {
+                    return partes;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error leyendo DB: " + e.getMessage());
+        }
+        return null;
+    }
+
     public ReWriteStatus CountMenu(String Fecha, String Tipo) {
         Tipo = Tipo.toLowerCase();
         File archivo = new File(RUTA_ARCHIVO);
@@ -263,39 +215,69 @@ public class MenuDB {
     }
 
 
+    public int CantidadDisponible (String Tipo){
 
-
-
-
-
-
-
-
-
-
-
-=======
-    public boolean consultarExistencia(String fecha, String tipo) {
-        return obtenerMenu(fecha, tipo) != null;
-    }
-
-    public String[] obtenerMenu(String fecha, String tipo) {
+        String fecha = java.time.LocalDate.now().toString();
         File archivo = new File(RUTA_ARCHIVO);
-        if (!archivo.exists()) return null;
+        if (!archivo.exists()) return -1;
 
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
             String linea;
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().isEmpty()) continue;
-                String[] partes = linea.split("\\s*\\|\\s*");
-                if (partes.length >= 9 && partes[0].equals(fecha) && partes[1].equalsIgnoreCase(tipo)) {
-                    return partes;
+                String[] Word = linea.split("\\s*\\|\\s*");
+                if (Word[1].equals(Tipo) && fecha.equals(Word[0])) {
+                    
+                    int valor8 = Integer.parseInt(Word[8].trim());
+                    int valor9 = Integer.parseInt(Word[9].trim());
+
+                    int resultadoResta = valor9 - valor8;
+                    
+                    return resultadoResta;
+
+
+
                 }
             }
         } catch (IOException e) {
             System.err.println("Error leyendo DB: " + e.getMessage());
         }
-        return null;
+        return -1;
+
+
+
+
+
+
+
+
+
+
+
     }
->>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
