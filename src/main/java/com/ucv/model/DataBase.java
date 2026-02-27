@@ -35,7 +35,7 @@ public class DataBase {
     public DataBase() {
         this.rutaArchivo = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "Output" + SEPARATOR + "DataBase.txt";
         this.rutaBDSecretaria = System.getProperty("user.dir") + SEPARATOR + "src" + SEPARATOR + "main" + SEPARATOR + "resources" + SEPARATOR + "BaseDataSecretaria.txt";
-        this.rutaPagoMovil = System.getProperty("user.dir") + SEPARATOR + "src" + SEPARATOR + "main" + SEPARATOR + "resources" + SEPARATOR + "DataBasePagos.txt";
+        this.rutaPagoMovil = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "Output" + SEPARATOR +  "DataBasePagos.txt";
     }
 
     // Constructor con rutas personalizadas (para testing o flexibilidad)
@@ -72,6 +72,7 @@ public class DataBase {
             System.err.println("Error en la prueba: " + e.getMessage());
         }
     }*/
+
 
     //SE USA EN EL LOGIN, ENCARGADA DE BUSCAR LOS DATOS DEL USUARIO PARA ACCEDER AL MENU
     public LoginStatus comprobarDatos(String id, String password) throws IOException {
@@ -311,7 +312,7 @@ public class DataBase {
                         MontoEncontrado = Math.round(MontoEncontrado * 100.0) / 100.0;
                         // Reconstruimos la línea: Nombre | ID | Pass | Rol | Hash | Monto
                         String Monto = String.valueOf(MontoEncontrado);
-                        lineaP = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + Monto;
+                        lineaP = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + Monto + " | " + WordP[6] + " | " + WordP[6];
                     }
                     lineasPrincipal.add(lineaP);
                 }
@@ -364,7 +365,7 @@ public class DataBase {
                         nuevoSaldo = Math.round(nuevoSaldo * 100.0) / 100.0;
 
                         // 4. Reconstruccion de la línea con el nuevo saldo
-                        linea = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + nuevoSaldo;
+                        linea = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + nuevoSaldo + " | " + WordP[6] + " | " + WordP[6];
                     } else {
                         saldoSuficiente = false;
                     }
