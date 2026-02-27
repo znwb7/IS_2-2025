@@ -1,6 +1,8 @@
 package com.ucv.view;
 
+import com.ucv.controller.PagoController;
 import com.ucv.model.DataBase;
+import com.ucv.model.PagoModel;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
@@ -16,10 +18,14 @@ public class BilleteraUCV extends JFrame {
     private static final Color GRIS_TARJETA = new Color(225, 225, 225);
     private static final Color AMARILLO_BOTON = new Color(255, 210, 35);
 
+    private final PagoController controlador;
+
     private final String usuarioID;
     private JLabel lblMonto;
 
     public BilleteraUCV(String usuarioID) {
+        PagoModel modelo = new PagoModel();
+        controlador = new PagoController(modelo, usuarioID);
         this.usuarioID = usuarioID;
         System.out.println(usuarioID);
 
@@ -75,33 +81,9 @@ public class BilleteraUCV extends JFrame {
         repaint();
     }
 
-    /** Actualiza el saldo mostrado desde DataBase.txt */
     public void actualizarSaldo() {
-        try {
-            DataBase db = new DataBase();
-            double saldo = obtenerSaldo(db);
-            lblMonto.setText("Bs " + String.format("%.2f", saldo));
-        } catch (Exception e) {
-            lblMonto.setText("Bs 0.00");
-        }
-    }
-
-    /** Obtiene el saldo del usuario desde la BD principal */
-    private double obtenerSaldo(DataBase db) throws IOException {
-        File archivo = new File(System.getProperty("user.dir") + File.separator +
-                "target" + File.separator + "Output" + File.separator + "DataBase.txt");
-        if (!archivo.exists()) return 0;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] partes = line.split("\\s*\\|\\s*");
-                if (partes.length >= 6 && partes[1].trim().equals(usuarioID)) {
-                    return Double.parseDouble(partes[5].trim());
-                }
-            }
-        }
-        return 0;
+        double saldo = controlador.obtenerSaldo();
+        lblMonto.setText("Bs " + String.format("%.2f", saldo));
     }
 
     /** Método que notifica que se realizó una recarga exitosa */

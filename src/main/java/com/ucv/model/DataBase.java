@@ -45,35 +45,6 @@ public class DataBase {
         this.rutaPagoMovil = rutaPagoMovil;
     }
 
-  
-   /* public static void main(String[] args) {
-        DataBase db = new DataBase();
-        String idPrueba = "31983764";
-
-        System.out.println("=== PRUEBA DE RETURNID (BUSCAR USUARIO ACTIVO) ===");
-
-        try {
-            // PASO 1: Asegurarnos de que el usuario tenga el "1" en la secretaría
-            // Nota: Asegúrate de que tu método LogedIn esté apuntando a rutaBDSecretaria para esta prueba
-            System.out.println("-> Paso 1: Marcando estado activo en Secretaria para ID: " + idPrueba);
-            db.LogedIn(idPrueba); 
-
-            // PASO 2: Ejecutar ReturnID
-            System.out.println("-> Paso 2: Ejecutando ReturnID()...");
-            String idEncontrado = db.ReturnID();
-
-            if (idEncontrado.startsWith("ERROR")) {
-                System.err.println("-> Resultado fallido: " + idEncontrado);
-            } else {
-                System.out.println("-> ¡Éxito! El ID del usuario activo es: " + idEncontrado);
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error en la prueba: " + e.getMessage());
-        }
-    }*/
-
-
     //SE USA EN EL LOGIN, ENCARGADA DE BUSCAR LOS DATOS DEL USUARIO PARA ACCEDER AL MENU
     public LoginStatus comprobarDatos(String id, String password) throws IOException {
         File file = new File(rutaArchivo);
@@ -272,68 +243,70 @@ public class DataBase {
     }
 
     //ACTUALIZA EL SALDO DEL USUARIO EN LA BD PRINCIPAL
-    public UpdateMoney UpdateMoney(String ID, String Fecha) {
+public UpdateMoney UpdateMoney(String ID, String montoASumar) {
 
-        File archivo = new File(rutaPagoMovil);
-        if (!archivo.exists()) return UpdateMoney.ARCHIVO_NO_EXISTE;
-        List<String> lineas = new ArrayList<>();
+    File archivo = new File(rutaArchivo);
+    if (!archivo.exists()) return UpdateMoney.ARCHIVO_NO_EXISTE;
 
-        boolean DaDaCo = false;
-        double MontoEncontrado = 0; // Para guardar el monto del pago
+    List<String> lineasActualizadas = new ArrayList<>();
+    boolean usuarioEncontrado = false;
 
-        // 1. Buscamos el monto en la base de datos de Pagos
-        try (BufferedReader lector = new BufferedReader(new FileReader(archivo))) {
+    try {
+        double monto = Double.parseDouble(montoASumar.trim().replace(',', '.'));
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+
             String linea;
-            while ((linea = lector.readLine()) != null) {
-                String[] Word = linea.split("\\s*\\|\\s*");
-                if (Word.length >= 6 && Word[1].equals(ID) && Word[5].equals(Fecha)) {
-                    MontoEncontrado = Double.parseDouble(Word[3]);
-                    DaDaCo = true;
-                }
-                lineas.add(linea);
-            }
-        } catch (IOException e) {
-            return UpdateMoney.ARCHIVO_NO_EXISTE;
-        }
 
-        // 2. Si se encontró el pago, actualizamos la BD principal (rutaArchivo)
-        if (DaDaCo) {
-            List<String> lineasPrincipal = new ArrayList<>();
-            File filePrincipal = new File(rutaArchivo);
-            
-            try (BufferedReader br = new BufferedReader(new FileReader(filePrincipal))) {
-                String lineaP;
-                while ((lineaP = br.readLine()) != null) {
-                    String[] WordP = lineaP.split("\\s*\\|\\s*");
-                    
-                    // Si encontramos al usuario por ID en la BD Principal
-                    if (WordP.length >= 6 && WordP[1].equals(ID)) {
-                        MontoEncontrado = MontoEncontrado + Double.parseDouble(WordP[5]);
-                        MontoEncontrado = Math.round(MontoEncontrado * 100.0) / 100.0;
-                        // Reconstruimos la línea: Nombre | ID | Pass | Rol | Hash | Monto
-                        String Monto = String.valueOf(MontoEncontrado);
-                        lineaP = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + Monto + " | " + WordP[6] + " | " + WordP[7];
-                    }
-                    lineasPrincipal.add(lineaP);
-                }
-            } catch (IOException e) {
-                return UpdateMoney.ERROR_AL_RECARGAR;
-            }
+            while ((linea = br.readLine()) != null) {
 
-            // 3. Escribimos los cambios de vuelta en la BD Principal
-            try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, false))) {
-                for (String l : lineasPrincipal) {
-                    escritor.write(l);
-                    escritor.newLine();
+                if (linea.trim().isEmpty()) {
+                    lineasActualizadas.add(linea);
+                    continue;
                 }
-                return UpdateMoney.SALDO_ACTUALIZADO_CON_EXITO;
-            } catch (IOException e) {
-                return UpdateMoney.ERROR_AL_RECARGAR;
+
+                String[] partes = linea.split("\\s*\\|\\s*");
+
+                if (partes.length >= 6 && partes[1].equals(ID)) {
+
+                    usuarioEncontrado = true;
+
+                    double saldoActual = Double.parseDouble(partes[5]);
+                    double nuevoSaldo = saldoActual + monto;
+
+                    nuevoSaldo = Math.round(nuevoSaldo * 100.0) / 100.0;
+
+                    linea = partes[0] + " | " +
+                            partes[1] + " | " +
+                            partes[2] + " | " +
+                            partes[3] + " | " +
+                            partes[4] + " | " +
+                            nuevoSaldo + " | " +
+                            partes[6] + " | " +
+                            partes[7];
+                }
+
+                lineasActualizadas.add(linea);
             }
         }
 
-        return UpdateMoney.PAGOMOVIL_NO_ENCONTRADO;
+        if (!usuarioEncontrado)
+            return UpdateMoney.PAGOMOVIL_NO_ENCONTRADO;
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo, false))) {
+            for (String l : lineasActualizadas) {
+                bw.write(l);
+                bw.newLine();
+            }
+        }
+
+        return UpdateMoney.SALDO_ACTUALIZADO_CON_EXITO;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return UpdateMoney.ERROR_AL_RECARGAR;
     }
+}
 
     //EXTRAE EL SALDO DEL USUARIO EN LA BD PRINCIPAL
     public UpdateMoney ExtractMoney(String ID, String montoARestar) {
@@ -582,8 +555,6 @@ public class DataBase {
         }
     }
 
-
-
     public String GetFoodFlag(String ID){
 
          try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
@@ -599,10 +570,32 @@ public class DataBase {
         } catch (IOException e) { 
             return "0"; 
         }
-
-
-
-
     }
+
+    public double obtenerSaldo(String usuarioID) {
+
+    File archivo = new File(System.getProperty("user.dir") + File.separator +
+            "target" + File.separator + "output" + File.separator + "DataBase.txt");
+
+    if (!archivo.exists()) return 0;
+
+    try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] partes = line.split("\\s*\\|\\s*");
+
+            if (partes.length >= 6 && partes[1].trim().equals(usuarioID)) {
+                return Double.parseDouble(partes[5].trim());
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+
 
 }

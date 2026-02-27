@@ -2,18 +2,11 @@ package com.ucv.controller;
 
 import com.ucv.model.DataBase;
 
-
 import com.ucv.controller.UserController.Response;
-
-
-
-
 
 public class FacialController {
 
-
     private final DataBase DataBase = new DataBase();
-
 
     public Response LoadImage() {
         // 1. Creamos el selector de archivos

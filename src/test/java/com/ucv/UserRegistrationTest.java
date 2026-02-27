@@ -40,7 +40,6 @@ public class UserRegistrationTest {
         controller = new UserController();
     }
 
-    
 
     @Test
     public void testRegistroExitoso() {

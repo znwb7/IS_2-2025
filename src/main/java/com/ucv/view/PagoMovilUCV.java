@@ -38,7 +38,7 @@ public class PagoMovilUCV extends JFrame {
 
         // Modelo y controlador
         PagoModel modelo = new PagoModel();
-        this.controlador = new PagoController(modelo, parentFrame);
+        this.controlador = new PagoController(modelo, usuarioID);
 
         setTitle("Pago Móvil · Comedor UCV");
         setSize(1920, 1080);
@@ -139,31 +139,63 @@ public class PagoMovilUCV extends JFrame {
     }
 
     /** Procesa la recarga usando el controlador y notifica al parentFrame */
-    private void procesarRecarga() {
-        String cedulaInput = txtCedula.getText().trim();
-        String montoInput = txtMonto.getText().trim();
-        String referenciaInput = txtReferencia.getText().trim();
+private void procesarRecarga() {
 
-        if (cedulaInput.isEmpty() || montoInput.isEmpty() || referenciaInput.isEmpty() ||
-                cedulaInput.equals("V-12345678") || montoInput.equals("Monto en Bs.") ||
-                referenciaInput.equals("Últimos 4 dígitos")) {
+    String cedulaInput = txtCedula.getText().trim();
+    String montoInput = txtMonto.getText().trim();
+    String referenciaInput = txtReferencia.getText().trim();
 
-            JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos correctamente.",
-                    "Error de Validación", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+    PagoModel.ResultadoValidacion resultado =
+            controlador.procesarPago(cedulaInput, montoInput, referenciaInput);
 
-        // Usamos el controlador
-        controlador.procesarPago(cedulaInput, montoInput, referenciaInput, this);
+    switch (resultado) {
 
-        // Si la recarga fue exitosa, actualizamos la billetera y cerramos
-    if (controlador.getUltimoResultado() == PagoModel.ResultadoValidacion.RECARGA_EXITOSA) {
-    JOptionPane.showMessageDialog(this, "Recarga realizada correctamente. Saldo actualizado.",
-            "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-    parentFrame.recargaExitosa();
-    dispose();
-}
+        case CAMPOS_INVALIDOS:
+            JOptionPane.showMessageDialog(this,
+                    "Campos inválidos.",
+                    "Error",
+                    JOptionPane.WARNING_MESSAGE);
+            break;
+
+        case PAGO_NO_ENCONTRADO:
+            JOptionPane.showMessageDialog(this,
+                    "Pago no encontrado.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            break;
+
+        case PAGO_YA_UTILIZADO:
+            JOptionPane.showMessageDialog(this,
+                    "Pago ya utilizado.",
+                    "Atención",
+                    JOptionPane.WARNING_MESSAGE);
+            break;
+
+        case MONTO_INCORRECTO:
+            JOptionPane.showMessageDialog(this,
+                    "Monto incorrecto.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            break;
+
+        case RECARGA_EXITOSA:
+            JOptionPane.showMessageDialog(this,
+                "Recarga exitosa.",
+                "Confirmación",
+                JOptionPane.INFORMATION_MESSAGE);
+
+            parentFrame.recargaExitosa();
+            dispose();
+            break;
+
+        case ERROR_SISTEMA:
+        default:
+            JOptionPane.showMessageDialog(this,
+                    "Error del sistema.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
     }
+}
 
     private JTextField crearCampoEstiloLogin(String placeholder, int x, int y, int width, int height) {
         JTextField campo = new JTextField(placeholder) {
