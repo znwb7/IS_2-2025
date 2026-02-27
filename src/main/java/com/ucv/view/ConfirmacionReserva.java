@@ -1,10 +1,7 @@
 package com.ucv.view;
 
-<<<<<<< HEAD
 import com.ucv.model.DataBase;
 import com.ucv.model.MenuDB;
-=======
->>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
@@ -78,15 +75,11 @@ public class ConfirmacionReserva extends JFrame {
         btnSi.setForeground(Color.BLACK);
         btnSi.addActionListener(e -> {
             dispose();
-<<<<<<< HEAD
             // Abre la pantalla final de éxito
             MenuDB Menudb = new MenuDB();
             Menudb.CountMenu(fecha, tipoSeleccionado);
             new ReservaConcretada(this.tipoSeleccionado, this.usuarioID).setVisible(true);
         });
-=======
-            new ReservaConcretada(this.tipoSeleccionado, usuarioID).setVisible(true);        });
->>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
 
         panelBotones.add(btnNo);
         panelBotones.add(btnSi);
