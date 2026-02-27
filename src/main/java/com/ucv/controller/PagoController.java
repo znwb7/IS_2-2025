@@ -4,8 +4,6 @@ import com.ucv.model.PagoModel;
 import com.ucv.model.PagoModel.ResultadoValidacion;
 import com.ucv.model.DataBase;
 
-import java.time.LocalDate;
-
 public class PagoController {
 
     private final PagoModel modelo;

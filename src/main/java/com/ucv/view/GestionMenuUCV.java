@@ -1,6 +1,6 @@
 package com.ucv.view;
 
-import com.ucv.model.DataBase;
+import com.ucv.controller.MenuController;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SIdeBar2;
 import com.ucv.view.components.PrimaryButton2;
@@ -18,39 +18,39 @@ public class GestionMenuUCV extends JFrame {
     private static final Color GRIS_CANCELAR = new Color(190, 190, 190);
     private static final Color GRIS_INPUT = new Color(235, 235, 235);
 
+    private final MenuController controller;
+
+    // Constructor sin parámetros por si se llama desde otra vista (crea su propio controlador)
     public GestionMenuUCV() {
+        this(new MenuController());
+    }
+
+    public GestionMenuUCV(MenuController controller) {
+        this.controller = controller;
         setTitle("Gestión de Menús · Comedor UCV");
-        setSize(1920, 1080);
+        setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Contenedor Principal
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
-        // --- 1. ENCABEZADO ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
-
-        // --- 2. SIDEBAR (Casita configurada como Admin) ---
         container.add(new SIdeBar2(this), BorderLayout.WEST);
 
-        // --- 3. CUERPO CENTRAL ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
 
-        // Tarjeta Gris
         PanelRedondeado tarjeta = new PanelRedondeado(40, GRIS_TARJETA);
         tarjeta.setPreferredSize(new Dimension(750, 240));
         tarjeta.setLayout(null);
 
-        // Texto Instrucción
         JLabel lblInstruccion = new JLabel("Seleccione la fecha de los menus que quiere modificar", SwingConstants.CENTER);
         lblInstruccion.setFont(new Font("Arial", Font.PLAIN, 24));
         lblInstruccion.setBounds(0, 25, 750, 40);
         tarjeta.add(lblInstruccion);
 
-        // --- COMBOBOXES ---
         String[] dias = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
                 "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
         String[] meses = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
@@ -69,18 +69,14 @@ public class GestionMenuUCV extends JFrame {
         tarjeta.add(cbMes);
         tarjeta.add(cbAno);
 
-        // --- BOTONES ---
         PrimaryButton2 btnCancelar = new PrimaryButton2("Cancelar", GRIS_CANCELAR);
         btnCancelar.setBounds(50, 170, 200, 55);
         btnCancelar.addActionListener(e -> {
-            dispose();
-            new AdminUCV("Administrador").setVisible(true);
+            controller.volverAAdmin(this);
         });
 
         PrimaryButton2 btnConfirmar = new PrimaryButton2("Confirmar", AMARILLO_BOTON);
         btnConfirmar.setBounds(500, 170, 200, 55);
-
-        // REDIRECCIÓN A DETALLE MENÚS
         btnConfirmar.addActionListener(e -> {
             String d = (String) cbDia.getSelectedItem();
             String m = (String) cbMes.getSelectedItem();
@@ -90,8 +86,8 @@ public class GestionMenuUCV extends JFrame {
                 JOptionPane.showMessageDialog(this, "Por favor seleccione una fecha válida", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
                 String fechaFormateada = d + "/" + m + "/" + a;
-                dispose();
-                new FechaMenusNewUCV(fechaFormateada,false,false).setVisible(true);
+                // SE DELEGA AL CONTROLADOR
+                controller.procesarFechaSeleccionada(fechaFormateada, this);
             }
         });
 
@@ -101,7 +97,6 @@ public class GestionMenuUCV extends JFrame {
         panelCentral.add(tarjeta);
         container.add(panelCentral, BorderLayout.CENTER);
 
-        // --- 4. FOOTER ---
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footer.setOpaque(false);
         footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 50));
@@ -112,8 +107,6 @@ public class GestionMenuUCV extends JFrame {
         lblCerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
         lblCerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
                 dispose();
                 com.ucv.ComedorApp.main(null);
             }
@@ -125,7 +118,6 @@ public class GestionMenuUCV extends JFrame {
         add(container);
     }
 
-    // --- CLASES INTERNAS ---
     class RoundedComboBox extends JComboBox<String> {
         public RoundedComboBox(String[] items) {
             super(items);

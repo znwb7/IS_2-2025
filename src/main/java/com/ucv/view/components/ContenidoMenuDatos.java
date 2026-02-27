@@ -1,5 +1,8 @@
 package com.ucv.view.components;
 
+import com.ucv.controller.MenuController;
+import com.ucv.view.FechaMenusNewUCV;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,12 +11,22 @@ public class ContenidoMenuDatos extends JPanel {
     private static final Color GRIS_INPUT = new Color(235, 235, 235);
     private static final Color AMARILLO_MODIFICAR = new Color(255, 210, 35);
 
-    public ContenidoMenuDatos(String tipo, String horario, String fecha, JFrame parent) {
+    // --- SOLUCIÓN: CONSTRUCTOR SOBRECARGADO (5 PARÁMETROS) ---
+    // Este puente salva a TarjetaMenuGestion. Como no recibe datos de la BD,
+    // crea un arreglo "fantasma" con información genérica para evitar que el programa explote.
+    public ContenidoMenuDatos(String tipo, String horario, String fecha, JFrame parent, MenuController controller) {
+        this(tipo, horario, fecha, new String[]{
+                fecha, tipo, "Plato fuerte", "Bebida", "Postre / Fruta", "0.00", "0.00", "0.00", "0", "500", "0.00"
+        }, parent, controller);
+    }
+
+    // --- CONSTRUCTOR PRINCIPAL (6 PARÁMETROS) ---
+    // Este es el que usa FechaMenusNewUCV con datos reales extraídos del .txt
+    public ContenidoMenuDatos(String tipo, String horario, String fecha, String[] datos, JFrame parent, MenuController controller) {
         setLayout(null);
         setOpaque(false);
-        setBounds(0, 0, 400, 450); // Tamaño estándar de la tarjeta
+        setBounds(0, 0, 400, 450);
 
-        // --- Título del Panel (Desayuno/Almuerzo) ---
         JLabel lblTipo = new JLabel(tipo, SwingConstants.CENTER) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -30,34 +43,36 @@ public class ContenidoMenuDatos extends JPanel {
         lblTipo.setBounds(120, 15, 160, 30);
         add(lblTipo);
 
-        // --- Campos de Comida ---
         int hReducida = 25;
         int xCampos = 40;
-        add(crearCampoMock("Plato fuerte", 55, 230, hReducida, xCampos));
-        add(crearCampoMock("Bebida", 85, 230, hReducida, xCampos));
-        add(crearCampoMock("Postre / Fruta", 115, 230, hReducida, xCampos));
 
-        // --- Horario ---
+        // --- DATOS DINÁMICOS ---
+        add(crearCampoMock(datos[2].toUpperCase(), 55, 230, hReducida, xCampos));
+        add(crearCampoMock(datos[3], 85, 230, hReducida, xCampos));
+        add(crearCampoMock(datos[4], 115, 230, hReducida, xCampos));
+
         JLabel lblHorario = new JLabel("Horario");
         lblHorario.setFont(new Font("Arial", Font.BOLD, 14));
         lblHorario.setBounds(40, 150, 100, 20);
         add(lblHorario);
         add(crearCampoMock(horario, 170, 230, hReducida, xCampos));
 
-        // --- Disponibles ---
+        // Extraemos Capacidad y CCB del modelo asegurando que no dé error si el arreglo es corto
+        String capacidadReal = (datos.length > 9) ? datos[9] + " raciones" : "500 raciones";
+        String ccbReal = (datos.length > 10) ? datos[10] : "0.00";
+
         JLabel lblDisp = new JLabel("Disponibles:");
         lblDisp.setFont(new Font("Arial", Font.BOLD, 14));
         lblDisp.setBounds(40, 210, 100, 20);
         add(lblDisp);
-        add(crearCampoMock("500 raciones", 205, 140, hReducida, 140));
+        add(crearCampoMock(capacidadReal, 205, 140, hReducida, 140));
 
-        // --- Precios ---
         JLabel lblCCB = new JLabel("Precio neto (CCB) :");
         lblCCB.setForeground(AZUL_TEXTO);
         lblCCB.setFont(new Font("Arial", Font.BOLD, 14));
         lblCCB.setBounds(40, 250, 150, 20);
         add(lblCCB);
-        add(crearCampoMock("0.00", 245, 90, hReducida, 180));
+        add(crearCampoMock(ccbReal, 245, 90, hReducida, 180));
 
         JLabel bs1 = new JLabel("Bs.");
         bs1.setBounds(310, 250, 30, 20);
@@ -70,26 +85,34 @@ public class ContenidoMenuDatos extends JPanel {
         add(lblFinal);
 
         String[] categorias = {"Estudiante:", "Profesor:", "Empleado:"};
+        String[] precios = {datos[5], datos[6], datos[7]};
+
         for (int i = 0; i < 3; i++) {
             JLabel lblCat = new JLabel(categorias[i], SwingConstants.RIGHT);
             lblCat.setBounds(30, 315 + (i * 30), 100, 20);
             add(lblCat);
-            add(crearCampoMock("0.00", 310 + (i * 30), 100, hReducida, 160));
+            add(crearCampoMock(precios[i], 310 + (i * 30), 100, hReducida, 160));
             JLabel bs = new JLabel("Bs.");
             bs.setBounds(270, 315 + (i * 30), 30, 20);
             add(bs);
         }
 
-        // --- Botón Modificar ---
         PrimaryButton2 btnModificar = new PrimaryButton2("Modificar", AMARILLO_MODIFICAR);
         btnModificar.setBounds(140, 405, 120, 36);
         btnModificar.setFont(new Font("Arial", Font.BOLD, 13));
         btnModificar.setForeground(Color.BLACK);
+
         btnModificar.addActionListener(e -> {
-            parent.dispose();
-            // Aquí llamarías a tu vista de AgregarPlato
-            // new AgregarPlatoUCV(fecha, tipo).setVisible(true);
+            if (parent instanceof FechaMenusNewUCV) {
+                FechaMenusNewUCV ventanaPadre = (FechaMenusNewUCV) parent;
+                if (ventanaPadre.confirmarModificacion(tipo)) {
+                    controller.irAAgregarPlato(fecha, tipo, parent);
+                }
+            } else {
+                controller.irAAgregarPlato(fecha, tipo, parent);
+            }
         });
+
         add(btnModificar);
     }
 

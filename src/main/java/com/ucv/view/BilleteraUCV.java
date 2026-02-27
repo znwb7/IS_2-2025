@@ -10,7 +10,6 @@ import com.ucv.view.components.PrimaryButton2;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
-import java.io.*;
 
 public class BilleteraUCV extends JFrame {
 

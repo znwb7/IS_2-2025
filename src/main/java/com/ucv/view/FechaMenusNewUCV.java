@@ -1,8 +1,8 @@
 package com.ucv.view;
 
+import com.ucv.controller.MenuController;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SIdeBar2;
-import com.ucv.model.DataBase;
 import com.ucv.view.components.ContenidoMenuDatos;
 import com.ucv.view.components.ContenidoMenuVacio;
 
@@ -17,9 +17,12 @@ public class FechaMenusNewUCV extends JFrame {
     private static final Color GRIS_BOTON_VOLVER = new Color(190, 190, 190);
 
     private String fecha;
+    private MenuController controller;
 
-    public FechaMenusNewUCV(String fechaSeleccionada, boolean tieneDesayuno, boolean tieneAlmuerzo) {
+    // AHORA RECIBE EL ARREGLO DE DATOS DIRECTAMENTE DEL CONTROLADOR
+    public FechaMenusNewUCV(String fechaSeleccionada, String[] datosDesayuno, String[] datosAlmuerzo, MenuController controller) {
         this.fecha = fechaSeleccionada;
+        this.controller = controller;
         setTitle("Detalle de Menús · Comedor UCV");
         setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -29,46 +32,34 @@ public class FechaMenusNewUCV extends JFrame {
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
-        // Componentes de estructura
         container.add(new HeaderUCV(), BorderLayout.NORTH);
         container.add(new SIdeBar2(this), BorderLayout.WEST);
 
-        // --- PANEL CENTRAL ---
         JPanel panelCentral = new JPanel(null);
         panelCentral.setOpaque(false);
 
-        // Título de la fecha
         JLabel lblTituloMenu = new JLabel("Menús para el " + fechaSeleccionada);
         lblTituloMenu.setFont(new Font("Arial", Font.BOLD, 32));
         lblTituloMenu.setForeground(Color.WHITE);
         lblTituloMenu.setBounds(320, 45, 600, 40);
         panelCentral.add(lblTituloMenu);
 
-        // Botón Volver
         JButton btnVolver = crearBotonVolver();
         btnVolver.setBounds(920, 45, 130, 40);
         btnVolver.addActionListener(e -> {
-            dispose();
-            new GestionMenuUCV().setVisible(true);
+            controller.volverAGestionMenu(this);
         });
         panelCentral.add(btnVolver);
 
-        // --- TARJETA IZQUIERDA (DESAYUNO) ---
-        panelCentral.add(crearTarjetaDinamica("Desayuno", "7:00 am - 11:00 am", 294, tieneDesayuno));
-
-        // --- TARJETA DERECHA (ALMUERZO) ---
-        panelCentral.add(crearTarjetaDinamica("Almuerzo", "12:00 pm - 3:00 pm", 715, tieneAlmuerzo));
+        panelCentral.add(crearTarjetaDinamica("Desayuno", "7:00 am - 11:00 am", 294, datosDesayuno));
+        panelCentral.add(crearTarjetaDinamica("Almuerzo", "12:00 pm - 3:00 pm", 715, datosAlmuerzo));
 
         container.add(panelCentral, BorderLayout.CENTER);
         container.add(crearFooter(), BorderLayout.SOUTH);
         add(container);
     }
 
-    /**
-     * Crea una tarjeta que decide automáticamente si mostrar datos o el botón de agregar.
-     */
-    private JPanel crearTarjetaDinamica(String tipo, String horario, int x, boolean tieneDatos) {
-        // Panel contenedor con bordes redondeados
+    private JPanel crearTarjetaDinamica(String tipo, String horario, int x, String[] datosMenu) {
         JPanel contenedor = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -82,19 +73,31 @@ public class FechaMenusNewUCV extends JFrame {
         contenedor.setOpaque(false);
         contenedor.setBounds(x, 100, 400, 450);
 
-        if (tieneDatos) {
-            // Usamos el componente de datos que ya tienes en tu paquete
-            ContenidoMenuDatos datos = new ContenidoMenuDatos(tipo, horario, fecha, this);
+        // Si datosMenu no es null, es que hay menú registrado en la DB
+        if (datosMenu != null) {
+            // Se mantiene la lógica. La confirmación debe dispararse cuando se interactúe con el botón modificar
+            // contenido dentro de ContenidoMenuDatos.
+            ContenidoMenuDatos datos = new ContenidoMenuDatos(tipo, horario, fecha, datosMenu, this, controller);
             datos.setBounds(0, 0, 400, 450);
             contenedor.add(datos);
         } else {
-            // Usamos el componente vacío (+) que ya tienes en tu paquete
-            ContenidoMenuVacio vacio = new ContenidoMenuVacio(tipo, fecha, this);
+            ContenidoMenuVacio vacio = new ContenidoMenuVacio(tipo, fecha, this, controller);
             vacio.setBounds(0, 0, 400, 450);
             contenedor.add(vacio);
         }
-
         return contenedor;
+    }
+
+    // MÉTODO AUXILIAR PARA LA CONFIRMACIÓN (Preservado de la versión 2)
+    public boolean confirmarModificacion(String tipoMenu) {
+        int respuesta = JOptionPane.showConfirmDialog(
+                this,
+                "¿Estás seguro de modificar el " + tipoMenu + "?",
+                "Confirmar Modificación",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+        return respuesta == JOptionPane.YES_OPTION;
     }
 
     private JButton crearBotonVolver() {
@@ -117,28 +120,22 @@ public class FechaMenusNewUCV extends JFrame {
     }
 
     private JPanel crearFooter() {
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footer.setOpaque(false);
-        footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 40));
+        JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelFooter.setOpaque(false);
+        panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
+
         JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
         lblCerrar.setForeground(Color.WHITE);
-        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 18));
+        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
         lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
                 dispose();
                 com.ucv.ComedorApp.main(null);
             }
         });
-        footer.add(lblCerrar);
-        return footer;
-    }
-
-    public static void main(String[] args) {
-        // Ejemplo de uso: Desayuno activo, Almuerzo vacío
-        SwingUtilities.invokeLater(() -> new FechaMenusNewUCV("24/02/2026", true, false).setVisible(true));
+        panelFooter.add(lblCerrar);
+        return panelFooter;
     }
 }

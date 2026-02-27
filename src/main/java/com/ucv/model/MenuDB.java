@@ -6,7 +6,6 @@ import java.util.List;
 
 public class MenuDB {
 
-    // Enums para estandarizar los retornos de cada método
     public enum WriteMenuStatus {
         REGISTRO_EXITOSO, ERROR_ESCRITURA, ACTUALIZACION_EXITOSA, MENU_NO_ENCONTRADO, ARCHIVO_NO_EXISTE
     }
@@ -16,9 +15,9 @@ public class MenuDB {
     }
 
     private static final String SEPARATOR = File.separator;
-    private static final String RUTA_ARCHIVO = System.getProperty("user.dir") 
-            + SEPARATOR + "target" 
-            + SEPARATOR + "Output" 
+    private static final String RUTA_ARCHIVO = System.getProperty("user.dir")
+            + SEPARATOR + "target"
+            + SEPARATOR + "Output"
             + SEPARATOR + "MenuDB.txt";
 
             //CREAR CARPETAS Y ARCHIVO
@@ -37,6 +36,7 @@ public class MenuDB {
         }
     }
 
+<<<<<<< HEAD
    public static void main(String[] args) {
         MenuDB db = new MenuDB();
         String fecha = "2026-02-25";
@@ -87,18 +87,25 @@ public class MenuDB {
     }
 
     public WriteMenuStatus WriteMenu(Boolean Modify, Boolean Type, String Fecha, String Tipo, String PlatoFuerte, String Bebida, String Postre, String PEstudiante, String PProfesor, String PEmpleado) throws IOException {
+=======
+    public WriteMenuStatus WriteMenu(Boolean Modify, Boolean Type, String Fecha, String Tipo, String PlatoFuerte, String Bebida, String Postre, String PEstudiante, String PProfesor, String PEmpleado, String Capacidad, String CCB) throws IOException {
+>>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
         Tipo = Tipo.toLowerCase();
         PlatoFuerte = PlatoFuerte.toLowerCase();
         Bebida = Bebida.toLowerCase();
         Postre = Postre.toLowerCase();
 
         if (Modify) {
+<<<<<<< HEAD
             return ModifyMenu(Fecha, Tipo, PlatoFuerte, Bebida, Postre, PEstudiante, PProfesor, PEmpleado);
+=======
+            return ModifyMenu(Type, Fecha, Tipo, PlatoFuerte, Bebida, Postre, PEstudiante, PProfesor, PEmpleado, Capacidad, CCB);
+>>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
         }
-        
+
         MakeArchive();
         try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
-            String NLine = Fecha + " | " + Tipo + " | " + PlatoFuerte + " | " + Bebida + " | " + Postre + " | " + PEstudiante + " | " + PProfesor + " | " + PEmpleado + " | " + "0";
+            String NLine = Fecha + " | " + Tipo + " | " + PlatoFuerte + " | " + Bebida + " | " + Postre + " | " + PEstudiante + " | " + PProfesor + " | " + PEmpleado + " | " + "0" + " | " + Capacidad + " | " + CCB;
             escritor.write(NLine);
             escritor.newLine();
             return WriteMenuStatus.REGISTRO_EXITOSO;
@@ -106,8 +113,6 @@ public class MenuDB {
             return WriteMenuStatus.ERROR_ESCRITURA;
         }
     }
-
-    
 
     public ReWriteStatus ReWriteSpace(String Fecha, String Tipo) throws IOException {
         Tipo = Tipo.toLowerCase();
@@ -142,17 +147,20 @@ public class MenuDB {
             }
             return ReWriteStatus.REWRITE_EXITOSO;
         }
-
         return ReWriteStatus.NO_ENCONTRADO;
     }
 
+<<<<<<< HEAD
     //Modificar Menu
     public WriteMenuStatus ModifyMenu(String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp) throws IOException {
+=======
+    public WriteMenuStatus ModifyMenu(Boolean Type, String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp, String Capacidad, String CCB) throws IOException {
+>>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
         Tipo = Tipo.toLowerCase();
         NPlato = NPlato.toLowerCase();
         NBebida = NBebida.toLowerCase();
         NPostre = NPostre.toLowerCase();
-        
+
         File archivo = new File(RUTA_ARCHIVO);
         if (!archivo.exists()) return WriteMenuStatus.ARCHIVO_NO_EXISTE;
 
@@ -166,9 +174,18 @@ public class MenuDB {
 
                 if (partes.length >= 9 && partes[0].equals(Fecha) && partes[1].equals(Tipo.toLowerCase())) {
                     String contadorActual = partes[8];
+<<<<<<< HEAD
                     
                     
                     linea = Fecha + " | " + Tipo + " | " + NPlato + " | " + NBebida + " | " + NPostre + " | " + NPEst + " | " + NPProf + " | " + NPEmp + " | " + contadorActual;
+=======
+
+                    if (Type) {
+                        Tipo = Tipo.toLowerCase().equals("almuerzo") ? "desayuno" : "almuerzo";
+                    }
+
+                    linea = Fecha + " | " + Tipo + " | " + NPlato + " | " + NBebida + " | " + NPostre + " | " + NPEst + " | " + NPProf + " | " + NPEmp + " | " + contadorActual + " | " + Capacidad + " | " + CCB;
+>>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
                     modificado = true;
                 }
                 lineas.add(linea);
@@ -187,6 +204,7 @@ public class MenuDB {
         return WriteMenuStatus.MENU_NO_ENCONTRADO;
     }
 
+<<<<<<< HEAD
 
     //Suma 1 persona cada vez que se llama
     public ReWriteStatus CountMenu(String Fecha, String Tipo) {
@@ -256,4 +274,28 @@ public class MenuDB {
 
 
 
+=======
+    public boolean consultarExistencia(String fecha, String tipo) {
+        return obtenerMenu(fecha, tipo) != null;
+    }
+
+    public String[] obtenerMenu(String fecha, String tipo) {
+        File archivo = new File(RUTA_ARCHIVO);
+        if (!archivo.exists()) return null;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) continue;
+                String[] partes = linea.split("\\s*\\|\\s*");
+                if (partes.length >= 9 && partes[0].equals(fecha) && partes[1].equalsIgnoreCase(tipo)) {
+                    return partes;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error leyendo DB: " + e.getMessage());
+        }
+        return null;
+    }
+>>>>>>> 537f234819642c250eae08f40d88895df43ac4f2
 }
