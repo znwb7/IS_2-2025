@@ -312,7 +312,7 @@ public class DataBase {
                         MontoEncontrado = Math.round(MontoEncontrado * 100.0) / 100.0;
                         // Reconstruimos la línea: Nombre | ID | Pass | Rol | Hash | Monto
                         String Monto = String.valueOf(MontoEncontrado);
-                        lineaP = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + Monto + " | " + WordP[6] + " | " + WordP[6];
+                        lineaP = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + Monto + " | " + WordP[6] + " | " + WordP[7];
                     }
                     lineasPrincipal.add(lineaP);
                 }
@@ -365,7 +365,7 @@ public class DataBase {
                         nuevoSaldo = Math.round(nuevoSaldo * 100.0) / 100.0;
 
                         // 4. Reconstruccion de la línea con el nuevo saldo
-                        linea = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + nuevoSaldo + " | " + WordP[6] + " | " + WordP[6];
+                        linea = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + nuevoSaldo + " | " + WordP[6] + " | " + WordP[7];
                     } else {
                         saldoSuficiente = false;
                     }
