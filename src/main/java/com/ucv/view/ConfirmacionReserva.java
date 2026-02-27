@@ -1,14 +1,11 @@
 package com.ucv.view;
 
-import com.ucv.model.DataBase;
-import com.ucv.model.MenuDB;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.LocalDate;
 
 public class ConfirmacionReserva extends JFrame {
 
@@ -68,18 +65,12 @@ public class ConfirmacionReserva extends JFrame {
             new MenusUsuario(usuarioID).setVisible(true);
         });
 
-
-        String fecha = java.time.LocalDate.now().toString();
         // BOTÓN CONFIRMAR: Concreta la acción
         PrimaryButton2 btnSi = new PrimaryButton2("Confirmar", AMARILLO_UCV);
         btnSi.setForeground(Color.BLACK);
         btnSi.addActionListener(e -> {
             dispose();
-            // Abre la pantalla final de éxito
-            MenuDB Menudb = new MenuDB();
-            Menudb.CountMenu(fecha, tipoSeleccionado);
-            new ReservaConcretada(this.tipoSeleccionado, this.usuarioID).setVisible(true);
-        });
+        new ReservaConcretada(this.tipoSeleccionado, usuarioID).setVisible(true);        });
 
         panelBotones.add(btnNo);
         panelBotones.add(btnSi);

@@ -221,7 +221,6 @@ public class PrincipalUsuario extends JFrame {
 // --- LÓGICA DE NAVEGACIÓN ACTUALIZADA ---
 
         btn.addActionListener(e -> {
-
             
             if (texto.equals("Ver menus")) {
 

@@ -10,7 +10,7 @@ public class VerificacionFacialExitosa extends JFrame {
     private static final Color AZUL_FONDO = new Color(18, 71, 150);
     private static final Color AMARILLO_UCV = new Color(255, 210, 35);
 
-    public VerificacionFacialExitosa() {
+    public VerificacionFacialExitosa(String usuarioID) {
         setTitle("Verificación Exitosa · Comedor UCV");
         setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,7 +22,7 @@ public class VerificacionFacialExitosa extends JFrame {
 
         // --- COMPONENTES DE ESTRUCTURA ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
-        container.add(new SideBar(this), BorderLayout.WEST);
+        container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
         // --- PANEL CENTRAL (Mensaje de Éxito) ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
@@ -74,9 +74,5 @@ public class VerificacionFacialExitosa extends JFrame {
         });
         panelFooter.add(lblCerrar);
         return panelFooter;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new VerificacionFacialExitosa().setVisible(true));
     }
 }
