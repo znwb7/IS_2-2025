@@ -7,7 +7,21 @@ import java.awt.geom.RoundRectangle2D;
 public class SideBar extends JPanel {
 
     private final Color GRIS_CLARO = new Color(225, 225, 225);
+    private final String usuarioID;
+
+    // Constructor principal (recomendado)
     public SideBar(JFrame ventanaActual, String usuarioID) {
+        this.usuarioID = usuarioID;
+        inicializar(ventanaActual);
+    }
+
+    // Constructor opcional para compatibilidad (NO recomendado para sesión real)
+    public SideBar(JFrame ventanaActual) {
+        this.usuarioID = null;
+        inicializar(ventanaActual);
+    }
+
+    private void inicializar(JFrame ventanaActual) {
 
         setPreferredSize(new Dimension(90, 0));
         setOpaque(false);
@@ -33,7 +47,12 @@ public class SideBar extends JPanel {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 ventanaActual.dispose();
-                new com.ucv.view.PrincipalUsuario(usuarioID).setVisible(true);
+
+                if (usuarioID != null) {
+                    new com.ucv.view.PrincipalUsuario(usuarioID).setVisible(true);
+                } else {
+                    new com.ucv.view.PrincipalUsuario("Usuario").setVisible(true);
+                }
             }
         });
 
@@ -53,17 +72,17 @@ public class SideBar extends JPanel {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 ventanaActual.dispose();
-                // Redirige a BilleteraUCV con el usuario de sesión
-                new com.ucv.view.BilleteraUCV(usuarioID).setVisible(true);
-            }
-        });
+                    new com.ucv.view.BilleteraUCV(usuarioID).setVisible(true);
+        }    });
 
         capsula.add(home);
         capsula.add(billetera);
         add(capsula);
     }
 
+    // ---------------- PANEL REDONDEADO ----------------
     static class PanelRedondeado extends JPanel {
+
         private final int radio;
         private final Color color;
 

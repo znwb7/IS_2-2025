@@ -1,5 +1,6 @@
 package com.ucv.view.components;
 
+import com.ucv.controller.MenuController;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -7,19 +8,17 @@ import java.awt.geom.RoundRectangle2D;
 public class TarjetaMenuGestion extends JPanel {
     private static final Color GRIS_TARJETA = new Color(225, 225, 225);
 
-    public TarjetaMenuGestion(String tipo, String horario, String fecha, boolean tieneDatos, JFrame parent) {
-        setLayout(null); // Para mantener tus coordenadas absolutas internas
+    public TarjetaMenuGestion(String tipo, String horario, String fecha, boolean tieneDatos, JFrame parent, MenuController controller) {
+        setLayout(null);
         setOpaque(false);
         setPreferredSize(new Dimension(400, 450));
 
         if (tieneDatos) {
-            // Si tiene datos, añadimos el panel que ya programaste
-            ContenidoMenuDatos datos = new ContenidoMenuDatos(tipo, horario, fecha, parent);
+            ContenidoMenuDatos datos = new ContenidoMenuDatos(tipo, horario, fecha, parent, controller);
             datos.setBounds(0, 0, 400, 450);
             add(datos);
         } else {
-            // Si está vacío, añadimos el panel del botón "+"
-            ContenidoMenuVacio vacio = new ContenidoMenuVacio(tipo, fecha, parent);
+            ContenidoMenuVacio vacio = new ContenidoMenuVacio(tipo, fecha, parent, controller);
             vacio.setBounds(0, 0, 400, 450);
             add(vacio);
         }

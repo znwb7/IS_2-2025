@@ -1,6 +1,5 @@
 package com.ucv.view;
 
-import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
@@ -13,16 +12,14 @@ public class ConfirmacionReserva extends JFrame {
     private final Color AZUL_FONDO = new Color(18, 71, 150);
     private final Color AMARILLO_UCV = new Color(255, 210, 35);
     private String tipoSeleccionado;
+    private String usuarioID;
 
-        private final String usuarioID;
-
-    // --- CONSTRUCTOR CORREGIDO ---
     public ConfirmacionReserva(String tipoSeleccionado, String usuarioID) {
-        this.tipoSeleccionado = tipoSeleccionado; // Corregido el nombre de la variable
+        this.tipoSeleccionado = tipoSeleccionado;
         this.usuarioID = usuarioID;
 
         setTitle("Confirmar Reserva · Comedor UCV");
-        setSize(1920, 1080);
+        setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -30,11 +27,11 @@ public class ConfirmacionReserva extends JFrame {
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
-        // Componentes base
+        // --- COMPONENTES BASE ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
         container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
-        // Contenido Central
+        // --- CONTENIDO CENTRAL ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -49,15 +46,15 @@ public class ConfirmacionReserva extends JFrame {
         gbc.insets = new Insets(0, 0, 10, 0);
         panelCentral.add(lblPregunta, gbc);
 
-        // Tipo de menú dinámico
+        // Tipo de menú dinámico (Ej: Desayuno / Almuerzo)
         JLabel lblMenu = new JLabel(this.tipoSeleccionado);
-        lblMenu.setFont(new Font("Segoe UI", Font.BOLD, 55)); // Un poco más grande para resaltar
+        lblMenu.setFont(new Font("Segoe UI", Font.BOLD, 55));
         lblMenu.setForeground(AMARILLO_UCV);
         gbc.gridy = 1;
         gbc.insets = new Insets(0, 0, 40, 0);
         panelCentral.add(lblMenu, gbc);
 
-        // Botonera
+        // --- BOTONERA ---
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 0));
         panelBotones.setOpaque(false);
 
@@ -65,8 +62,7 @@ public class ConfirmacionReserva extends JFrame {
         PrimaryButton2 btnNo = new PrimaryButton2("Cancelar", new Color(180, 180, 180));
         btnNo.addActionListener(e -> {
             dispose();
-            // Al regresar, suponemos true para que el usuario vuelva a ver las opciones
-            new MenusUsuario(this.usuarioID).setVisible(true);
+            new MenusUsuario(usuarioID).setVisible(true);
         });
 
         // BOTÓN CONFIRMAR: Concreta la acción
@@ -74,9 +70,7 @@ public class ConfirmacionReserva extends JFrame {
         btnSi.setForeground(Color.BLACK);
         btnSi.addActionListener(e -> {
             dispose();
-            // Abre la pantalla final de éxito
-            new ReservaConcretada(this.tipoSeleccionado, this.usuarioID).setVisible(true);
-        });
+            new ReservaConcretada(this.tipoSeleccionado, usuarioID).setVisible(true);        });
 
         panelBotones.add(btnNo);
         panelBotones.add(btnSi);
@@ -85,31 +79,33 @@ public class ConfirmacionReserva extends JFrame {
         panelCentral.add(panelBotones, gbc);
 
         container.add(panelCentral, BorderLayout.CENTER);
+
+        // --- IMPLEMENTACIÓN DEL FOOTER CON CIERRE DE SESIÓN ---
         container.add(crearFooter(), BorderLayout.SOUTH);
 
         add(container);
     }
 
     private JPanel crearFooter() {
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footer.setOpaque(false);
-        footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 50));
+        JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelFooter.setOpaque(false);
+        panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
 
         JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
         lblCerrar.setForeground(Color.WHITE);
-        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 18));
+        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
         lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Lógica de cierre de sesión unificada
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
                 dispose();
                 com.ucv.ComedorApp.main(null);
             }
         });
 
-        footer.add(lblCerrar);
-        return footer;
+        panelFooter.add(lblCerrar);
+        return panelFooter;
     }
 }
