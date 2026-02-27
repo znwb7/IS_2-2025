@@ -1,7 +1,7 @@
 package com.ucv.view;
 
-import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
+import com.ucv.view.components.SideBar;
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,12 +11,8 @@ public class VerificacionFacialExitosa extends JFrame {
     private static final Color AMARILLO_UCV = new Color(255, 210, 35);
 
     public VerificacionFacialExitosa() {
-        DataBase dataBase = new DataBase();
-        dataBase.MenuOut(dataBase.ReturnID());
-
-
         setTitle("Verificación Exitosa · Comedor UCV");
-        setSize(1920, 1080);
+        setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -26,6 +22,7 @@ public class VerificacionFacialExitosa extends JFrame {
 
         // --- COMPONENTES DE ESTRUCTURA ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
+        container.add(new SideBar(this), BorderLayout.WEST);
 
         // --- PANEL CENTRAL (Mensaje de Éxito) ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
@@ -39,10 +36,10 @@ public class VerificacionFacialExitosa extends JFrame {
         lblExito.setFont(new Font("Segoe UI", Font.BOLD, 42));
         lblExito.setForeground(Color.WHITE);
         gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 10, 0); // Pequeño margen inferior
+        gbc.insets = new Insets(0, 0, 10, 0);
         panelCentral.add(lblExito, gbc);
 
-        // 2. Línea Inferior: Puede ingresar al Comedor (Amarillo e Itálica para resaltar)
+        // 2. Línea Inferior: Puede ingresar al Comedor (Amarillo e Itálica)
         JLabel lblIngreso = new JLabel("Puede ingresar al Comedor");
         lblIngreso.setFont(new Font("Segoe UI", Font.BOLD | Font.ITALIC, 38));
         lblIngreso.setForeground(AMARILLO_UCV);
@@ -51,34 +48,32 @@ public class VerificacionFacialExitosa extends JFrame {
 
         container.add(panelCentral, BorderLayout.CENTER);
 
-        // --- FOOTER ---
+        // --- FOOTER IMPLEMENTADO ---
         container.add(crearFooter(), BorderLayout.SOUTH);
 
         add(container);
     }
 
+    // BLOQUE DE CÓDIGO IMPLEMENTADO
     private JPanel crearFooter() {
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footer.setOpaque(false);
-        footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 50));
+        JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelFooter.setOpaque(false);
+        panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
 
-        JLabel cerrarSesion = new JLabel("<html><u>Cerrar Sesión</u></html>");
-        cerrarSesion.setForeground(Color.WHITE);
-        cerrarSesion.setFont(new Font("Arial", Font.PLAIN, 20));
-        cerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        cerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
+        JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
+        lblCerrar.setForeground(Color.WHITE);
+        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
+        lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
                 dispose();
-                // Aquí podrías redirigir al Login
+                // Redirección al punto de entrada principal
+                com.ucv.ComedorApp.main(null);
             }
         });
-
-        footer.add(cerrarSesion);
-        return footer;
+        panelFooter.add(lblCerrar);
+        return panelFooter;
     }
 
     public static void main(String[] args) {
