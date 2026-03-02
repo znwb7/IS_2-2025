@@ -1,5 +1,6 @@
 package com.ucv.view;
 
+import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import javax.swing.*;
@@ -11,6 +12,12 @@ public class VerificacionFacialExitosa extends JFrame {
     private static final Color AMARILLO_UCV = new Color(255, 210, 35);
 
     public VerificacionFacialExitosa(String usuarioID) {
+        DataBase dataBase = new DataBase();
+        dataBase.MenuOut(dataBase.ReturnID());
+
+
+
+
         setTitle("Verificación Exitosa · Comedor UCV");
         setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -67,6 +74,8 @@ public class VerificacionFacialExitosa extends JFrame {
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
                 dispose();
                 // Redirección al punto de entrada principal
                 com.ucv.ComedorApp.main(null);

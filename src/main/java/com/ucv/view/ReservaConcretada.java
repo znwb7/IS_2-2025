@@ -87,6 +87,8 @@ public class ReservaConcretada extends JFrame {
         cerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
                 dispose();
                 LoginUCV login = new LoginUCV();
                 // Asumiendo que el controlador se asocia como en tus otras vistas

@@ -22,10 +22,10 @@ public class PagoController {
             try {
                 DataBase db = new DataBase();
 
-                DataBase.UpdateMoney update =
+                DataBase.EnumUpdateMoney update =
                         db.UpdateMoney(usuarioID, monto);
 
-                if (update != DataBase.UpdateMoney.SALDO_ACTUALIZADO_CON_EXITO) {
+                if (update != DataBase.EnumUpdateMoney.SALDO_ACTUALIZADO_CON_EXITO) {
                     return ResultadoValidacion.ERROR_SISTEMA;
                 }
 

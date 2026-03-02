@@ -1,6 +1,7 @@
 package com.ucv.view;
 
 import com.ucv.controller.MenuController;
+import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SIdeBar2;
 import com.ucv.view.components.ContenidoMenuDatos;
@@ -131,6 +132,8 @@ public class FechaMenusNewUCV extends JFrame {
         lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                DataBase dataBase = new DataBase();
+                dataBase.LogedOut();
                 dispose();
                 com.ucv.ComedorApp.main(null);
             }
