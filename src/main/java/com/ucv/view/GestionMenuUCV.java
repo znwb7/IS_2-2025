@@ -1,10 +1,11 @@
 package com.ucv.view;
 
 import com.ucv.controller.MenuController;
-import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SIdeBar2;
 import com.ucv.view.components.PrimaryButton2;
+import com.ucv.view.components.BotonCerrarSesion;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -21,7 +22,6 @@ public class GestionMenuUCV extends JFrame {
 
     private final MenuController controller;
 
-    // Constructor sin parámetros por si se llama desde otra vista (crea su propio controlador)
     public GestionMenuUCV() {
         this(new MenuController());
     }
@@ -34,12 +34,17 @@ public class GestionMenuUCV extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // Contenedor principal con fondo azul
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
+        // --- 1. ENCABEZADO ESTÁNDAR ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
+
+        // --- 2. SIDEBAR IZQUIERDO ---
         container.add(new SIdeBar2(this), BorderLayout.WEST);
 
+        // --- 3. PANEL CENTRAL (Selección de Fecha) ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
 
@@ -47,12 +52,12 @@ public class GestionMenuUCV extends JFrame {
         tarjeta.setPreferredSize(new Dimension(750, 240));
         tarjeta.setLayout(null);
 
-        JLabel lblInstruccion = new JLabel("Seleccione la fecha de los menus que quiere modificar", SwingConstants.CENTER);
+        JLabel lblInstruccion = new JLabel("Seleccione la fecha de los menús que quiere modificar", SwingConstants.CENTER);
         lblInstruccion.setFont(new Font("Arial", Font.PLAIN, 24));
         lblInstruccion.setBounds(0, 25, 750, 40);
         tarjeta.add(lblInstruccion);
 
-        String[] dias = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+        String[] dias = {"Día", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
                 "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
         String[] meses = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
         String[] anos = {"Año", "2025", "2026", "2027", "2028", "2029", "2030"};
@@ -72,9 +77,7 @@ public class GestionMenuUCV extends JFrame {
 
         PrimaryButton2 btnCancelar = new PrimaryButton2("Cancelar", GRIS_CANCELAR);
         btnCancelar.setBounds(50, 170, 200, 55);
-        btnCancelar.addActionListener(e -> {
-            controller.volverAAdmin(this);
-        });
+        btnCancelar.addActionListener(e -> controller.volverAAdmin(this));
 
         PrimaryButton2 btnConfirmar = new PrimaryButton2("Confirmar", AMARILLO_BOTON);
         btnConfirmar.setBounds(500, 170, 200, 55);
@@ -83,11 +86,10 @@ public class GestionMenuUCV extends JFrame {
             String m = (String) cbMes.getSelectedItem();
             String a = (String) cbAno.getSelectedItem();
 
-            if (d.equals("Dia") || m.equals("Mes") || a.equals("Año")) {
+            if (d.equals("Día") || m.equals("Mes") || a.equals("Año")) {
                 JOptionPane.showMessageDialog(this, "Por favor seleccione una fecha válida", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
                 String fechaFormateada = d + "/" + m + "/" + a;
-                // SE DELEGA AL CONTROLADOR
                 controller.procesarFechaSeleccionada(fechaFormateada, this);
             }
         });
@@ -98,28 +100,31 @@ public class GestionMenuUCV extends JFrame {
         panelCentral.add(tarjeta);
         container.add(panelCentral, BorderLayout.CENTER);
 
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footer.setOpaque(false);
-        footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 50));
-
-        JLabel lblCerrarSesion = new JLabel("<html><u>Cerrar Sesión</u></html>");
-        lblCerrarSesion.setForeground(Color.WHITE);
-        lblCerrarSesion.setFont(new Font("Arial", Font.PLAIN, 22));
-        lblCerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblCerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
-                dispose();
-                com.ucv.ComedorApp.main(null);
-            }
-        });
-
-        footer.add(lblCerrarSesion);
-        container.add(footer, BorderLayout.SOUTH);
+        // --- 4. PANEL DERECHO (Botón Cerrar Sesión) ---
+        container.add(crearContenedorCerrarSesion(), BorderLayout.EAST);
 
         add(container);
     }
+
+    private JPanel crearContenedorCerrarSesion() {
+        JPanel panelDerecho = new JPanel(new GridBagLayout());
+        panelDerecho.setOpaque(false);
+        panelDerecho.setPreferredSize(new Dimension(120, 0));
+
+        // Componente con icono y lógica de logout
+        BotonCerrarSesion btnCerrar = new BotonCerrarSesion(this);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weighty = 1.0;
+        // Insets estandarizados para que el botón no se mueva de lugar entre ventanas
+        gbc.insets = new Insets(25, 0, 0, 0);
+
+        panelDerecho.add(btnCerrar, gbc);
+        return panelDerecho;
+    }
+
+    // --- COMPONENTES INTERNOS ---
 
     class RoundedComboBox extends JComboBox<String> {
         public RoundedComboBox(String[] items) {
@@ -177,10 +182,11 @@ public class GestionMenuUCV extends JFrame {
         }
         @Override
         protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g;
+            Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(color);
             g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), radio, radio));
+            g2.dispose();
         }
     }
 

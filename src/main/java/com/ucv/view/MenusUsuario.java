@@ -1,10 +1,10 @@
 package com.ucv.view;
 
 import com.ucv.controller.MenuController;
-import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.TarjetaMenuUsuario;
+import com.ucv.view.components.BotonCerrarSesion; // Importado
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,18 +27,19 @@ public class MenusUsuario extends JFrame {
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
+        // --- 1. ENCABEZADO ESTÁNDAR (Logo circular a la derecha) ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
+
+        // --- 2. SIDEBAR IZQUIERDO ---
         container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
-        // --- EXTRACCIÓN A TRAVÉS DEL CONTROLADOR (CUMPLE MVC) ---
+        // --- 3. LÓGICA DE DATOS ---
         MenuController controller = new MenuController();
         String fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-
-        // El controlador nos da el arreglo, la vista no sabe de dónde sale
         String[] datosDesayuno = controller.obtenerDatosMenu(fechaActual, "desayuno");
         String[] datosAlmuerzo = controller.obtenerDatosMenu(fechaActual, "almuerzo");
 
-        // --- RENDERIZADO DEL PANEL CENTRAL ---
+        // --- 4. PANEL CENTRAL (Tarjetas de Menú) ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -56,30 +57,31 @@ public class MenusUsuario extends JFrame {
         panelCentral.add(tarjetaAlmuerzo, gbc);
 
         container.add(panelCentral, BorderLayout.CENTER);
-        container.add(crearFooter(), BorderLayout.SOUTH);
+
+        // --- 5. PANEL DERECHO (Botón Cerrar Sesión) ---
+        container.add(crearContenedorCerrarSesion(), BorderLayout.EAST);
 
         add(container);
     }
 
-    private JPanel crearFooter() {
-        JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panelFooter.setOpaque(false);
-        panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
+    private JPanel crearContenedorCerrarSesion() {
+        JPanel panelDerecho = new JPanel(new GridBagLayout());
+        panelDerecho.setOpaque(false);
+        // Ancho estándar de 120px para que la pastilla respire bien
+        panelDerecho.setPreferredSize(new Dimension(120, 0));
 
-        JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
-        lblCerrar.setForeground(Color.WHITE);
-        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
-        lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
-                dispose();
-                com.ucv.ComedorApp.main(null);
-            }
-        });
-        panelFooter.add(lblCerrar);
-        return panelFooter;
+        // Componente reutilizable con icono y lógica de logout
+        BotonCerrarSesion btnCerrar = new BotonCerrarSesion(this);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weighty = 1.0;
+        // Margen de 25px para alineación con el logo del Header
+        gbc.insets = new Insets(25, 0, 0, 0);
+
+        panelDerecho.add(btnCerrar, gbc);
+        return panelDerecho;
     }
+
+    // El método crearFooter() original ha sido eliminado
 }

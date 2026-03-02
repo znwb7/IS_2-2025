@@ -1,9 +1,9 @@
 package com.ucv.view;
 
 import com.ucv.controller.FacialController;
-import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
+import com.ucv.view.components.BotonCerrarSesion;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -25,21 +25,24 @@ public class VerificacionFacialUCV extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // Contenedor principal
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
-        // --- COMPONENTES DE ESTRUCTURA ---
+        // --- 1. ENCABEZADO ESTÁNDAR ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
+
+        // --- 2. SIDEBAR IZQUIERDO ---
         container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
-        // --- PANEL CENTRAL ---
+        // --- 3. PANEL CENTRAL (Interfaz de Carga) ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.anchor = GridBagConstraints.CENTER;
 
-        // 1. Título
+        // Título
         JLabel lblTitulo = new JLabel("Verificación facial");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 32));
         lblTitulo.setForeground(Color.WHITE);
@@ -47,24 +50,24 @@ public class VerificacionFacialUCV extends JFrame {
         gbc.insets = new Insets(0, 0, 10, 0);
         panelCentral.add(lblTitulo, gbc);
 
-        // 2. Caja Gris de Carga
+        // Caja Gris de Carga
         JPanel panelCuadro = crearPanelCargaVisual();
         gbc.gridy = 1;
         gbc.insets = new Insets(10, 0, 20, 0);
         panelCentral.add(panelCuadro, gbc);
 
-        // 3. Botón Volver
+        // Botón Volver
         JButton btnVolver = crearBotonEstilo("Volver", GRIS_BOTON);
         btnVolver.addActionListener(e -> {
             dispose();
-            new PrincipalUsuario("Usuario").setVisible(true);
+            new PrincipalUsuario(usuarioID).setVisible(true);
         });
 
         gbc.gridy = 2;
         gbc.insets = new Insets(10, 0, 10, 0);
         panelCentral.add(btnVolver, gbc);
 
-        // 4. Texto informativo pie
+        // Texto informativo pie
         JLabel lblFooterText = new JLabel("Solo se aceptan archivos en formato .jpg");
         lblFooterText.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblFooterText.setForeground(new Color(180, 190, 210));
@@ -74,10 +77,27 @@ public class VerificacionFacialUCV extends JFrame {
 
         container.add(panelCentral, BorderLayout.CENTER);
 
-        // --- IMPLEMENTACIÓN DEL FOOTER UNIFICADO ---
-        container.add(crearCerrarSesionFooter(), BorderLayout.SOUTH);
+        // --- 4. PANEL DERECHO (Botón Cerrar Sesión Estandarizado) ---
+        container.add(crearContenedorCerrarSesion(), BorderLayout.EAST);
 
         add(container);
+    }
+
+    private JPanel crearContenedorCerrarSesion() {
+        JPanel panelDerecho = new JPanel(new GridBagLayout());
+        panelDerecho.setOpaque(false);
+        panelDerecho.setPreferredSize(new Dimension(120, 0)); // Ancho estándar de 120px
+
+        BotonCerrarSesion btnCerrar = new BotonCerrarSesion(this);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weighty = 1.0;
+        // Insets de 25px para alineación perfecta con el logo del Header
+        gbc.insets = new Insets(25, 0, 0, 0);
+
+        panelDerecho.add(btnCerrar, gbc);
+        return panelDerecho;
     }
 
     private JPanel crearPanelCargaVisual() {
@@ -128,18 +148,6 @@ public class VerificacionFacialUCV extends JFrame {
                     );
                 }
             }
-
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                btnPlus.setForeground(AZUL_FONDO);
-                btnPlus.setFont(new Font("Arial", Font.BOLD, 95));
-            }
-
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                btnPlus.setForeground(new Color(60, 60, 60));
-                btnPlus.setFont(new Font("Arial", Font.PLAIN, 85));
-            }
         });
 
         p.add(btnPlus);
@@ -170,28 +178,5 @@ public class VerificacionFacialUCV extends JFrame {
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
-    }
-
-    // BLOQUE ACTUALIZADO
-    private JPanel crearCerrarSesionFooter() {
-        JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panelFooter.setOpaque(false);
-        panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
-
-        JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
-        lblCerrar.setForeground(Color.WHITE);
-        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
-        lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
-                dispose();
-                com.ucv.ComedorApp.main(null); // Redirige al inicio de la app
-            }
-        });
-        panelFooter.add(lblCerrar);
-        return panelFooter;
     }
 }

@@ -1,11 +1,11 @@
 package com.ucv.view;
 
 import com.ucv.controller.MenuController;
-import com.ucv.model.DataBase;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SIdeBar2;
 import com.ucv.view.components.ContenidoMenuDatos;
 import com.ucv.view.components.ContenidoMenuVacio;
+import com.ucv.view.components.BotonCerrarSesion;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,22 +20,27 @@ public class FechaMenusNewUCV extends JFrame {
     private String fecha;
     private MenuController controller;
 
-    // AHORA RECIBE EL ARREGLO DE DATOS DIRECTAMENTE DEL CONTROLADOR
     public FechaMenusNewUCV(String fechaSeleccionada, String[] datosDesayuno, String[] datosAlmuerzo, MenuController controller) {
         this.fecha = fechaSeleccionada;
         this.controller = controller;
+
         setTitle("Detalle de Menús · Comedor UCV");
         setSize(1920, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // Contenedor principal
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
+        // --- 1. ENCABEZADO ESTÁNDAR ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
+
+        // --- 2. SIDEBAR IZQUIERDO ---
         container.add(new SIdeBar2(this), BorderLayout.WEST);
 
+        // --- 3. PANEL CENTRAL (Tarjetas de Menú) ---
         JPanel panelCentral = new JPanel(null);
         panelCentral.setOpaque(false);
 
@@ -52,12 +57,34 @@ public class FechaMenusNewUCV extends JFrame {
         });
         panelCentral.add(btnVolver);
 
+        // Tarjetas dinámicas de Desayuno y Almuerzo
         panelCentral.add(crearTarjetaDinamica("Desayuno", "7:00 am - 11:00 am", 294, datosDesayuno));
         panelCentral.add(crearTarjetaDinamica("Almuerzo", "12:00 pm - 3:00 pm", 715, datosAlmuerzo));
 
         container.add(panelCentral, BorderLayout.CENTER);
-        container.add(crearFooter(), BorderLayout.SOUTH);
+
+        // --- 4. PANEL DERECHO (Boton Cerrar Sesión) ---
+        container.add(crearContenedorCerrarSesion(), BorderLayout.EAST);
+
         add(container);
+    }
+
+    private JPanel crearContenedorCerrarSesion() {
+        JPanel contenedor = new JPanel(new GridBagLayout());
+        contenedor.setOpaque(false);
+        contenedor.setPreferredSize(new Dimension(120, 0));
+
+        // Componente con pastilla blanca e icono
+        BotonCerrarSesion btnCerrar = new BotonCerrarSesion(this);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weighty = 1.0;
+        // Margen superior estandarizado a 25px para alinear con el logo
+        gbc.insets = new Insets(25, 0, 0, 0);
+
+        contenedor.add(btnCerrar, gbc);
+        return contenedor;
     }
 
     private JPanel crearTarjetaDinamica(String tipo, String horario, int x, String[] datosMenu) {
@@ -74,10 +101,7 @@ public class FechaMenusNewUCV extends JFrame {
         contenedor.setOpaque(false);
         contenedor.setBounds(x, 100, 400, 450);
 
-        // Si datosMenu no es null, es que hay menú registrado en la DB
         if (datosMenu != null) {
-            // Se mantiene la lógica. La confirmación debe dispararse cuando se interactúe con el botón modificar
-            // contenido dentro de ContenidoMenuDatos.
             ContenidoMenuDatos datos = new ContenidoMenuDatos(tipo, horario, fecha, datosMenu, this, controller);
             datos.setBounds(0, 0, 400, 450);
             contenedor.add(datos);
@@ -89,7 +113,6 @@ public class FechaMenusNewUCV extends JFrame {
         return contenedor;
     }
 
-    // MÉTODO AUXILIAR PARA LA CONFIRMACIÓN (Preservado de la versión 2)
     public boolean confirmarModificacion(String tipoMenu) {
         int respuesta = JOptionPane.showConfirmDialog(
                 this,
@@ -116,29 +139,8 @@ public class FechaMenusNewUCV extends JFrame {
         btn.setFont(new Font("Arial", Font.BOLD, 16));
         btn.setContentAreaFilled(false);
         btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
-    }
-
-    private JPanel crearFooter() {
-        JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panelFooter.setOpaque(false);
-        panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
-
-        JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
-        lblCerrar.setForeground(Color.WHITE);
-        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
-        lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
-                dispose();
-                com.ucv.ComedorApp.main(null);
-            }
-        });
-        panelFooter.add(lblCerrar);
-        return panelFooter;
     }
 }

@@ -1,11 +1,11 @@
 package com.ucv.view;
 
 import com.ucv.controller.PagoController;
-import com.ucv.model.DataBase;
 import com.ucv.model.PagoModel;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
+import com.ucv.view.components.BotonCerrarSesion;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +18,6 @@ public class BilleteraUCV extends JFrame {
     private static final Color AMARILLO_BOTON = new Color(255, 210, 35);
 
     private final PagoController controlador;
-
     private final String usuarioID;
     private JLabel lblMonto;
 
@@ -26,7 +25,6 @@ public class BilleteraUCV extends JFrame {
         PagoModel modelo = new PagoModel();
         controlador = new PagoController(modelo, usuarioID);
         this.usuarioID = usuarioID;
-        System.out.println(usuarioID);
 
         setTitle("Mi Saldo · Comedor UCV");
         setSize(1920, 800);
@@ -34,11 +32,17 @@ public class BilleteraUCV extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // Contenedor principal con fondo azul
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
-        container.add(new HeaderUCV(), BorderLayout.NORTH);
-        container.add(new SideBar(this,usuarioID), BorderLayout.WEST);
 
+        // --- 1. ENCABEZADO ESTÁNDAR ---
+        container.add(new HeaderUCV(), BorderLayout.NORTH);
+
+        // --- 2. SIDEBAR IZQUIERDO ---
+        container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
+
+        // --- 3. PANEL CENTRAL (Contenido de Saldo) ---
         JPanel panelCentral = new JPanel(null);
         panelCentral.setOpaque(false);
 
@@ -71,13 +75,31 @@ public class BilleteraUCV extends JFrame {
 
         panelCentral.add(tarjetaSaldo);
         container.add(panelCentral, BorderLayout.CENTER);
-        container.add(crearFooter(), BorderLayout.SOUTH);
+
+        // --- 4. PANEL DERECHO (Boton Cerrar Sesión) ---
+        container.add(crearContenedorCerrarSesion(), BorderLayout.EAST);
 
         add(container);
 
-        actualizarSaldo(); // Mostrar saldo actual al abrir
-        revalidate();
-        repaint();
+        actualizarSaldo();
+    }
+
+    private JPanel crearContenedorCerrarSesion() {
+        JPanel panelDerecho = new JPanel(new GridBagLayout());
+        panelDerecho.setOpaque(false);
+        panelDerecho.setPreferredSize(new Dimension(120, 0));
+
+        // Componente reutilizable que ya tiene la lógica de confirmación y pastilla blanca
+        BotonCerrarSesion btnCerrar = new BotonCerrarSesion(this);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weighty = 1.0;
+        // Alineación estándar de 25px desde arriba
+        gbc.insets = new Insets(25, 0, 0, 0);
+
+        panelDerecho.add(btnCerrar, gbc);
+        return panelDerecho;
     }
 
     public void actualizarSaldo() {
@@ -85,31 +107,12 @@ public class BilleteraUCV extends JFrame {
         lblMonto.setText("Bs " + String.format("%.2f", saldo));
     }
 
-    /** Método que notifica que se realizó una recarga exitosa */
     public void recargaExitosa() {
-        actualizarSaldo();  // Solo actualiza el saldo
-        this.setVisible(true);  // Vuelve a mostrar la ventana
+        actualizarSaldo();
+        this.setVisible(true);
     }
 
-    private JPanel crearFooter() {
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footer.setOpaque(false);
-        footer.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
-        JLabel cerrarSesion = new JLabel("<html><u>Cerrar Sesión</u></html>");
-        cerrarSesion.setForeground(Color.WHITE);
-        cerrarSesion.setFont(new Font("Arial", Font.PLAIN, 20));
-        cerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        cerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
-                dispose();
-            }
-        });
-        footer.add(cerrarSesion);
-        return footer;
-    }
-
+    // Clase interna para la tarjeta de saldo
     static class PanelRedondeado extends JPanel {
         private int radio;
         private Color color;

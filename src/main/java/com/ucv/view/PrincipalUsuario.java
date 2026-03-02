@@ -1,298 +1,141 @@
 package com.ucv.view;
 
 import com.ucv.model.DataBase;
-import com.ucv.view.components.SideBar; // Sidebar versión usuario
+import com.ucv.view.components.SideBar;
+import com.ucv.view.components.HeaderUCV;
+import com.ucv.view.components.BotonCerrarSesion;
 
 import javax.swing.*;
-
 import java.awt.*;
 
-import java.time.LocalDate;
-
-import java.time.format.DateTimeFormatter;
-
 public class PrincipalUsuario extends JFrame {
-    DataBase dataBase = new DataBase();
+
     private final String usuarioID;
-
-    LocalDate fechaActual = LocalDate.now();
-
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-    String fechaTexto = fechaActual.format(formatter);
-
     private final Color AZUL_FONDO = new Color(18, 71, 150);
-
-    private final Color AZUL_ENCABEZADO = new Color(10, 45, 110);
-
     private final Color AZUL_BOTON = new Color(24, 116, 205);
 
     public PrincipalUsuario(String usuarioID) {
         this.usuarioID = usuarioID;
-        System.out.println("ID del usuario en PrincipalUsuario: " + usuarioID); // Verificación de ID
 
         setTitle("Comedor UCV - Menú de Usuario");
-
         setSize(1920, 800);
-
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-
         setLocationRelativeTo(null);
-
-        getContentPane().setBackground(AZUL_FONDO);
-
         setLayout(new BorderLayout());
 
-        // --- 1. ENCABEZADO ---
+        // Contenedor principal con fondo azul
+        JPanel container = new JPanel(new BorderLayout());
+        container.setBackground(AZUL_FONDO);
 
-        add(crearEncabezadoUsuario(), BorderLayout.NORTH);
+        // --- 1. ENCABEZADO ESTÁNDAR ---
+        container.add(new HeaderUCV(), BorderLayout.NORTH);
 
+        // --- 2. SIDEBAR IZQUIERDO ---
+        container.add(new SideBar(this, usuarioID), BorderLayout.WEST);
 
-
-// --- 2. CONTENEDOR INFERIOR ---
-
-        JPanel contenedorInferior = new JPanel(new BorderLayout());
-
-        contenedorInferior.setOpaque(false);
-
-        contenedorInferior.add(new SideBar(this, usuarioID), BorderLayout.WEST);
-
-// --- 3. PANEL DE CUERPO ---
-
+        // --- 3. PANEL CENTRAL (Botones de Acción) ---
         JPanel panelCuerpo = new JPanel(new GridBagLayout());
-
         panelCuerpo.setOpaque(false);
-
         GridBagConstraints gbc = new GridBagConstraints();
-
         gbc.gridx = 0;
-
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-
-
         JLabel lblOpcion = new JLabel("Seleccione una opción");
-
         lblOpcion.setForeground(Color.WHITE);
-
-        lblOpcion.setFont(new Font("Arial", Font.BOLD, 32));
-
+        lblOpcion.setFont(new Font("Segoe UI", Font.BOLD, 32));
         lblOpcion.setHorizontalAlignment(SwingConstants.CENTER);
-
         gbc.gridy = 0;
-
-        gbc.insets = new Insets(0, 0, 20, 0);
-
+        gbc.insets = new Insets(0, 0, 30, 0);
         panelCuerpo.add(lblOpcion, gbc);
 
-
-
         gbc.insets = new Insets(10, 0, 10, 0);
-
         gbc.gridy = 1;
-
         panelCuerpo.add(crearBotonUsuario("Ver menus"), gbc);
 
         gbc.gridy = 2;
-
         panelCuerpo.add(crearBotonUsuario("Entrar al comedor"), gbc);
 
-        contenedorInferior.add(panelCuerpo, BorderLayout.CENTER);
+        container.add(panelCuerpo, BorderLayout.CENTER);
 
-        add(contenedorInferior, BorderLayout.CENTER);
+        // --- 4. PANEL DERECHO (Botón Cerrar Sesión) ---
+        container.add(crearContenedorCerrarSesion(), BorderLayout.EAST);
 
-
-// --- 4. FOOTER ---
-
-        add(crearFooter(), BorderLayout.SOUTH);
-
+        add(container);
     }
 
-    private JPanel crearEncabezadoUsuario() {
+    private JPanel crearContenedorCerrarSesion() {
+        JPanel panelDerecho = new JPanel(new GridBagLayout());
+        panelDerecho.setOpaque(false);
+        panelDerecho.setPreferredSize(new Dimension(120, 0));
 
-        JPanel panelEncabezado = new JPanel(null) {
+        // Componente reutilizable con la pastilla blanca
+        BotonCerrarSesion btnCerrar = new BotonCerrarSesion(this);
 
-            @Override
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weighty = 1.0;
+        // Margen estandarizado a 25px para alineación con el logo circular
+        gbc.insets = new Insets(25, 0, 0, 0);
 
-            protected void paintComponent(Graphics g) {
-
-                super.paintComponent(g);
-
-                Graphics2D g2 = (Graphics2D) g.create();
-
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                g2.setColor(AZUL_ENCABEZADO);
-
-                int alto = 140;
-
-                g2.fillRoundRect(-30, 0, getWidth() + 60, alto, 60, 60);
-
-                g2.fillRect(-30, 0, getWidth() + 60, alto / 2);
-
-                g2.dispose();
-
-            }
-
-        };
-
-        panelEncabezado.setPreferredSize(new Dimension(0, 150));
-
-        panelEncabezado.setOpaque(false);
-
-
-
-        JLabel lblTitulo = new JLabel("Comedor UCV");
-
-        lblTitulo.setForeground(Color.WHITE);
-
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 70));
-
-        lblTitulo.setBounds(40, 15, 600, 80);
-
-
-
-        JLabel lblFecha = new JLabel(fechaTexto);
-
-        lblFecha.setForeground(new Color(210, 210, 210));
-
-        lblFecha.setFont(new Font("Arial", Font.PLAIN, 22));
-
-        lblFecha.setBounds(45, 85, 200, 30);
-
-
-
-        panelEncabezado.add(lblTitulo);
-
-        panelEncabezado.add(lblFecha);
-
-        return panelEncabezado;
-
+        panelDerecho.add(btnCerrar, gbc);
+        return panelDerecho;
     }
-
-
 
     private JButton crearBotonUsuario(String texto) {
-
         JButton btn = new JButton(texto) {
-
             @Override
-
             protected void paintComponent(Graphics g) {
-
                 Graphics2D g2 = (Graphics2D) g.create();
-
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
                 g2.setColor(AZUL_BOTON);
-
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 45, 45);
-
                 g2.setColor(Color.WHITE);
 
                 FontMetrics fm = g2.getFontMetrics();
-
                 int x = (getWidth() - fm.stringWidth(getText())) / 2;
-
                 int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
-
                 g2.drawString(getText(), x, y);
-
                 g2.dispose();
-
             }
-
         };
 
-
-
-        btn.setFont(new Font("Arial", Font.BOLD, 28));
-
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 28));
         btn.setPreferredSize(new Dimension(450, 80));
-
         btn.setContentAreaFilled(false);
-
         btn.setBorderPainted(false);
-
         btn.setFocusPainted(false);
-
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-// --- LÓGICA DE NAVEGACIÓN ACTUALIZADA ---
-
         btn.addActionListener(e -> {
-            
             if (texto.equals("Ver menus")) {
-
                 new MenusUsuario(usuarioID).setVisible(true);
-                dispose(); // Cerramos la ventana actual
-
+                dispose();
             } else if (texto.equals("Entrar al comedor")) {
-
-                if (dataBase.GetFoodFlag(dataBase.ReturnID()).equals("1")){
-
+                DataBase db = new DataBase(); // Instancia local para la verificación
+                if ("1".equals(db.GetFoodFlag(usuarioID))) {
                     new VerificacionFacialUCV(usuarioID).setVisible(true);
-                    dispose(); // Cerramos la ventana actual
-
-                }else{
-
-                    javax.swing.JOptionPane.showMessageDialog(
-                        null, 
-                        "Antes Debe Generar un Turno", 
-                        "Aviso del Sistema", 
-                        javax.swing.JOptionPane.WARNING_MESSAGE
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Antes debe generar un turno de comida.",
+                            "Aviso del Sistema",
+                            JOptionPane.WARNING_MESSAGE
                     );
-
                 }
-                
-
             }
-
         });
-
-
 
         return btn;
-
     }
 
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {}
 
-
-    private JPanel crearFooter() {
-
-        JPanel panelFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-        panelFooter.setOpaque(false);
-
-        panelFooter.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 40));
-
-
-
-        JLabel lblCerrar = new JLabel("<html><u>Cerrar Sesión</u></html>");
-
-        lblCerrar.setForeground(Color.WHITE);
-
-        lblCerrar.setFont(new Font("Arial", Font.PLAIN, 20));
-
-        lblCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        lblCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
-
-            @Override
-
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                DataBase dataBase = new DataBase();
-                dataBase.LogedOut();
-                dispose();
-                com.ucv.ComedorApp.main(null);
-
-            }
-
+        SwingUtilities.invokeLater(() -> {
+            new PrincipalUsuario("Invitado_UCV").setVisible(true);
         });
-
-        panelFooter.add(lblCerrar);
-
-        return panelFooter;
-
     }
 }
