@@ -49,7 +49,7 @@ public class MenuDB {
         MakeArchive();
         try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
             String NLine = Fecha + " | " + Tipo + " | " + PlatoFuerte + " | " + Bebida + " | " + Postre + " | " + PEstudiante + " | " + PProfesor + " | " + PEmpleado + " | " + "0" + " | " + Capacidad + " | " + CCB;
-            escritor.write(NLine);
+            escritor.write(NLine);// 0      1               2                      3                4                 5                     6                      7              8                 9               10                                                                    
             escritor.newLine();
             return WriteMenuStatus.REGISTRO_EXITOSO;
         } catch (IOException e) {
@@ -70,7 +70,7 @@ public class MenuDB {
             while ((linea = lector.readLine()) != null) {
                 String[] partes = linea.split("\\s*\\|\\s*");
 
-                if (partes.length >= 9 && partes[0].equals(Fecha) && partes[1].equals(Tipo)) {
+                if (partes[0].equals(Fecha) && partes[1].equals(Tipo)) {
                     int contador = Integer.parseInt(partes[8]);
                     contador++;
                     partes[8] = String.valueOf(contador);
