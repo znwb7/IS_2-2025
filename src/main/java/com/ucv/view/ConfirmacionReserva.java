@@ -79,7 +79,20 @@ public class ConfirmacionReserva extends JFrame {
         panelBotones.add(btnSi);
 
         gbc.gridy = 2;
+        gbc.insets = new Insets(0, 0, 20, 0); // Espacio antes del texto informativo
         panelCentral.add(panelBotones, gbc);
+
+        // --- NUEVO TEXTO INFORMATIVO ---
+        JLabel lblInfoPago = new JLabel("<html><div style='text-align: center;'>"
+                + "El pago se realiza en el momento de acceder al comedor<br>"
+                + "Sera descontando del saldo que tenga en su monedero<br>"
+                + "<i>Si usted no tiene dinero en su monedero, le sera denegado el acceso</i>"
+                + "</div></html>");
+        lblInfoPago.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        lblInfoPago.setForeground(new Color(220, 220, 220)); // Gris claro para no saturar
+        gbc.gridy = 3;
+        gbc.insets = new Insets(10, 0, 0, 0);
+        panelCentral.add(lblInfoPago, gbc);
 
         container.add(panelCentral, BorderLayout.CENTER);
 
@@ -92,19 +105,23 @@ public class ConfirmacionReserva extends JFrame {
     private JPanel crearContenedorCerrarSesion() {
         JPanel contenedor = new JPanel(new GridBagLayout());
         contenedor.setOpaque(false);
-        // Ancho suficiente para la pastilla blanca
         contenedor.setPreferredSize(new Dimension(120, 0));
 
-        // Componente con icono y lógica de confirmación integrada
         BotonCerrarSesion btnCerrar = new BotonCerrarSesion(this);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.weighty = 1.0;
-        // Alineación visual con el centro del logo del header (25px)
         gbc.insets = new Insets(25, 0, 0, 0);
 
         contenedor.add(btnCerrar, gbc);
         return contenedor;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            ConfirmacionReserva test = new ConfirmacionReserva("ALMUERZO", "12345678");
+            test.setVisible(true);
+        });
     }
 }

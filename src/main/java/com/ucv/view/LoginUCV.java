@@ -2,7 +2,7 @@ package com.ucv.view;
 
 import com.ucv.controller.UserController;
 import com.ucv.model.DataBase;
-import com.ucv.view.components.PrimaryButton; // Importamos tu componente
+import com.ucv.view.components.PrimaryButton;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -60,49 +60,65 @@ public class LoginUCV extends JFrame {
         gbc.insets = new Insets(-100, 0, 90, 0);
         center.add(titulo, gbc);
 
-       // --- TARJETA AZUL ENSANCHADA ---
-                RoundedPanel card = new RoundedPanel(50, AZUL_UCV);
-        card.setPreferredSize(new Dimension(480, 300)); // MUCHO MÁS ANCHO
+        // --- TARJETA AZUL ---
+        RoundedPanel card = new RoundedPanel(50, AZUL_UCV);
+        card.setPreferredSize(new Dimension(480, 300));
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-// Aumentamos el margen lateral (150) para centrar el contenido en el panel ancho
-        card.setBorder(BorderFactory.createEmptyBorder(20, 40, 40, 40));
+        card.setBorder(BorderFactory.createEmptyBorder(20, 40, 30, 40));
 
         JLabel lblLogin = new JLabel("Iniciar Sesión");
         lblLogin.setFont(new Font("Segoe UI", Font.BOLD, 28));
         lblLogin.setForeground(Color.WHITE);
         lblLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
         card.add(lblLogin);
-        card.add(Box.createVerticalStrut(20));
+        card.add(Box.createVerticalStrut(15));
 
-// Los campos se estirarán hasta el límite del margen del card
+        // --- CAMPO CÉDULA Y AYUDA ---
         JTextField campoCedula = crearCampo("Cédula", false);
-        JPasswordField campoPass = (JPasswordField) crearCampo("Contraseña", true);
-
+        campoCedula.setAlignmentX(Component.CENTER_ALIGNMENT);
         card.add(campoCedula);
-        card.add(Box.createVerticalStrut(12));
+
+        JLabel ayudaCedula = new JLabel("Coloque solo números sin puntos, letras u caracteres especiales. Ej: 12345678");
+        ayudaCedula.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        ayudaCedula.setForeground(new Color(225, 225, 225));
+        ayudaCedula.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Ajuste de margen para que el texto sea visible y empiece a la izquierda
+        ayudaCedula.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+        card.add(ayudaCedula);
+
+        card.add(Box.createVerticalStrut(8));
+
+        // --- CAMPO CONTRASEÑA Y AYUDA ---
+        JPasswordField campoPass = (JPasswordField) crearCampo("Contraseña", true);
+        campoPass.setAlignmentX(Component.CENTER_ALIGNMENT);
         card.add(campoPass);
-        card.add(Box.createVerticalStrut(20));
 
+        JLabel ayudaPass = new JLabel("Debe tener mínimo tres caracteres (Letras y/o Números)");
+        ayudaPass.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        ayudaPass.setForeground(new Color(225, 225, 225));
+        ayudaPass.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Ajuste de margen para alinear a la izquierda sin recortar el texto
+        ayudaPass.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 115));
+        card.add(ayudaPass);
 
-        // --- BOTÓN IMPLEMENTADO CON PRIMARYBUTTON ---
+        card.add(Box.createVerticalStrut(15));
+
+        // --- BOTÓN ---
         PrimaryButton btnLogin = new PrimaryButton("Ingresar");
-        // Nota: El centrado y tamaño ya vienen definidos en la clase PrimaryButton
+        // Aseguramos el centrado explícito del botón
+        btnLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
         card.add(btnLogin);
 
-        JLabel lblMensaje = new JLabel(" ");
-        lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblMensaje.setAlignmentX(Component.CENTER_ALIGNMENT);
-        card.add(lblMensaje);
+        card.add(Box.createVerticalStrut(10));
 
-
-        JLabel linkRegistro = new JLabel(
-                "<html>¿No tienes cuenta? <u>Regístrate</u></html>");
+        // --- ENLACE DE REGISTRO CENTRADO ---
+        JLabel linkRegistro = new JLabel("<html>¿No tienes cuenta? <u>Regístrate</u></html>");
         linkRegistro.setForeground(Color.WHITE);
         linkRegistro.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         linkRegistro.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        // Centrado respecto al botón "Ingresar"
         linkRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
-        linkRegistro.setBorder(BorderFactory.createEmptyBorder(-4, 100, 0, 20));
-
+        linkRegistro.setBorder(BorderFactory.createEmptyBorder(0, 100, 0, 0));
         card.add(linkRegistro);
 
         gbc.gridy = 1;
