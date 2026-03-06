@@ -12,4 +12,5 @@ buildNumber.properties
 
 # IDEs
 .vscode/
+.idea/
 docs/
