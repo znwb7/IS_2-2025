@@ -198,13 +198,15 @@ El directorio **target** es generado automáticamente por **Maven** durante el p
 target
 ├── classes
 ├── test-classes
+├── Output
 └── comedor-app-<version>.jar
 ```
 
-Este directorio incluye:
+Este directorio incluye (entre otras):
 
 * **classes**: archivos `.class` generados a partir del código fuente.
 * **test-classes**: clases compiladas correspondientes a las pruebas unitarias.
+* * **Output**: archivos .txt de bases de datos para escritura.
 * **archivo .jar**: artefacto ejecutable generado por Maven.
 
 El contenido de este directorio **no debe modificarse manualmente**, ya que se recrea automáticamente cada vez que se ejecuta el proceso de compilación mediante:
