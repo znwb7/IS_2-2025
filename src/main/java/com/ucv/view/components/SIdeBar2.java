@@ -34,7 +34,7 @@ public class SIdeBar2 extends JPanel {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 ventanaActual.dispose();
                 // REDIRECCIÓN ÚNICA A ADMIN
-                new com.ucv.view.AdminUCV("Administrador").setVisible(true);
+                new com.ucv.view.admin.AdminUCV("Administrador").setVisible(true);
             }
         });
 

@@ -49,9 +49,9 @@ public class SideBar extends JPanel {
                 ventanaActual.dispose();
 
                 if (usuarioID != null) {
-                    new com.ucv.view.PrincipalUsuario(usuarioID).setVisible(true);
+                    new com.ucv.view.user.PrincipalUsuario(usuarioID).setVisible(true);
                 } else {
-                    new com.ucv.view.PrincipalUsuario("Usuario").setVisible(true);
+                    new com.ucv.view.user.PrincipalUsuario("Usuario").setVisible(true);
                 }
             }
         });
@@ -72,7 +72,7 @@ public class SideBar extends JPanel {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 ventanaActual.dispose();
-                    new com.ucv.view.BilleteraUCV(usuarioID).setVisible(true);
+                    new com.ucv.view.user.BilleteraUCV(usuarioID).setVisible(true);
         }    });
 
         capsula.add(home);

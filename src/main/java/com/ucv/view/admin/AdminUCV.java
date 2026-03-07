@@ -1,4 +1,4 @@
-package com.ucv.view;
+package com.ucv.view.admin;
 
 import com.ucv.view.components.SIdeBar2;
 import com.ucv.view.components.BotonCerrarSesion;
@@ -107,7 +107,7 @@ public class AdminUCV extends JFrame {
         btn.addActionListener(e -> {
             if (texto.equals("Configurar Menus")) {
                 dispose();
-                new com.ucv.view.GestionMenuUCV().setVisible(true);
+                new com.ucv.view.admin.GestionMenuUCV().setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "Función '" + texto + "' en desarrollo.");
             }

@@ -1,7 +1,7 @@
 package com.ucv.view.components;
 
 import com.ucv.controller.MenuController;
-import com.ucv.view.FechaMenusNewUCV;
+import com.ucv.view.admin.FechaMenusNewUCV;
 
 import javax.swing.*;
 import java.awt.*;

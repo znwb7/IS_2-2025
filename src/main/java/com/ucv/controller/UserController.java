@@ -134,9 +134,9 @@ public void loginRequested(String id, String password, LoginUCV vista) {
         RolUsuario rol = dataBase.obtenerRol(id);
         vista.dispose();
         if (rol == RolUsuario.ADMIN) {
-            new com.ucv.view.AdminUCV("Administrador").setVisible(true);
+            new com.ucv.view.admin.AdminUCV("Administrador").setVisible(true);
         } else {
-            new com.ucv.view.PrincipalUsuario(id).setVisible(true);
+            new com.ucv.view.user.PrincipalUsuario(id).setVisible(true);
         }
     } catch (IOException e) {
         javax.swing.JOptionPane.showMessageDialog(

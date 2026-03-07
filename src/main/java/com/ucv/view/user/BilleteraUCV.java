@@ -1,4 +1,4 @@
-package com.ucv.view;
+package com.ucv.view.user;
 
 import com.ucv.controller.PagoController;
 import com.ucv.model.PagoModel;
