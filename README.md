@@ -25,8 +25,11 @@ El sistema fue desarrollado utilizando el siguiente conjunto de tecnologías:
 ### Lenguaje y Frameworks
 
 **Lenguaje:** Java (OpenJDK 17)
+
 **Interfaz Gráfica:** Swing
+
 **Pruebas Unitarias:** JUnit
+
 **Gestión de Dependencias y Build:** Maven
 
 ### Herramientas de Desarrollo
