@@ -117,7 +117,7 @@ El nombre del archivo `.jar` puede variar dependiendo de la configuración del `
 
 También es posible descargar directamente el archivo ejecutable `.jar` desde la sección de **Releases** del repositorio.
 
-Allí se encuentran versiones compiladas listas para ejecutar sin necesidad de compilar el proyecto.
+Allí se encuentran versiones compiladas listas para ejecutar sin necesidad de compilar el proyecto desde src.
 
 Descargar desde:
 
