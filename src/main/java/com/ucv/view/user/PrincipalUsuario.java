@@ -111,14 +111,14 @@ public class PrincipalUsuario extends JFrame {
                 new MenusUsuario(usuarioID).setVisible(true);
                 dispose();
             } else if (texto.equals("Entrar al comedor")) {
-                DataBase db = new DataBase(); // Instancia local para la verificación
+                DataBase db = new DataBase();
                 if ("1".equals(db.GetFoodFlag(usuarioID))) {
                     new VerificacionFacialUCV(usuarioID).setVisible(true);
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(
                             this,
-                            "Antes debe generar un turno de comida.",
+                            "Antes debe reservar un turno de comida.",
                             "Aviso del Sistema",
                             JOptionPane.WARNING_MESSAGE
                     );

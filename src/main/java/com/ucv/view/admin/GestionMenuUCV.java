@@ -189,8 +189,4 @@ public class GestionMenuUCV extends JFrame {
             g2.dispose();
         }
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GestionMenuUCV().setVisible(true));
-    }
 }
