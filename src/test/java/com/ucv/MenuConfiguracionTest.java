@@ -35,11 +35,13 @@ public class MenuConfiguracionTest {
             // Verificar que el arreglo no sea nulo
             assertNotNull(datosRecuperados, "No se pudo recuperar el menú recién guardado");
 
-            // Verificar que los datos se transformaron segun tu logica (a minusculas)
+            // --- CORRECCIÓN AQUÍ ---
+            // Ahora verificamos que conserve el formato Capitalizado en lugar de forzar minúsculas
             assertEquals(fechaPrueba, datosRecuperados[0], "La fecha no coincide");
-            assertEquals("pabellon criollo", datosRecuperados[2], "El plato fuerte no se guardó/leyó en minúsculas");
+            assertEquals("Pabellon Criollo", datosRecuperados[2], "El plato fuerte no conservó las mayúsculas/formato original");
             assertEquals("500", datosRecuperados[9], "La capacidad no coincide");
             assertEquals("30.00", datosRecuperados[10], "El CCB no coincide");
+
         }, "Se produjo una excepción inesperada de entrada/salida durante la prueba");
     }
 

@@ -37,10 +37,6 @@ public class MenuDB {
     }
 
     public WriteMenuStatus WriteMenu(Boolean Modify, Boolean Type, String Fecha, String Tipo, String PlatoFuerte, String Bebida, String Postre, String PEstudiante, String PProfesor, String PEmpleado, String Capacidad, String CCB) throws IOException {
-        Tipo = Tipo.toLowerCase();
-        PlatoFuerte = PlatoFuerte.toLowerCase();
-        Bebida = Bebida.toLowerCase();
-        Postre = Postre.toLowerCase();
 
         if (Modify) {
             return ModifyMenu(Type, Fecha, Tipo, PlatoFuerte, Bebida, Postre, PEstudiante, PProfesor, PEmpleado, Capacidad, CCB);
@@ -95,9 +91,7 @@ public class MenuDB {
 
     public WriteMenuStatus ModifyMenu(Boolean Type, String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp, String Capacidad, String CCB) throws IOException {
         Tipo = Tipo.toLowerCase();
-        NPlato = NPlato.toLowerCase();
-        NBebida = NBebida.toLowerCase();
-        NPostre = NPostre.toLowerCase();
+        // Recordatorio: No agregar los toLowerCase() de platos, bebidas y postres aquí.
 
         File archivo = new File(RUTA_ARCHIVO);
         if (!archivo.exists()) return WriteMenuStatus.ARCHIVO_NO_EXISTE;
@@ -108,9 +102,16 @@ public class MenuDB {
         try (BufferedReader lector = new BufferedReader(new FileReader(archivo))) {
             String linea;
             while ((linea = lector.readLine()) != null) {
+                // Protección: Ignorar líneas en blanco para evitar errores de índice
+                if (linea.trim().isEmpty()) {
+                    lineas.add(linea);
+                    continue;
+                }
+
                 String[] partes = linea.split("\\s*\\|\\s*");
 
-                if (partes.length >= 9 && partes[0].equals(Fecha) && partes[1].equals(Tipo.toLowerCase())) {
+                // CORRECCIÓN: Usamos equalsIgnoreCase al igual que en obtenerMenu()
+                if (partes.length >= 9 && partes[0].trim().equals(Fecha.trim()) && partes[1].trim().equalsIgnoreCase(Tipo)) {
                     String contadorActual = partes[8];
 
                     if (Type) {
@@ -118,7 +119,7 @@ public class MenuDB {
                     }
 
                     linea = Fecha + " | " + Tipo + " | " + NPlato + " | " + NBebida + " | " + NPostre + " | " + NPEst + " | " + NPProf + " | " + NPEmp + " | " + contadorActual + " | " + Capacidad + " | " + CCB;
-                    modificado = true;                                                                                                                              //8                           9             10
+                    modificado = true;
                 }
                 lineas.add(linea);
             }
@@ -214,10 +215,9 @@ public class MenuDB {
         return ReWriteStatus.NO_ENCONTRADO;
     }
 
-
-    public int CantidadDisponible (String Tipo){
-
-        String fecha = java.time.LocalDate.now().toString();
+    public int CantidadDisponible(String Tipo) {
+        // CORRECCIÓN: Formato exacto de fecha "dd/MM/yyyy" para que coincida con el TXT
+        String fecha = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         File archivo = new File(RUTA_ARCHIVO);
         if (!archivo.exists()) return -1;
 
@@ -226,23 +226,18 @@ public class MenuDB {
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().isEmpty()) continue;
                 String[] Word = linea.split("\\s*\\|\\s*");
-                if (Word[1].equals(Tipo) && fecha.equals(Word[0])) {
-                    
-                    int valor8 = Integer.parseInt(Word[8].trim());
-                    int valor9 = Integer.parseInt(Word[9].trim());
+                // Comparamos ignorando mayúsculas/minúsculas
+                if (Word[1].equalsIgnoreCase(Tipo) && fecha.equals(Word[0])) {
 
-                    int resultadoResta = valor9 - valor8;
-                    
-                    return resultadoResta;
+                    int valor8 = Integer.parseInt(Word[8].trim()); // Contador (Reservados)
+                    int valor9 = Integer.parseInt(Word[9].trim()); // Capacidad Total
 
-
-
+                    return valor9 - valor8; // Retorna los cupos que sobran
                 }
             }
         } catch (IOException e) {
             System.err.println("Error leyendo DB: " + e.getMessage());
         }
         return -1;
-
     }
 }

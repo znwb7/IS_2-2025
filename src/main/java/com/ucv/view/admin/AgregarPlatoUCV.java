@@ -242,18 +242,16 @@ public class AgregarPlatoUCV extends JFrame {
         String cap = txtCapacidad.getText().equals("Capacidad") || txtCapacidad.getText().isEmpty() ? "500" : txtCapacidad.getText();
         String ccb = txtCCBResult.getText().isEmpty() ? "0.00" : txtCCBResult.getText();
 
+        // Extraemos las tarifas de la vista
+        String tEst = txtTarifaEst.getText().equals("20-30") ? "0" : txtTarifaEst.getText();
+        String tProf = txtTarifaProf.getText().equals("70-90") ? "0" : txtTarifaProf.getText();
+        String tEmp = txtTarifaEmp.getText().equals("90-110") ? "0" : txtTarifaEmp.getText();
+
+        // Llamamos al metodo actualizado del controlador
         controller.registrarNuevoPlato(
-                fecha,
-                tipoMenu,
-                pFuerte,
-                pBebida,
-                pPostre,
-                pEst,
-                pProf,
-                pEmp,
-                cap,
-                ccb,
-                this
+                fecha, tipoMenu, pFuerte, pBebida, pPostre,
+                pEst, pProf, pEmp, cap, ccb,
+                tEst, tProf, tEmp, this // Se añadieron las 3 tarifas
         );
     }
 

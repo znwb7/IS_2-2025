@@ -47,7 +47,7 @@ public class ContenidoMenuDatos extends JPanel {
         int xCampos = 40;
 
         // --- DATOS DINÁMICOS ---
-        add(crearCampoMock(datos[2].toUpperCase(), 55, 230, hReducida, xCampos));
+        add(crearCampoMock(datos[2], 55, 230, hReducida, xCampos));
         add(crearCampoMock(datos[3], 85, 230, hReducida, xCampos));
         add(crearCampoMock(datos[4], 115, 230, hReducida, xCampos));
 

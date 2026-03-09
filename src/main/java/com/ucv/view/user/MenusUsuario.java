@@ -4,7 +4,7 @@ import com.ucv.controller.MenuController;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.TarjetaMenuUsuario;
-import com.ucv.view.components.BotonCerrarSesion; // Importado
+import com.ucv.view.components.BotonCerrarSesion;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,7 +27,7 @@ public class MenusUsuario extends JFrame {
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(AZUL_FONDO);
 
-        // --- 1. ENCABEZADO ESTÁNDAR (Logo circular a la derecha) ---
+        // --- 1. ENCABEZADO ESTÁNDAR ---
         container.add(new HeaderUCV(), BorderLayout.NORTH);
 
         // --- 2. SIDEBAR IZQUIERDO ---
@@ -39,22 +39,44 @@ public class MenusUsuario extends JFrame {
         String[] datosDesayuno = controller.obtenerDatosMenu(fechaActual, "desayuno");
         String[] datosAlmuerzo = controller.obtenerDatosMenu(fechaActual, "almuerzo");
 
-        // --- 4. PANEL CENTRAL (Tarjetas de Menú) ---
+        // --- 4. PANEL CENTRAL (Contenido adaptado al prototipo) ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(20, 40, 20, 40);
-
-        // Tarjeta Desayuno
-        TarjetaMenuUsuario tarjetaDesayuno = new TarjetaMenuUsuario("Desayuno", "7:00 AM - 9:00 AM", datosDesayuno, usuarioID, controller);
         gbc.gridx = 0;
-        gbc.gridy = 0;
-        panelCentral.add(tarjetaDesayuno, gbc);
+        gbc.anchor = GridBagConstraints.CENTER;
 
-        // Tarjeta Almuerzo
-        TarjetaMenuUsuario tarjetaAlmuerzo = new TarjetaMenuUsuario("Almuerzo", "11:30 AM - 1:30 PM", datosAlmuerzo, usuarioID, controller);
-        gbc.gridx = 1;
-        panelCentral.add(tarjetaAlmuerzo, gbc);
+        // Título Principal
+        JLabel lblTitulo = new JLabel("Menus disponibles");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 40));
+        lblTitulo.setForeground(Color.WHITE);
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        panelCentral.add(lblTitulo, gbc);
+
+        // Contenedor de Tarjetas
+        JPanel panelTarjetas = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 0));
+        panelTarjetas.setOpaque(false);
+
+        TarjetaMenuUsuario tarjetaDesayuno = new TarjetaMenuUsuario("Desayuno", "7:00 am - 11:00 am", datosDesayuno, usuarioID, controller);
+        TarjetaMenuUsuario tarjetaAlmuerzo = new TarjetaMenuUsuario("Almuerzo", "12:00 pm - 5:00 pm", datosAlmuerzo, usuarioID, controller);
+
+        panelTarjetas.add(tarjetaDesayuno);
+        panelTarjetas.add(tarjetaAlmuerzo);
+
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 30, 0);
+        panelCentral.add(panelTarjetas, gbc);
+
+        // Footer Informativo
+        JLabel lblInfo = new JLabel("<html><center><b>El pago se realiza en el momento de acceder al comedor</b><br>"
+                + "Sera descontando del saldo que tenga en su monedero<br>"
+                + "<i>Si usted no tiene dinero en su monedero, le sera denegado el acceso</i></center></html>");
+        lblInfo.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        lblInfo.setForeground(new Color(220, 220, 220));
+        gbc.gridy = 2;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        panelCentral.add(lblInfo, gbc);
 
         container.add(panelCentral, BorderLayout.CENTER);
 
@@ -67,21 +89,16 @@ public class MenusUsuario extends JFrame {
     private JPanel crearContenedorCerrarSesion() {
         JPanel panelDerecho = new JPanel(new GridBagLayout());
         panelDerecho.setOpaque(false);
-        // Ancho estándar de 120px para que la pastilla respire bien
         panelDerecho.setPreferredSize(new Dimension(120, 0));
 
-        // Componente reutilizable con icono y lógica de logout
         BotonCerrarSesion btnCerrar = new BotonCerrarSesion(this);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.weighty = 1.0;
-        // Margen de 25px para alineación con el logo del Header
         gbc.insets = new Insets(25, 0, 0, 0);
 
         panelDerecho.add(btnCerrar, gbc);
         return panelDerecho;
     }
-
-    // El método crearFooter() original ha sido eliminado
 }

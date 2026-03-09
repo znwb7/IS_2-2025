@@ -1,5 +1,6 @@
 package com.ucv.view.user;
 
+import com.ucv.controller.MenuController;
 import com.ucv.view.components.HeaderUCV;
 import com.ucv.view.components.SideBar;
 import com.ucv.view.components.PrimaryButton2;
@@ -70,9 +71,27 @@ public class ConfirmacionReserva extends JFrame {
 
         PrimaryButton2 btnSi = new PrimaryButton2("Confirmar", AMARILLO_UCV);
         btnSi.setForeground(Color.BLACK);
+
+        // CORRECCIÓN: Ahora el botón ejecuta la reserva real en el Backend
         btnSi.addActionListener(e -> {
-            dispose();
-            new ReservaConcretada(this.tipoSeleccionado, usuarioID).setVisible(true);
+            MenuController controller = new MenuController();
+            boolean exito = controller.procesarReserva(this.tipoSeleccionado, usuarioID);
+
+            if (exito) {
+                // Si todo salió bien, va a la pantalla de éxito
+                dispose();
+                new ReservaConcretada(this.tipoSeleccionado, usuarioID).setVisible(true);
+            } else {
+                // Si ya reservó antes o se acabaron los cupos, lanza alerta
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No se pudo completar la reserva.\nVerifique que no tenga una reserva activa o que aún haya cupos disponibles.",
+                        "Error de Reserva",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                dispose();
+                new MenusUsuario(usuarioID).setVisible(true);
+            }
         });
 
         panelBotones.add(btnNo);
