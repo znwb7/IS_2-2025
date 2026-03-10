@@ -4,6 +4,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +57,29 @@ public class DataBase {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
     //CREACION DE CARPETAS Y ARCHIVOS DE LA BD
 
         private void crearArchivo() throws IOException {
@@ -85,9 +110,9 @@ public class DataBase {
             if (UserAlreadyExists(id)) return RegistroStatus.PERSONA_YA_EXISTENTE;
 
             try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, true))) {
-                String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + "0" + " | " + "0" + " | " + "0" + " | " + "0";
-                escritor.write(linea);                                                                                        //SALDO       LOGUEADO   TURNO ACTIVO   SALDO A DEBITAR
-                escritor.newLine();                                                                                             //5            6            7               8 
+                String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + "Saldo" + " | " + "LoginActivo" + " | " + "PoseeTurnoAlmuerzo" + " | "+ "PoseeTurnoDesayuno" + " | " + "SaldoDebitoAlmuerzo" + " | " + "SaldoDebitoDesayuno" + " | " + "Fecha";
+                escritor.write(linea);                                                                                        //SALDO                    LOGUEADO                TURNO ACTIVO Almuerzo   Turno ACTIVO DESAYUNO                  SALDO A DEBITAR Almuerzo         Saldo a debitar desayuno    fecha
+                escritor.newLine();                                                                                             //5                          6                        7                          8                                  9                           10                              11
                 return RegistroStatus.REGISTRO_EXITOSO;
             } catch (IOException e) {
                 return RegistroStatus.ERROR_LECTURA_DB;
@@ -395,7 +420,7 @@ public class DataBase {
                                 double nuevoSaldo = saldoActual + monto;
                                 nuevoSaldo = Math.round(nuevoSaldo * 100.0) / 100.0;
 
-                                linea = Word[0] + " | " + Word[1] + " | " + Word[2] + " | " + Word[3] + " | " + Word[4] + " | " + nuevoSaldo + " | " + Word[6] + " | " + Word[7] + " | " + Word[8];
+                                linea = Word[0] + " | " + Word[1] + " | " + Word[2] + " | " + Word[3] + " | " + Word[4] + " | " + nuevoSaldo + " | " + Word[6] + " | " + Word[7] + " | " + Word[8]+ " | " + Word[9]+ " | " + Word[10]+ " | " + Word[11];
                             }
 
                             lineasActualizadas.add(linea);
@@ -452,7 +477,7 @@ public class DataBase {
                                 nuevoSaldo = Math.round(nuevoSaldo * 100.0) / 100.0;
 
                                 // 4. Reconstruccion de la línea con el nuevo saldo
-                                linea = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + nuevoSaldo + " | " + WordP[6] + " | " + WordP[7] + " | " + WordP[8];
+                               linea = WordP[0] + " | " + WordP[1] + " | " + WordP[2] + " | " + WordP[3] + " | " + WordP[4] + " | " + nuevoSaldo + " | " + WordP[6] + " | " + WordP[7] + " | " + WordP[8]+ " | " + WordP[9]+ " | " + WordP[10]+ " | " + WordP[11];
                             } else {
                                 saldoSuficiente = false;
                             }
@@ -514,8 +539,88 @@ public class DataBase {
    
     //BANDERAS DEL MENU
 
-        //Activa el booleano que dice si posee un menu activo o no
-        public void MenuActive(String ID) {
+        public void MenuDesayunoActive(String ID) {
+            SetDateDB(ID);
+            File file = new File(rutaArchivo);
+            if (!file.exists()) return;
+
+            List<String> lineasActualizadas = new ArrayList<>();
+
+            // 1. Fase de Lectura y Modificación
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) {
+                        lineasActualizadas.add(line);
+                        continue;
+                    }
+                    String[] Word = line.split("\\s*\\|\\s*");
+
+                    if (Word[1].equals(ID)) {
+                        Word[8] = "1"; // Modifica la palabra 9 (índice 8)
+                        line = String.join(" | ", Word);
+                        System.out.println("-> ¡ID encontrado! Cambiando estado de turno a 1.");
+                    }
+                    lineasActualizadas.add(line);
+                }
+            } catch (IOException e) {
+                System.err.println("Error al leer la base de datos: " + e.getMessage());
+                return;
+            }
+
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) { // 'false' para sobrescribir
+                for (String l : lineasActualizadas) {
+                    bw.write(l);
+                    bw.newLine();
+                }
+                System.out.println("-> Base de datos actualizada correctamente.");
+            } catch (IOException e) {
+                System.err.println("Error al escribir en la base de datos: " + e.getMessage());
+            }
+        }
+
+        public void MenuDesayunoOut(String ID) {
+            File file = new File(rutaArchivo);
+            if (!file.exists()) return;
+
+            List<String> lineasActualizadas = new ArrayList<>();
+
+            // 1. Fase de Lectura y Modificación
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) {
+                        lineasActualizadas.add(line);
+                        continue;
+                    }
+                    String[] Word = line.split("\\s*\\|\\s*");
+
+                    if (Word[1].equals(ID)) {
+                        Word[8] = "0"; // Modifica la palabra 9 (índice 8)
+                        line = String.join(" | ", Word);
+                        System.out.println("-> ¡ID encontrado! Cambiando estado de turno a 1.");
+                    }
+                    lineasActualizadas.add(line);
+                }
+            } catch (IOException e) {
+                System.err.println("Error al leer la base de datos: " + e.getMessage());
+                return;
+            }
+
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) { // 'false' para sobrescribir
+                for (String l : lineasActualizadas) {
+                    bw.write(l);
+                    bw.newLine();
+                }
+                System.out.println("-> Base de datos actualizada correctamente.");
+            } catch (IOException e) {
+                System.err.println("Error al escribir en la base de datos: " + e.getMessage());
+            }
+        }
+
+        //Activa el booleano que dice si posee un menu activo o no Almuerzo
+        public void MenuAlmuerzoActive(String ID) {
+            SetDateDB(ID);
             File file = new File(rutaArchivo);
             if (!file.exists()) return;
 
@@ -554,8 +659,8 @@ public class DataBase {
             }
         }
         
-        //Desactiva el bool de posesion de menu
-        public void MenuOut(String ID) {
+        //Desactiva el bool de posesion de menu Almuerzo
+        public void MenuAlmuerzoOut(String ID) {
             File file = new File(rutaArchivo);
             if (!file.exists()) return;
 
@@ -594,7 +699,24 @@ public class DataBase {
             }
         }
 
-        public String GetFoodFlag(String ID){
+        public String GetFoodDesayunoFlag(String ID){
+
+            try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+                String Line;
+                while ((Line = br.readLine()) != null) {
+                    String[] Word = Line.split("\\s*\\|\\s*");
+                    if (Line.isEmpty()) continue;
+                    if (Word[1].equals(ID)) {
+                        return Word[8]; 
+                    }
+                } 
+                return "0"; 
+            } catch (IOException e) { 
+                return "0"; 
+            }
+        }
+
+        public String GetFoodAlmuerzoFlag(String ID){
 
             try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
                 String Line;
@@ -637,9 +759,9 @@ public class DataBase {
         }
     //FIN
 
-    //nosewe
+    //Pone los precios de la comida en la db espacio especifico del usuario
         
-      public EnumRegistrarTransaccion RegisterTransaction(String id, String tipo) {
+      public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
             try {
                 RolUsuario rol = obtenerRol(id);
 
@@ -685,10 +807,18 @@ public class DataBase {
                             continue;
                         }
                         String[] wordsP = linea.split("\\s*\\|\\s*");
-                        if (wordsP.length > 1 && wordsP[1].equals(id)) {
+                        //SALDO A DEBITAR DESAYUNO
+                        if (wordsP[1].equals(id) && tipo.equals("desayuno")) {
                             usuarioEncontrado = true;
-                            // Actualizamos el "Saldo a debitar" (índice 8)
-                            wordsP[8] = montoAPagar; 
+                            // Actualizamos el "Saldo a debitar" 
+                            wordsP[10] = montoAPagar; 
+                            linea = String.join(" | ", wordsP);
+                        }
+                        //ALMUERZO
+                        if (wordsP[1].equals(id) && tipo.equals("almuerzo")) {
+                            usuarioEncontrado = true;
+                            // Actualizamos el "Saldo a debitar"
+                            wordsP[9] = montoAPagar; 
                             linea = String.join(" | ", wordsP);
                         }
                         lineasActualizadas.add(linea);
@@ -714,8 +844,50 @@ public class DataBase {
         }
     //FIN
 
+    //ESTABLECE LA FECHA Y ES LLAMADO CUANDO SE LLAMA A CUALQUIERA DE LOS DOS MENUS
+
+        private void SetDateDB(String ID){
+             File file = new File(rutaArchivo);
+            if (!file.exists()) return;
+
+            List<String> lineasActualizadas = new ArrayList<>();
+
+            // 1. Fase de Lectura y Modificación
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) {
+                        lineasActualizadas.add(line);
+                        continue;
+                    }
+                    String[] Word = line.split("\\s*\\|\\s*");
+
+                    if (Word[1].equals(ID)) {
+                        Word[11] = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));; // Modifica la palabra 9 (índice 8)
+                        line = String.join(" | ", Word);
+                        System.out.println("-> ¡ID encontrado! Cambiando fecha a " + Word[11]);
+                    }
+                    lineasActualizadas.add(line);
+                }
+            } catch (IOException e) {
+                System.err.println("Error al leer la base de datos: " + e.getMessage());
+                return;
+            }
+
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) { // 'false' para sobrescribir
+                for (String l : lineasActualizadas) {
+                    bw.write(l);
+                    bw.newLine();
+                }
+                System.out.println("-> Base de datos actualizada correctamente.");
+            } catch (IOException e) {
+                System.err.println("Error al escribir en la base de datos: " + e.getMessage());
+            }
 
 
+
+
+        }
 
 
 }
