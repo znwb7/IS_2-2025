@@ -29,7 +29,7 @@ public class DataBase {
         }
 
         public enum RolUsuario {
-            ADMIN, PROFESOR, EMPLEADO, ESTUDIANTE, ERROR, SECRETARIA
+            ADMIN, PROFESOR, EMPLEADO, ESTUDIANTE, ERROR, SECRETARIA, EXONERADO, BECADO
         }
     //FIN
 
@@ -82,7 +82,7 @@ public class DataBase {
             if (Hash == null) return RegistroStatus.FALTA_HASH_BDSECRETARIA;
 
             if (UserAlreadyExists(id)) return RegistroStatus.PERSONA_YA_EXISTENTE;
-
+            System.out.println(rol.name().toLowerCase());
             try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, true))) {
                 String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + 0 + " | " + "LoginActivo" + " | " + "PoseeTurnoAlmuerzo" + " | "+ "PoseeTurnoDesayuno" + " | " + "SaldoDebitoAlmuerzo" + " | " + "SaldoDebitoDesayuno" + " | " + "Fecha";
                 escritor.write(linea);                                                                                        //SALDO                    LOGUEADO                TURNO ACTIVO Almuerzo   Turno ACTIVO DESAYUNO                  SALDO A DEBITAR Almuerzo         Saldo a debitar desayuno    fecha
@@ -242,6 +242,8 @@ public class DataBase {
                             case "profesor": return RolUsuario.PROFESOR;
                             case "empleado": return RolUsuario.EMPLEADO;
                             case "secretaria": return RolUsuario.SECRETARIA;
+                            case "becado": return RolUsuario.BECADO;
+                            case "exonerado": return RolUsuario.EXONERADO;
                             default: return RolUsuario.ESTUDIANTE;
                         }
                     }
@@ -291,6 +293,8 @@ public class DataBase {
                         case "profesor": return RolUsuario.PROFESOR;
                         case "empleado": return RolUsuario.EMPLEADO;
                         case "secretaria": return RolUsuario.SECRETARIA;
+                        case "becado": return RolUsuario.BECADO;
+                        case "exonerado": return RolUsuario.EXONERADO;
                         default: return RolUsuario.ESTUDIANTE;
                     }
                 }
