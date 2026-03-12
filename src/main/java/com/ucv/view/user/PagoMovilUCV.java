@@ -11,6 +11,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.geom.RoundRectangle2D;
 
 public class PagoMovilUCV extends JFrame {
@@ -20,11 +22,14 @@ public class PagoMovilUCV extends JFrame {
     private static final Color AMARILLO_BOTON = new Color(255, 210, 35);
     private static final Color GRIS_CANCELAR = new Color(190, 190, 190);
     private static final Color AZUL_TEXTO = new Color(18, 71, 150);
+    private static final Color AZUL_BOTON_ACTIVO = new Color(10, 45, 100);
 
     private final PagoController controlador;
-    private JTextField txtCedula, txtMonto, txtReferencia;
+    private JTextField txtCedula, txtMonto, txtReferencia, txtCedulaPana;
     private final String usuarioID;
     private final BilleteraUCV parentFrame;
+    private JToggleButton btnActivarPana;
+    
 
     public PagoMovilUCV(String usuarioID, BilleteraUCV parentFrame) {
         this.usuarioID = usuarioID;
@@ -116,6 +121,46 @@ public class PagoMovilUCV extends JFrame {
         txtReferencia = crearCampoEstiloLogin("Últimos 4 dígitos", xCampo, 240 + (2 * gap), 400, alturaInput);
         tarjeta.add(txtReferencia);
 
+        // --- NUEVA SECCIÓN: BOTÓN AZUL Y CEDULA PANA ---
+        int yNuevaFila = 240 + (3 * gap);
+
+        // Botón Azul Redondeado (Toggle)
+        btnActivarPana = new JToggleButton("Saldo Pana");
+        btnActivarPana.setBounds(xLabel, yNuevaFila, 180, alturaInput);
+        btnActivarPana.setFocusPainted(false);
+        btnActivarPana.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnActivarPana.setForeground(Color.WHITE);
+        btnActivarPana.setBackground(AZUL_FONDO);
+        btnActivarPana.setBorder(BorderFactory.createEmptyBorder());
+        
+        // Listener para cambio de estado visual
+        btnActivarPana.addActionListener(e -> {
+            if (btnActivarPana.isSelected()) {
+                btnActivarPana.setBackground(AZUL_BOTON_ACTIVO);
+                btnActivarPana.setText("Saldo Pana Activado");
+                txtCedulaPana.setEnabled(true);
+            } else {
+                btnActivarPana.setBackground(AZUL_FONDO);
+                btnActivarPana.setText("Saldo Pana");
+                txtCedulaPana.setEnabled(false);
+                txtCedulaPana.setText("Cédula del Pana");
+            }
+        });
+        tarjeta.add(btnActivarPana);
+
+        // Campo Cédula Pana (Solo Números)
+        txtCedulaPana = crearCampoEstiloLogin("Cédula del Pana", xLabel + 200, yNuevaFila, 330, alturaInput);
+        txtCedulaPana.setEnabled(false); // Inhabilitado por defecto
+        txtCedulaPana.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!Character.isDigit(c)) {
+                    e.consume(); // Bloquea cualquier cosa que no sea número
+                }
+            }
+        });
+        tarjeta.add(txtCedulaPana);
+
         // Botones de Acción
         PrimaryButton2 btnCancelar = new PrimaryButton2("Cancelar", GRIS_CANCELAR);
         btnCancelar.setBounds(290, 440, 150, 45);
@@ -156,26 +201,47 @@ public class PagoMovilUCV extends JFrame {
         return panelDerecho;
     }
 
-    private void procesarRecarga() {
-        String cedulaInput = txtCedula.getText().trim();
-        String montoInput = txtMonto.getText().trim();
-        String referenciaInput = txtReferencia.getText().trim();
+private void procesarRecarga() {
 
-        PagoModel.ResultadoValidacion resultado = controlador.procesarPago(cedulaInput, montoInput, referenciaInput);
+    String cedulaInput = txtCedula.getText().trim();
+    String montoInput = txtMonto.getText().trim();
+    String referenciaInput = txtReferencia.getText().trim();
+    String cedulaPana = txtCedulaPana.getText().trim();
+    boolean saldoPanaActivo = btnActivarPana.isSelected();
 
-        switch (resultado) {
-            case CAMPOS_INVALIDOS -> JOptionPane.showMessageDialog(this, "Campos inválidos.", "Error", JOptionPane.WARNING_MESSAGE);
-            case PAGO_NO_ENCONTRADO -> JOptionPane.showMessageDialog(this, "Pago no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
-            case PAGO_YA_UTILIZADO -> JOptionPane.showMessageDialog(this, "Pago ya utilizado.", "Atención", JOptionPane.WARNING_MESSAGE);
-            case MONTO_INCORRECTO -> JOptionPane.showMessageDialog(this, "Monto incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
-            case RECARGA_EXITOSA -> {
-                JOptionPane.showMessageDialog(this, "Recarga exitosa.", "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-                parentFrame.recargaExitosa();
-                dispose();
-            }
-            default -> JOptionPane.showMessageDialog(this, "Error del sistema.", "Error", JOptionPane.ERROR_MESSAGE);
+    PagoModel.ResultadoValidacion resultado =
+            controlador.procesarPago(
+                    cedulaInput,
+                    montoInput,
+                    referenciaInput,
+                    saldoPanaActivo,
+                    cedulaPana
+            );
+
+    switch (resultado) {
+        case CAMPOS_INVALIDOS ->
+                JOptionPane.showMessageDialog(this,"Campos inválidos.","Error",JOptionPane.WARNING_MESSAGE);
+
+        case PAGO_NO_ENCONTRADO ->
+                JOptionPane.showMessageDialog(this,"Pago no encontrado.","Error",JOptionPane.ERROR_MESSAGE);
+
+        case PAGO_YA_UTILIZADO ->
+                JOptionPane.showMessageDialog(this,"Pago ya utilizado.","Atención",JOptionPane.WARNING_MESSAGE);
+
+        case MONTO_INCORRECTO ->
+                JOptionPane.showMessageDialog(this,"Monto incorrecto.","Error",JOptionPane.ERROR_MESSAGE);
+
+        case RECARGA_EXITOSA -> {
+            JOptionPane.showMessageDialog(this,"Recarga exitosa.","Confirmación",JOptionPane.INFORMATION_MESSAGE);
+
+            parentFrame.recargaExitosa();
+            dispose();
         }
+
+        default ->
+                JOptionPane.showMessageDialog(this,"Error del sistema.","Error",JOptionPane.ERROR_MESSAGE);
     }
+}
 
     private JTextField crearCampoEstiloLogin(String placeholder, int x, int y, int width, int height) {
         JTextField campo = new JTextField(placeholder) {
@@ -215,5 +281,13 @@ public class PagoMovilUCV extends JFrame {
             g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), radio, radio));
             g2.dispose();
         }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            // Pasamos null en parentFrame para la prueba
+            PagoMovilUCV frame = new PagoMovilUCV("12345", null);
+            frame.setVisible(true);
+        });
     }
 }

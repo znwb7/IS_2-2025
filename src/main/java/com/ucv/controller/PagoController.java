@@ -14,16 +14,36 @@ public class PagoController {
         this.usuarioID = usuarioID;
     }
 
-    public ResultadoValidacion procesarPago(String cedula, String monto, String referencia) {
+    public ResultadoValidacion procesarPago(
+            String cedula,
+            String monto,
+            String referencia,
+            boolean saldoPana,
+            String cedulaPana) {
 
-        ResultadoValidacion resultado = modelo.validarYProcesarPago(cedula, monto, referencia);
+        ResultadoValidacion resultado =
+                modelo.validarYProcesarPago(cedula, monto, referencia);
 
         if (resultado == ResultadoValidacion.RECARGA_EXITOSA) {
+
             try {
+
                 DataBase db = new DataBase();
 
+                String usuarioDestino = usuarioID;
+
+                // Si el toggle está activo, buscar el usuario del pana
+                if (saldoPana) {
+
+                    if (cedulaPana == null || cedulaPana.isBlank()) {
+                        return ResultadoValidacion.CAMPOS_INVALIDOS;
+                    }
+
+                    usuarioDestino = cedulaPana;
+                }
+
                 DataBase.EnumUpdateMoney update =
-                        db.UpdateMoney(usuarioID, monto);
+                        db.UpdateMoney(usuarioDestino, monto);
 
                 if (update != DataBase.EnumUpdateMoney.SALDO_ACTUALIZADO_CON_EXITO) {
                     return ResultadoValidacion.ERROR_SISTEMA;
@@ -39,6 +59,7 @@ public class PagoController {
     }
 
     public double obtenerSaldo() {
+
         try {
             DataBase db = new DataBase();
             return db.obtenerSaldo(usuarioID);
