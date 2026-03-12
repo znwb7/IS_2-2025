@@ -29,7 +29,7 @@ public class DataBase {
         }
 
         public enum RolUsuario {
-            ADMIN, PROFESOR, EMPLEADO, ESTUDIANTE, ERROR, SECRETARIA
+            ADMIN, PROFESOR, EMPLEADO, ESTUDIANTE, ERROR, SECRETARIA, EXONERADO, BECADO
         }
     //FIN
 
@@ -82,7 +82,7 @@ public class DataBase {
             if (Hash == null) return RegistroStatus.FALTA_HASH_BDSECRETARIA;
 
             if (UserAlreadyExists(id)) return RegistroStatus.PERSONA_YA_EXISTENTE;
-
+            System.out.println(rol.name().toLowerCase());
             try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaArchivo, true))) {
                 String linea = name + " | " + id + " | " + password + " | " + rol.name().toLowerCase() + " | " + Hash + " | " + 0 + " | " + "LoginActivo" + " | " + "PoseeTurnoAlmuerzo" + " | "+ "PoseeTurnoDesayuno" + " | " + "SaldoDebitoAlmuerzo" + " | " + "SaldoDebitoDesayuno" + " | " + "Fecha";
                 escritor.write(linea);                                                                                        //SALDO                    LOGUEADO                TURNO ACTIVO Almuerzo   Turno ACTIVO DESAYUNO                  SALDO A DEBITAR Almuerzo         Saldo a debitar desayuno    fecha
@@ -242,6 +242,8 @@ public class DataBase {
                             case "profesor": return RolUsuario.PROFESOR;
                             case "empleado": return RolUsuario.EMPLEADO;
                             case "secretaria": return RolUsuario.SECRETARIA;
+                            case "becado": return RolUsuario.BECADO;
+                            case "exonerado": return RolUsuario.EXONERADO;
                             default: return RolUsuario.ESTUDIANTE;
                         }
                     }
@@ -291,6 +293,8 @@ public class DataBase {
                         case "profesor": return RolUsuario.PROFESOR;
                         case "empleado": return RolUsuario.EMPLEADO;
                         case "secretaria": return RolUsuario.SECRETARIA;
+                        case "becado": return RolUsuario.BECADO;
+                        case "exonerado": return RolUsuario.EXONERADO;
                         default: return RolUsuario.ESTUDIANTE;
                     }
                 }
@@ -729,7 +733,7 @@ public class DataBase {
     //FIN
 
     //Pone los precios de la comida en la db espacio especifico del usuario
-public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
+    public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
 
     try {
 
@@ -860,7 +864,7 @@ public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
     //FIN
 
     //ESTABLECE LA FECHA Y ES LLAMADO CUANDO SE LLAMA A CUALQUIERA DE LOS DOS MENUS
-        private void SetDateDB(String ID){
+    private void SetDateDB(String ID){
              File file = new File(rutaArchivo);
             if (!file.exists()) return;
 
@@ -899,7 +903,7 @@ public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
             }
         }
 
-        public double getPrecioDesayuno(String ID) {
+    public double getPrecioDesayuno(String ID) {
 
             try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
 
@@ -921,27 +925,27 @@ public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
             return 0;
         }
 
-        public double getPrecioAlmuerzo(String ID) {
+    public double getPrecioAlmuerzo(String ID) {
 
-            try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
 
-                String line;
+            String line;
 
-                while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
 
-                    String[] word = line.split("\\s*\\|\\s*");
+                String[] word = line.split("\\s*\\|\\s*");
 
-                    if (word[1].equals(ID)) {
-                        return Double.parseDouble(word[9]);
-                    }
+                if (word[1].equals(ID)) {
+                    return Double.parseDouble(word[9]);
                 }
-
-            } catch (Exception e) {
-                return 0;
             }
 
+        } catch (Exception e) {
             return 0;
+        }
 
-            
-}
+        return 0;
+    }
+
+
 }

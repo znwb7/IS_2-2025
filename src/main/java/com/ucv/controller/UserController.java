@@ -139,7 +139,7 @@ public void loginRequested(String id, String password, LoginUCV vista) {
         } else if
             (rol == RolUsuario.SECRETARIA) {
             new com.ucv.view.comedor.VerificacionFacialUCV().setVisible(true);
-        } else if (rol == RolUsuario.ESTUDIANTE || rol == RolUsuario.PROFESOR || rol == RolUsuario.EMPLEADO) {
+        } else if (rol == RolUsuario.ESTUDIANTE || rol == RolUsuario.PROFESOR || rol == RolUsuario.EMPLEADO || rol == RolUsuario.EXONERADO || rol == RolUsuario.BECADO) {
             new com.ucv.view.user.MenusUsuario(id).setVisible(true);
         } else {
             javax.swing.JOptionPane.showMessageDialog(
