@@ -729,7 +729,7 @@ public class DataBase {
     //FIN
 
     //Pone los precios de la comida en la db espacio especifico del usuario
-public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
+    public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
 
     try {
 
@@ -860,7 +860,7 @@ public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
     //FIN
 
     //ESTABLECE LA FECHA Y ES LLAMADO CUANDO SE LLAMA A CUALQUIERA DE LOS DOS MENUS
-        private void SetDateDB(String ID){
+    private void SetDateDB(String ID){
              File file = new File(rutaArchivo);
             if (!file.exists()) return;
 
@@ -899,7 +899,7 @@ public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
             }
         }
 
-        public double getPrecioDesayuno(String ID) {
+    public double getPrecioDesayuno(String ID) {
 
             try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
 
@@ -921,25 +921,27 @@ public EnumRegistrarTransaccion PrecioComida(String id, String tipo) {
             return 0;
         }
 
-        public double getPrecioAlmuerzo(String ID) {
+    public double getPrecioAlmuerzo(String ID) {
 
-            try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
 
-                String line;
+            String line;
 
-                while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
 
-                    String[] word = line.split("\\s*\\|\\s*");
+                String[] word = line.split("\\s*\\|\\s*");
 
-                    if (word[1].equals(ID)) {
-                        return Double.parseDouble(word[9]);
-                    }
+                if (word[1].equals(ID)) {
+                    return Double.parseDouble(word[9]);
                 }
-
-            } catch (Exception e) {
-                return 0;
             }
 
+        } catch (Exception e) {
             return 0;
-}
+        }
+
+        return 0;
+    }
+
+
 }
