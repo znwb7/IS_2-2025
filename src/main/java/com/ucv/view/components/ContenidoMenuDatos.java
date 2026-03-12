@@ -1,7 +1,7 @@
 package com.ucv.view.components;
 
 import com.ucv.controller.MenuController;
-import com.ucv.view.admin.FechaMenusNewUCV;
+import com.ucv.view.admin.GestionMenus;
 
 import javax.swing.*;
 import java.awt.*;
@@ -103,8 +103,8 @@ public class ContenidoMenuDatos extends JPanel {
         btnModificar.setForeground(Color.BLACK);
 
         btnModificar.addActionListener(e -> {
-            if (parent instanceof FechaMenusNewUCV) {
-                FechaMenusNewUCV ventanaPadre = (FechaMenusNewUCV) parent;
+            if (parent instanceof GestionMenus) {
+                GestionMenus ventanaPadre = (GestionMenus) parent;
                 if (ventanaPadre.confirmarModificacion(tipo)) {
                     controller.irAAgregarPlato(fecha, tipo, parent);
                 }

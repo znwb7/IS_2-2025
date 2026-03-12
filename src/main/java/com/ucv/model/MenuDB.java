@@ -216,7 +216,6 @@ public class MenuDB {
     }
 
     public int CantidadDisponible(String Tipo) {
-        // CORRECCIÓN: Formato exacto de fecha "dd/MM/yyyy" para que coincida con el TXT
         String fecha = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         File archivo = new File(RUTA_ARCHIVO);
         if (!archivo.exists()) return -1;

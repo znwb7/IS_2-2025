@@ -12,7 +12,7 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-public class GestionMenuUCV extends JFrame {
+public class FechaMenus extends JFrame {
 
     private static final Color AZUL_FONDO = new Color(18, 71, 150);
     private static final Color GRIS_TARJETA = new Color(225, 225, 225);
@@ -22,11 +22,11 @@ public class GestionMenuUCV extends JFrame {
 
     private final MenuController controller;
 
-    public GestionMenuUCV() {
+    public FechaMenus() {
         this(new MenuController());
     }
 
-    public GestionMenuUCV(MenuController controller) {
+    public FechaMenus(MenuController controller) {
         this.controller = controller;
         setTitle("Gestión de Menús · Comedor UCV");
         setSize(1920, 800);
@@ -60,7 +60,7 @@ public class GestionMenuUCV extends JFrame {
         String[] dias = {"Día", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
                 "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
         String[] meses = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
-        String[] anos = {"Año", "2025", "2026", "2027", "2028", "2029", "2030"};
+        String[] anos = {"Año", "2026", "2027", "2028", "2029", "2030"};
 
         RoundedComboBox cbDia = new RoundedComboBox(dias);
         cbDia.setBounds(50, 90, 200, 55);
@@ -81,18 +81,48 @@ public class GestionMenuUCV extends JFrame {
 
         PrimaryButton2 btnConfirmar = new PrimaryButton2("Confirmar", AMARILLO_BOTON);
         btnConfirmar.setBounds(500, 170, 200, 55);
-        btnConfirmar.addActionListener(e -> {
-            String d = (String) cbDia.getSelectedItem();
-            String m = (String) cbMes.getSelectedItem();
-            String a = (String) cbAno.getSelectedItem();
+btnConfirmar.addActionListener(e -> {
 
-            if (d.equals("Día") || m.equals("Mes") || a.equals("Año")) {
-                JOptionPane.showMessageDialog(this, "Por favor seleccione una fecha válida", "Error", JOptionPane.ERROR_MESSAGE);
-            } else {
-                String fechaFormateada = d + "/" + m + "/" + a;
-                controller.procesarFechaSeleccionada(fechaFormateada, this);
-            }
-        });
+    String d = (String) cbDia.getSelectedItem();
+    String m = (String) cbMes.getSelectedItem();
+    String a = (String) cbAno.getSelectedItem();
+
+    if (d.equals("Día") || m.equals("Mes") || a.equals("Año")) {
+        JOptionPane.showMessageDialog(this, "Seleccione día, mes y año.", "Fecha inválida", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    String fechaFormateada = d + "/" + m + "/" + a;
+
+    try {
+
+        java.time.format.DateTimeFormatter formatter =
+                java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                        .withResolverStyle(java.time.format.ResolverStyle.STRICT);
+
+        java.time.LocalDate fechaSeleccionada =
+                java.time.LocalDate.parse(fechaFormateada, formatter);
+
+        java.time.LocalDate hoy = java.time.LocalDate.now();
+
+        if (fechaSeleccionada.isBefore(hoy)) {
+            JOptionPane.showMessageDialog(this,
+                    "No se pueden seleccionar fechas anteriores a hoy.",
+                    "Fecha inválida",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        controller.procesarFechaSeleccionada(fechaFormateada, this);
+
+    } catch (java.time.format.DateTimeParseException ex) {
+
+        JOptionPane.showMessageDialog(this,
+                "La fecha seleccionada no existe en el calendario.",
+                "Fecha inválida",
+                JOptionPane.ERROR_MESSAGE);
+    }
+});
 
         tarjeta.add(btnCancelar);
         tarjeta.add(btnConfirmar);

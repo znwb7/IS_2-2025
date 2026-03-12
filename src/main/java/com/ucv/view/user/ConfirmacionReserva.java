@@ -72,7 +72,7 @@ public class ConfirmacionReserva extends JFrame {
         PrimaryButton2 btnSi = new PrimaryButton2("Confirmar", AMARILLO_UCV);
         btnSi.setForeground(Color.BLACK);
 
-        // CORRECCIÓN: Ahora el botón ejecuta la reserva real en el Backend
+        //Ahora el botón ejecuta la reserva real en el Backend
         btnSi.addActionListener(e -> {
             MenuController controller = new MenuController();
             boolean exito = controller.procesarReserva(this.tipoSeleccionado, usuarioID);

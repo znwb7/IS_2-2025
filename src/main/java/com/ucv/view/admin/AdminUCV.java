@@ -107,7 +107,7 @@ public class AdminUCV extends JFrame {
         btn.addActionListener(e -> {
             if (texto.equals("Configurar Menus")) {
                 dispose();
-                new com.ucv.view.admin.GestionMenuUCV().setVisible(true);
+                new com.ucv.view.admin.FechaMenus().setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "Función '" + texto + "' en desarrollo.");
             }

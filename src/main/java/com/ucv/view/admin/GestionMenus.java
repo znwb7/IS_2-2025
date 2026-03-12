@@ -11,7 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-public class FechaMenusNewUCV extends JFrame {
+public class GestionMenus extends JFrame {
 
     private static final Color AZUL_FONDO = new Color(18, 71, 150);
     private static final Color GRIS_TARJETA = new Color(225, 225, 225);
@@ -20,7 +20,7 @@ public class FechaMenusNewUCV extends JFrame {
     private String fecha;
     private MenuController controller;
 
-    public FechaMenusNewUCV(String fechaSeleccionada, String[] datosDesayuno, String[] datosAlmuerzo, MenuController controller) {
+    public GestionMenus(String fechaSeleccionada, String[] datosDesayuno, String[] datosAlmuerzo, MenuController controller) {
         this.fecha = fechaSeleccionada;
         this.controller = controller;
 

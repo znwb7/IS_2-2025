@@ -1,53 +1,127 @@
 package com.ucv.controller;
 
 import com.ucv.model.DataBase;
-import com.ucv.model.MenuDB;
 import com.ucv.controller.UserController.Response;
+import java.time.LocalTime;
 
 public class FacialController {
 
     private final DataBase DataBase = new DataBase();
 
-    public Response LoadImage() {
-        // 1. Creamos el selector de archivos
-        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
-        
-        // Filtramos para que solo muestre imágenes
-        javax.swing.filechooser.FileNameExtensionFilter filter = 
-            new javax.swing.filechooser.FileNameExtensionFilter("Imágenes (JPG)", "jpg");
-        fileChooser.setFileFilter(filter);
+    private String obtenerTipoComida() {
 
-        int seleccion = fileChooser.showOpenDialog(null);
+    LocalTime horaActual = LocalTime.now();
 
+    LocalTime inicioDesayuno = LocalTime.of(7,0);
+    LocalTime finDesayuno = LocalTime.of(11,0);
 
-        //El usuario selecciona un archivo
-        if (seleccion == javax.swing.JFileChooser.APPROVE_OPTION) {
-            java.io.File archivoSeleccionado = fileChooser.getSelectedFile();
-            String ruta = archivoSeleccionado.getAbsolutePath();
+    LocalTime inicioAlmuerzo = LocalTime.of(12,0);
+    LocalTime finAlmuerzo = LocalTime.of(17,0);
 
-            if (!ruta.endsWith(".jpg") ) {
-                return new Response(false, "Error: El archivo seleccionado no es una imagen JPG válida");
-            }
-            // Generamos el hash de la imagen seleccionada
-            String Hash = DataBase.CreateHash(ruta);
-
-            // Validamos si hubo error en la lectura física del archivo
-            if (Hash.startsWith("Error")) {
-                return new Response(false, "Error al leer el archivo de imagen");
-            }
-
-            // Buscamos el hash en la base de datos
-            String hashEncontrado = DataBase.returnHash(Hash);
-
-            if (Hash.equals(hashEncontrado)) {  
-                return new Response(true, "Datos Confirmados: Acceso Permitido");
-            } else {
-                // RETORNO FALTANTE: Si el hash no existe en la DB
-                return new Response(false, "Error: Rostro no reconocido o no registrado");
-            }
-        } 
-        
-        // El usuario cerró la ventana o presionó cancelar
-        return new Response(false, "Carga de imagen cancelada por el usuario");
+    if (!horaActual.isBefore(inicioDesayuno) && !horaActual.isAfter(finDesayuno)) {
+        return "desayuno";
     }
+
+    if (!horaActual.isBefore(inicioAlmuerzo) && !horaActual.isAfter(finAlmuerzo)) {
+        return "almuerzo";
+    }
+
+    return "fuera_horario";
+}
+
+public Response LoadImage(String userID) {
+
+    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+
+    javax.swing.filechooser.FileNameExtensionFilter filter =
+            new javax.swing.filechooser.FileNameExtensionFilter("Imágenes (JPG)", "jpg");
+
+    fileChooser.setFileFilter(filter);
+
+    int seleccion = fileChooser.showOpenDialog(null);
+
+    if (seleccion == javax.swing.JFileChooser.APPROVE_OPTION) {
+
+        java.io.File archivoSeleccionado = fileChooser.getSelectedFile();
+        String ruta = archivoSeleccionado.getAbsolutePath();
+
+        if (!ruta.endsWith(".jpg")) {
+            return new Response(false, "Error: El archivo seleccionado no es una imagen JPG válida");
+        }
+
+        String hashImagen = DataBase.CreateHash(ruta);
+
+        if (hashImagen.startsWith("Error")) {
+            return new Response(false, "Error al leer el archivo de imagen");
+        }
+
+        String hashDB = DataBase.getHashByID(userID);
+
+        if (hashDB == null) {
+            return new Response(false, "Error: Usuario no encontrado");
+        }
+
+        if (!hashImagen.equals(hashDB)) {
+            return new Response(false, "Error: Rostro no coincide con el usuario");
+        }
+
+        // -------------------------
+        // VERIFICACIONES DE COMIDA
+        // -------------------------
+
+        String tipoComida = obtenerTipoComida();
+
+        if (tipoComida.equals("fuera_horario")) {
+            return new Response(false, "No estamos en horario de comida");
+        }
+
+        // verificar turno
+        if (tipoComida.equals("desayuno")) {
+
+            if (!DataBase.GetFoodDesayunoFlag(userID).equals("1")) {
+                return new Response(false, "No posee reservación de desayuno");
+            }
+
+        } else {
+
+            if (!DataBase.GetFoodAlmuerzoFlag(userID).equals("1")) {
+                return new Response(false, "No posee reservación de almuerzo");
+            }
+
+        }
+
+        // obtener saldo guardado
+        double saldoUsuario = DataBase.obtenerSaldo(userID);
+
+        double costo = tipoComida.equals("desayuno") ?
+            DataBase.getPrecioDesayuno(userID) :
+            DataBase.getPrecioAlmuerzo(userID);
+
+        if (saldoUsuario < costo) {
+            return new Response(false, "Saldo insuficiente para pagar la comida");
+        }
+
+        // cobrar comida
+        com.ucv.model.DataBase.EnumUpdateMoney resultadoCobro =
+                DataBase.ExtractMoney(userID, String.valueOf(costo));
+
+        if (resultadoCobro != com.ucv.model.DataBase.EnumUpdateMoney.SALDO_ACTUALIZADO_CON_EXITO) {
+            return new Response(false, "Error al procesar el pago");
+        }
+
+        // Desactivar turno luego de cobrar
+        if (tipoComida.equals("desayuno")) {
+            DataBase.MenuDesayunoOut(userID);
+        }
+
+        if (tipoComida.equals("almuerzo")) {
+            DataBase.MenuAlmuerzoOut(userID);
+        }
+
+    return new Response(true, "Acceso permitido. Comida registrada.");
+
+    }
+
+    return new Response(false, "Carga de imagen cancelada por el usuario");
+}
 }

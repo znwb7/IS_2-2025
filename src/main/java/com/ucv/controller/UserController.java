@@ -59,6 +59,7 @@ public class UserController {
         }
     }
 
+
     // ------------------- LOGIN -------------------
     public Response login(String id, String password) {
         try {
@@ -135,8 +136,18 @@ public void loginRequested(String id, String password, LoginUCV vista) {
         vista.dispose();
         if (rol == RolUsuario.ADMIN) {
             new com.ucv.view.admin.AdminUCV("Administrador").setVisible(true);
+        } else if
+            (rol == RolUsuario.SECRETARIA) {
+            new com.ucv.view.comedor.VerificacionFacialUCV().setVisible(true);
+        } else if (rol == RolUsuario.ESTUDIANTE) {
+            new com.ucv.view.user.MenusUsuario(id).setVisible(true);
         } else {
-            new com.ucv.view.user.PrincipalUsuario(id).setVisible(true);
+            javax.swing.JOptionPane.showMessageDialog(
+                    vista,
+                    "Rol de usuario desconocido",
+                    "Error crítico",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
         }
     } catch (IOException e) {
         javax.swing.JOptionPane.showMessageDialog(
@@ -145,8 +156,8 @@ public void loginRequested(String id, String password, LoginUCV vista) {
                 "Error crítico",
                 javax.swing.JOptionPane.ERROR_MESSAGE
         );
+        }
     }
-}
 
     public void registerRequested(String nombre, String apellido , String id, String password, LoginUCV vista, javax.swing.JLabel lblMensaje) {
         Response response = register(nombre, apellido, id, password);

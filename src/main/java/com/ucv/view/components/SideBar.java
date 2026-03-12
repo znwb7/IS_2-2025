@@ -49,9 +49,9 @@ public class SideBar extends JPanel {
                 ventanaActual.dispose();
 
                 if (usuarioID != null) {
-                    new com.ucv.view.user.PrincipalUsuario(usuarioID).setVisible(true);
+                    new com.ucv.view.user.MenusUsuario(usuarioID).setVisible(true);
                 } else {
-                    new com.ucv.view.user.PrincipalUsuario("Usuario").setVisible(true);
+                    new com.ucv.view.user.MenusUsuario("Usuario").setVisible(true);
                 }
             }
         });

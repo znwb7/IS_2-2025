@@ -1,20 +1,24 @@
 package com.ucv.controller;
 
+import com.ucv.model.DataBase;
 import com.ucv.model.MenuDB;
 import com.ucv.view.admin.AdminUCV;
 import com.ucv.view.admin.AgregarPlatoUCV;
-import com.ucv.view.admin.FechaMenusNewUCV;
-import com.ucv.view.admin.GestionMenuUCV;
+import com.ucv.view.admin.GestionMenus;
+import com.ucv.view.admin.FechaMenus;
 import com.ucv.view.user.ConfirmacionReserva;
+
 
 import javax.swing.JFrame;
 
 public class MenuController {
 
     private final MenuDB menuDB;
+    private final DataBase dataBase;
 
     public MenuController() {
         this.menuDB = new MenuDB();
+        this.dataBase = new DataBase();
     }
 
     public String[] obtenerDatosMenu(String fecha, String tipo) {
@@ -42,7 +46,7 @@ public class MenuController {
         String[] datosAlmuerzo = menuDB.obtenerMenu(fecha, "almuerzo");
 
         if (vistaActual != null) vistaActual.dispose();
-        new FechaMenusNewUCV(fecha, datosDesayuno, datosAlmuerzo, this).setVisible(true);
+        new GestionMenus(fecha, datosDesayuno, datosAlmuerzo, this).setVisible(true);
     }
 
     public void irAAgregarPlato(String fecha, String tipo, JFrame vistaActual) {
@@ -110,7 +114,7 @@ public class MenuController {
 
     public void volverAGestionMenu(JFrame vistaActual) {
         if (vistaActual != null) vistaActual.dispose();
-        new GestionMenuUCV(this).setVisible(true);
+        new FechaMenus(this).setVisible(true);
     }
 
     public void volverAAdmin(JFrame vistaActual) {
@@ -123,31 +127,45 @@ public class MenuController {
         new ConfirmacionReserva(tipo, usuarioID).setVisible(true);
     }
 
-    // --- LÓGICA DE PROCESAMIENTO DE RESERVA CORREGIDA ---
-    public boolean procesarReserva(String tipo, String usuarioID) {
-        String fechaActual = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    // --- LÓGICA DE PROCESAMIENTO DE RESERVAS---
+public boolean procesarReserva(String tipo, String usuarioID) {
 
-        // 1. Verificar si el usuario ya reservó ESTE TIPO de menú hoy (Desayuno y Almuerzo son independientes)
-        if (yaReservoEsteMenu(usuarioID, fechaActual, tipo)) {
-            return false;
-        }
+    String fechaActual = java.time.LocalDate.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-        // 2. Verificar si hay cupos disponibles en el menú
-        if (menuDB.CantidadDisponible(tipo) <= 0) {
-            return false;
-        }
-
-        // 3. Procesar: Aumentar el contador en MenuDB.txt (+1)
-        MenuDB.ReWriteStatus status = menuDB.CountMenu(fechaActual, tipo);
-
-        if (status == MenuDB.ReWriteStatus.REWRITE_EXITOSO) {
-            // 4. Guardar registro local para evitar doble reserva del MISMO plato
-            registrarReservaLocal(usuarioID, fechaActual, tipo);
-            return true;
-        }
-
+    // 1. Verificar si ya reservó este menú hoy
+    if (yaReservoEsteMenu(usuarioID, fechaActual, tipo)) {
         return false;
     }
+
+    // 2. Verificar cupos
+    if (menuDB.CantidadDisponible(tipo) <= 0) {
+        return false;
+    }
+
+    // 3. Aumentar contador del menú
+    MenuDB.ReWriteStatus status = menuDB.CountMenu(fechaActual, tipo);
+
+if (status == MenuDB.ReWriteStatus.REWRITE_EXITOSO) {
+
+    registrarReservaLocal(usuarioID, fechaActual, tipo);
+
+    if (tipo.equalsIgnoreCase("desayuno")) {
+        dataBase.MenuDesayunoActive(usuarioID);
+    }
+
+    if (tipo.equalsIgnoreCase("almuerzo")) {
+        dataBase.MenuAlmuerzoActive(usuarioID);
+    }
+
+    // REGISTRAR PRECIO DE LA COMIDA EN LA BD
+    dataBase.PrecioComida(usuarioID, tipo);
+
+    return true;
+}
+
+    return false;
+}
 
     // --- MÉTODOS AUXILIARES DE CONTROL DE RESERVAS ---
     private boolean yaReservoEsteMenu(String usuarioID, String fecha, String tipo) {
