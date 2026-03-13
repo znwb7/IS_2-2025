@@ -39,8 +39,8 @@ public class MenuConfiguracionTest {
             // Ahora verificamos que conserve el formato Capitalizado en lugar de forzar minúsculas
             assertEquals(fechaPrueba, datosRecuperados[0], "La fecha no coincide");
             assertEquals("Pabellon Criollo", datosRecuperados[2], "El plato fuerte no conservó las mayúsculas/formato original");
-            assertEquals("500", datosRecuperados[9], "La capacidad no coincide");
-            assertEquals("30.00", datosRecuperados[10], "El CCB no coincide");
+            assertEquals("500", datosRecuperados[10], "La capacidad no coincide");
+            assertEquals("30.00", datosRecuperados[11], "El CCB no coincide");
 
         }, "Se produjo una excepción inesperada de entrada/salida durante la prueba");
     }
