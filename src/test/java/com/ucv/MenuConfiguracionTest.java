@@ -19,7 +19,7 @@ public class MenuConfiguracionTest {
             MenuDB.WriteMenuStatus estadoEscritura = menuDB.WriteMenu(
                     false, false, fechaPrueba, tipoPrueba,
                     "Pabellon Criollo", "Jugo de Mora", "Galleta",
-                    "15.00", "20.00", "25.00", "500", "30.00"
+                    "15.00", "20.00", "25.00", "10", "500", "30.00"
             );
 
             // Verificar que se guardó correctamente (JUnit 5: condicion, mensaje)

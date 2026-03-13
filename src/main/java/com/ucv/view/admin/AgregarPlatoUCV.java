@@ -28,8 +28,8 @@ public class AgregarPlatoUCV extends JFrame {
 
     private JTextField txtPlato, txtBebida, txtPostre, txtCapacidad, txtCCBResult;
     private JTextField txtCF, txtCV, txtNB, txtMerma;
-    private JTextField txtTarifaEst, txtTarifaProf, txtTarifaEmp;
-    private JTextField txtPrecioEst, txtPrecioProf, txtPrecioEmp;
+    private JTextField txtTarifaEst, txtTarifaProf, txtTarifaEmp, txtTarifaBec;
+    private JTextField txtPrecioEst, txtPrecioProf, txtPrecioEmp, txtPrecioBec;
 
     public AgregarPlatoUCV(String fecha, String tipoMenu, MenuController controller) {
 
@@ -56,7 +56,7 @@ public class AgregarPlatoUCV extends JFrame {
         gbcCentrar.anchor = GridBagConstraints.CENTER;
 
         PanelRedondeado tarjetaPrincipal = new PanelRedondeado(40, GRIS_TARJETA);
-        tarjetaPrincipal.setPreferredSize(new Dimension(950, 520));
+        tarjetaPrincipal.setPreferredSize(new Dimension(950, 580));       
         tarjetaPrincipal.setLayout(null);
 
         int col1X = 60;
@@ -124,7 +124,7 @@ public class AgregarPlatoUCV extends JFrame {
         tarjetaPrincipal.add(lblNota);
 
         PanelRedondeado panelTarifas = new PanelRedondeado(25, Color.WHITE);
-        panelTarifas.setBounds(630, 50, 280, 220);
+        panelTarifas.setBounds(630, 50, 280, 260);
         panelTarifas.setLayout(null);
 
         JLabel lblTarifaT = new JLabel("Tarifas (%)", SwingConstants.CENTER);
@@ -144,13 +144,19 @@ public class AgregarPlatoUCV extends JFrame {
         lblEmp.setBounds(20, 160, 100, 30);
         panelTarifas.add(lblEmp);
 
+        JLabel lblBec = new JLabel("Becado");
+        lblBec.setBounds(20, 210, 100, 30);
+        panelTarifas.add(lblBec);
+
         txtTarifaEst = crearCampoEstiloLogin("20-30", 140, 60, 110, 35, true, true);
         txtTarifaProf = crearCampoEstiloLogin("70-90", 140, 110, 110, 35, true, true);
         txtTarifaEmp = crearCampoEstiloLogin("90-110", 140, 160, 110, 35, true, true);
+        txtTarifaBec = crearCampoEstiloLogin("5-19", 140, 210, 110, 35, true, true);
 
         panelTarifas.add(txtTarifaEst);
         panelTarifas.add(txtTarifaProf);
         panelTarifas.add(txtTarifaEmp);
+        panelTarifas.add(txtTarifaBec);
 
         tarjetaPrincipal.add(panelTarifas);
 
@@ -162,11 +168,12 @@ public class AgregarPlatoUCV extends JFrame {
         txtPrecioEst = crearCampoEstiloLogin("0.00", 740, 320, 110, 35, false, false);
         txtPrecioProf = crearCampoEstiloLogin("0.00", 740, 365, 110, 35, false, false);
         txtPrecioEmp = crearCampoEstiloLogin("0.00", 740, 410, 110, 35, false, false);
+        txtPrecioBec = crearCampoEstiloLogin("0.00", 740, 455, 110, 35, false, false);
 
-        JTextField[] camposPrecios = {txtPrecioEst, txtPrecioProf, txtPrecioEmp};
-        String[] tipos = {"Estudiante:", "Profesor:", "Empleado:"};
+        JTextField[] camposPrecios = {txtPrecioEst, txtPrecioProf, txtPrecioEmp, txtPrecioBec};
+        String[] tipos = {"Estudiante:", "Profesor:", "Empleado:", "Becado:"};
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
 
             JLabel lbl = new JLabel(tipos[i], SwingConstants.RIGHT);
             lbl.setBounds(630, 320 + (i * 45), 100, 30);
@@ -180,12 +187,12 @@ public class AgregarPlatoUCV extends JFrame {
         }
 
         PrimaryButton2 btnCanc = new PrimaryButton2("Cancelar", GRIS_CANCELAR);
-        btnCanc.setBounds(635, 465, 120, 40);
+        btnCanc.setBounds(635, 515, 120, 40);
         btnCanc.addActionListener(e -> controller.procesarFechaSeleccionada(fecha, this));
         tarjetaPrincipal.add(btnCanc);
 
         PrimaryButton2 btnAgr = new PrimaryButton2("Agregar Menu", AMARILLO_BOTON);
-        btnAgr.setBounds(765, 465, 170, 40);
+        btnAgr.setBounds(765, 515, 170, 40);
         btnAgr.addActionListener(e -> registrarPlatoAction(fecha, tipoMenu));
         tarjetaPrincipal.add(btnAgr);
 
@@ -229,31 +236,34 @@ public class AgregarPlatoUCV extends JFrame {
         }
     }
 
-    private void registrarPlatoAction(String fecha, String tipoMenu) {
+private void registrarPlatoAction(String fecha, String tipoMenu) {
 
-        String pFuerte = txtPlato.getText().equals("Plato fuerte") ? "N/A" : txtPlato.getText();
-        String pBebida = txtBebida.getText().equals("Bebida") ? "N/A" : txtBebida.getText();
-        String pPostre = txtPostre.getText().equals("Postre / Fruta") ? "N/A" : txtPostre.getText();
+    String pFuerte = txtPlato.getText().equals("Plato fuerte") ? "N/A" : txtPlato.getText();
+    String pBebida = txtBebida.getText().equals("Bebida") ? "N/A" : txtBebida.getText();
+    String pPostre = txtPostre.getText().equals("Postre / Fruta") ? "N/A" : txtPostre.getText();
 
-        String pEst = txtPrecioEst.getText().equals("0.00") || txtPrecioEst.getText().isEmpty() ? "0" : txtPrecioEst.getText();
-        String pProf = txtPrecioProf.getText().equals("0.00") || txtPrecioProf.getText().isEmpty() ? "0" : txtPrecioProf.getText();
-        String pEmp = txtPrecioEmp.getText().equals("0.00") || txtPrecioEmp.getText().isEmpty() ? "0" : txtPrecioEmp.getText();
+    String pEst = txtPrecioEst.getText().equals("0.00") || txtPrecioEst.getText().isEmpty() ? "0" : txtPrecioEst.getText();
+    String pProf = txtPrecioProf.getText().equals("0.00") || txtPrecioProf.getText().isEmpty() ? "0" : txtPrecioProf.getText();
+    String pEmp = txtPrecioEmp.getText().equals("0.00") || txtPrecioEmp.getText().isEmpty() ? "0" : txtPrecioEmp.getText();
+    String pBec = txtPrecioBec.getText().equals("0.00") || txtPrecioBec.getText().isEmpty() ? "0" : txtPrecioBec.getText();
 
-        String cap = txtCapacidad.getText().equals("Capacidad") || txtCapacidad.getText().isEmpty() ? "500" : txtCapacidad.getText();
-        String ccb = txtCCBResult.getText().isEmpty() ? "0.00" : txtCCBResult.getText();
+    String cap = txtCapacidad.getText().equals("Capacidad") || txtCapacidad.getText().isEmpty() ? "500" : txtCapacidad.getText();
+    String ccb = txtCCBResult.getText().isEmpty() ? "0.00" : txtCCBResult.getText();
 
-        // Extraemos las tarifas de la vista
-        String tEst = txtTarifaEst.getText().equals("20-30") ? "0" : txtTarifaEst.getText();
-        String tProf = txtTarifaProf.getText().equals("70-90") ? "0" : txtTarifaProf.getText();
-        String tEmp = txtTarifaEmp.getText().equals("90-110") ? "0" : txtTarifaEmp.getText();
+    String tEst = txtTarifaEst.getText().equals("20-30") ? "0" : txtTarifaEst.getText();
+    String tProf = txtTarifaProf.getText().equals("70-90") ? "0" : txtTarifaProf.getText();
+    String tEmp = txtTarifaEmp.getText().equals("90-110") ? "0" : txtTarifaEmp.getText();
+    String tBec = txtTarifaBec.getText().equals("5-19") ? "0" : txtTarifaBec.getText();
 
-        // Llamamos al metodo actualizado del controlador
-        controller.registrarNuevoPlato(
-                fecha, tipoMenu, pFuerte, pBebida, pPostre,
-                pEst, pProf, pEmp, cap, ccb,
-                tEst, tProf, tEmp, this // Se añadieron las 3 tarifas
-        );
-    }
+    controller.registrarNuevoPlato(
+            fecha, tipoMenu,
+            pFuerte, pBebida, pPostre,
+            pEst, pProf, pEmp, pBec,
+            cap, ccb,
+            tEst, tProf, tEmp, tBec,
+            this
+    );
+}
 
     private void configurarEscuchadores() {
 
@@ -266,6 +276,7 @@ public class AgregarPlatoUCV extends JFrame {
         txtTarifaEst.getDocument().addDocumentListener(dl);
         txtTarifaProf.getDocument().addDocumentListener(dl);
         txtTarifaEmp.getDocument().addDocumentListener(dl);
+        txtTarifaBec.getDocument().addDocumentListener(dl);
     }
 
     private void actualizarPreciosFinales() {
@@ -277,6 +288,7 @@ public class AgregarPlatoUCV extends JFrame {
             txtPrecioEst.setText(String.format(java.util.Locale.US, "%.2f", ccb * (obtenerTarifa(txtTarifaEst.getText(), "20-30") / 100f)));
             txtPrecioProf.setText(String.format(java.util.Locale.US, "%.2f", ccb * (obtenerTarifa(txtTarifaProf.getText(), "70-90") / 100f)));
             txtPrecioEmp.setText(String.format(java.util.Locale.US, "%.2f", ccb * (obtenerTarifa(txtTarifaEmp.getText(), "90-110") / 100f)));
+            txtPrecioBec.setText(String.format(java.util.Locale.US, "%.2f", ccb * (obtenerTarifa(txtTarifaBec.getText(), "5-19") / 100f)));
 
         } catch (Exception ignored) {}
     }

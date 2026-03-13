@@ -1,6 +1,7 @@
 package com.ucv.controller;
 
 import com.ucv.model.DataBase;
+import com.ucv.model.DataBase.RolUsuario;
 import com.ucv.controller.UserController.Response;
 import java.time.LocalTime;
 
@@ -66,7 +67,7 @@ public Response LoadImage(String userID) {
         }
 
         // -------------------------
-        // VERIFICACIONES DE COMIDA
+        // VERIFICAR HORARIO
         // -------------------------
 
         String tipoComida = obtenerTipoComida();
@@ -75,7 +76,10 @@ public Response LoadImage(String userID) {
             return new Response(false, "No estamos en horario de comida");
         }
 
-        // verificar turno
+        // -------------------------
+        // VERIFICAR RESERVACIÓN
+        // -------------------------
+
         if (tipoComida.equals("desayuno")) {
 
             if (!DataBase.GetFoodDesayunoFlag(userID).equals("1")) {
@@ -87,21 +91,51 @@ public Response LoadImage(String userID) {
             if (!DataBase.GetFoodAlmuerzoFlag(userID).equals("1")) {
                 return new Response(false, "No posee reservación de almuerzo");
             }
-
         }
 
-        // obtener saldo guardado
+        // -------------------------
+        // OBTENER ROL DEL USUARIO
+        // -------------------------
+
+        RolUsuario rolUsuario;
+
+        try {
+            rolUsuario = DataBase.obtenerRol(userID);
+        } catch (java.io.IOException e) {
+            return new Response(false, "Error al obtener rol del usuario");
+        }
+
+        // -------------------------
+        // USUARIO EXONERADO
+        // -------------------------
+
+        if (rolUsuario == RolUsuario.EXONERADO) {
+
+            if (tipoComida.equals("desayuno")) {
+                DataBase.MenuDesayunoOut(userID);
+            }
+
+            if (tipoComida.equals("almuerzo")) {
+                DataBase.MenuAlmuerzoOut(userID);
+            }
+
+            return new Response(true, "Acceso permitido (usuario exonerado).");
+        }
+
+        // -------------------------
+        // USUARIO NORMAL (SE COBRA)
+        // -------------------------
+
         double saldoUsuario = DataBase.obtenerSaldo(userID);
 
-        double costo = tipoComida.equals("desayuno") ?
-            DataBase.getPrecioDesayuno(userID) :
-            DataBase.getPrecioAlmuerzo(userID);
+        double costo = tipoComida.equals("desayuno")
+                ? DataBase.getPrecioDesayuno(userID)
+                : DataBase.getPrecioAlmuerzo(userID);
 
         if (saldoUsuario < costo) {
             return new Response(false, "Saldo insuficiente para pagar la comida");
         }
 
-        // cobrar comida
         com.ucv.model.DataBase.EnumUpdateMoney resultadoCobro =
                 DataBase.ExtractMoney(userID, String.valueOf(costo));
 
@@ -109,7 +143,10 @@ public Response LoadImage(String userID) {
             return new Response(false, "Error al procesar el pago");
         }
 
-        // Desactivar turno luego de cobrar
+        // -------------------------
+        // DESACTIVAR TURNO
+        // -------------------------
+
         if (tipoComida.equals("desayuno")) {
             DataBase.MenuDesayunoOut(userID);
         }
@@ -118,8 +155,7 @@ public Response LoadImage(String userID) {
             DataBase.MenuAlmuerzoOut(userID);
         }
 
-    return new Response(true, "Acceso permitido. Comida registrada.");
-
+        return new Response(true, "Acceso permitido. Comida registrada.");
     }
 
     return new Response(false, "Carga de imagen cancelada por el usuario");

@@ -36,22 +36,57 @@ public class MenuDB {
         }
     }
 
-    public WriteMenuStatus WriteMenu(Boolean Modify, Boolean Type, String Fecha, String Tipo, String PlatoFuerte, String Bebida, String Postre, String PEstudiante, String PProfesor, String PEmpleado, String Capacidad, String CCB) throws IOException {
+public WriteMenuStatus WriteMenu(Boolean Modify, Boolean Type,
+                                 String Fecha, String Tipo,
+                                 String PlatoFuerte, String Bebida, String Postre,
+                                 String PEstudiante, String PProfesor, String PEmpleado, String PBecado,
+                                 String Capacidad, String CCB) throws IOException {
 
-        if (Modify) {
-            return ModifyMenu(Type, Fecha, Tipo, PlatoFuerte, Bebida, Postre, PEstudiante, PProfesor, PEmpleado, Capacidad, CCB);
-        }
-
-        MakeArchive();
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
-            String NLine = Fecha + " | " + Tipo + " | " + PlatoFuerte + " | " + Bebida + " | " + Postre + " | " + PEstudiante + " | " + PProfesor + " | " + PEmpleado + " | " + "0" + " | " + Capacidad + " | " + CCB;
-            escritor.write(NLine);// 0      1               2                      3                4                 5                     6                      7              8                 9               10                                                                    
-            escritor.newLine();
-            return WriteMenuStatus.REGISTRO_EXITOSO;
-        } catch (IOException e) {
-            return WriteMenuStatus.ERROR_ESCRITURA;
-        }
+    if (Modify) {
+        return ModifyMenu(Type, Fecha, Tipo, PlatoFuerte, Bebida, Postre,
+                          PEstudiante, PProfesor, PEmpleado, PBecado, Capacidad, CCB);
     }
+
+    MakeArchive();
+
+    try (BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO, true))) {
+
+        String NLine = Fecha + " | " +
+                       Tipo + " | " +
+                       PlatoFuerte + " | " +
+                       Bebida + " | " +
+                       Postre + " | " +
+                       PEstudiante + " | " +
+                       PProfesor + " | " +
+                       PEmpleado + " | " +
+                       PBecado + " | " +
+                       "0" + " | " +
+                       Capacidad + " | " +
+                       CCB;
+
+        escritor.write(NLine);
+        // índice columnas
+        // 0 Fecha
+        // 1 Tipo
+        // 2 PlatoFuerte
+        // 3 Bebida
+        // 4 Postre
+        // 5 Precio Estudiante
+        // 6 Precio Profesor
+        // 7 Precio Empleado
+        // 8 Precio Becado
+        // 9 Estado
+        // 10 Capacidad
+        // 11 CCB
+
+        escritor.newLine();
+
+        return WriteMenuStatus.REGISTRO_EXITOSO;
+
+    } catch (IOException e) {
+        return WriteMenuStatus.ERROR_ESCRITURA;
+    }
+}
 
     public ReWriteStatus ReWriteSpace(String Fecha, String Tipo) throws IOException {
         Tipo = Tipo.toLowerCase();
@@ -67,9 +102,9 @@ public class MenuDB {
                 String[] partes = linea.split("\\s*\\|\\s*");
 
                 if (partes[0].equals(Fecha) && partes[1].equals(Tipo)) {
-                    int contador = Integer.parseInt(partes[8]);
+                    int contador = Integer.parseInt(partes[9]);
                     contador++;
-                    partes[8] = String.valueOf(contador);
+                    partes[9] = String.valueOf(contador);
                     linea = String.join(" | ", partes);
                     encontrado = true;
                 }
@@ -89,7 +124,7 @@ public class MenuDB {
         return ReWriteStatus.NO_ENCONTRADO;
     }
 
-    public WriteMenuStatus ModifyMenu(Boolean Type, String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp, String Capacidad, String CCB) throws IOException {
+    public WriteMenuStatus ModifyMenu(Boolean Type, String Fecha, String Tipo, String NPlato, String NBebida, String NPostre, String NPEst, String NPProf, String NPEmp, String PBecado, String Capacidad, String CCB) throws IOException {
         Tipo = Tipo.toLowerCase();
         // Recordatorio: No agregar los toLowerCase() de platos, bebidas y postres aquí.
 
@@ -110,15 +145,18 @@ public class MenuDB {
 
                 String[] partes = linea.split("\\s*\\|\\s*");
 
-                // CORRECCIÓN: Usamos equalsIgnoreCase al igual que en obtenerMenu()
-                if (partes.length >= 9 && partes[0].trim().equals(Fecha.trim()) && partes[1].trim().equalsIgnoreCase(Tipo)) {
-                    String contadorActual = partes[8];
+                if (partes.length >= 12 && partes[0].trim().equals(Fecha.trim()) && partes[1].trim().equalsIgnoreCase(Tipo)) {
+
+                    String contadorActual = partes[9];
 
                     if (Type) {
                         Tipo = Tipo.toLowerCase().equals("almuerzo") ? "desayuno" : "almuerzo";
                     }
 
-                    linea = Fecha + " | " + Tipo + " | " + NPlato + " | " + NBebida + " | " + NPostre + " | " + NPEst + " | " + NPProf + " | " + NPEmp + " | " + contadorActual + " | " + Capacidad + " | " + CCB;
+                    linea = Fecha + " | " + Tipo + " | " + NPlato + " | " + NBebida + " | " + NPostre + " | " +
+                            NPEst + " | " + NPProf + " | " + NPEmp + " | " + PBecado + " | " +
+                            contadorActual + " | " + Capacidad + " | " + CCB;
+
                     modificado = true;
                 }
                 lineas.add(linea);
@@ -150,7 +188,7 @@ public class MenuDB {
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().isEmpty()) continue;
                 String[] partes = linea.split("\\s*\\|\\s*");
-                if (partes.length >= 9 && partes[0].equals(fecha) && partes[1].equalsIgnoreCase(tipo)) {
+                if (partes.length >= 12 && partes[0].equals(fecha) && partes[1].equalsIgnoreCase(tipo)) {
                     return partes;
                 }
             }
@@ -177,18 +215,18 @@ public class MenuDB {
                 String[] partes = linea.split("\\s*\\|\\s*");
 
                 // Verificamos que la línea tenga el formato correcto, coincida la fecha y el tipo
-                if (partes.length >= 9 && partes[0].equals(Fecha) && partes[1].equalsIgnoreCase(Tipo)) {
+                if (partes.length >= 12 && partes[0].equals(Fecha) && partes[1].equalsIgnoreCase(Tipo)) {
                     try {
-                        // Obtenemos el valor en el índice 8 (Word[8]), sumamos 1
-                        int contador = Integer.parseInt(partes[8]);
+                        // Obtenemos el valor en el índice 9 (Word[9]), sumamos 1
+                        int contador = Integer.parseInt(partes[9]);
                         contador++;
-                        partes[8] = String.valueOf(contador);
+                        partes[9] = String.valueOf(contador);
                         
                         // Reconstruimos la línea con el nuevo valor
                         linea = String.join(" | ", partes);
                         encontrado = true;
                     } catch (NumberFormatException e) {
-                        // En caso de que el valor en la posición 8 no sea un número válido
+                        // En caso de que el valor en la posición 9 no sea un número válido
                         System.err.println("Error: El contador en el archivo no es un número válido.");
                     }
                 }
@@ -228,8 +266,8 @@ public class MenuDB {
                 // Comparamos ignorando mayúsculas/minúsculas
                 if (Word[1].equalsIgnoreCase(Tipo) && fecha.equals(Word[0])) {
 
-                    int valor8 = Integer.parseInt(Word[8].trim()); // Contador (Reservados)
-                    int valor9 = Integer.parseInt(Word[9].trim()); // Capacidad Total
+                    int valor8 = Integer.parseInt(Word[9].trim()); // Contador (Reservados)
+                    int valor9 = Integer.parseInt(Word[10].trim()); // Capacidad Total
 
                     return valor9 - valor8; // Retorna los cupos que sobran
                 }

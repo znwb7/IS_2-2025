@@ -782,6 +782,10 @@ public class DataBase {
                             montoAPagar = wordMenu[7].trim();
                             break;
 
+                        case BECADO:
+                            montoAPagar = wordMenu[8].trim();
+                            break;
+
                         default:
                             return EnumRegistrarTransaccion.ERROR;
                     }

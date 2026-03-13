@@ -39,7 +39,7 @@ public class MenusUsuario extends JFrame {
         String[] datosDesayuno = controller.obtenerDatosMenu(fechaActual, "desayuno");
         String[] datosAlmuerzo = controller.obtenerDatosMenu(fechaActual, "almuerzo");
 
-        // --- 4. PANEL CENTRAL (Contenido adaptado al prototipo) ---
+        // --- 4. PANEL CENTRAL ---
         JPanel panelCentral = new JPanel(new GridBagLayout());
         panelCentral.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
