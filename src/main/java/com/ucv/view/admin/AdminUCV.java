@@ -2,7 +2,7 @@ package com.ucv.view.admin;
 
 import com.ucv.view.components.SIdeBar2;
 import com.ucv.view.components.BotonCerrarSesion;
-import com.ucv.view.components.HeaderUCV; // Importamos el nuevo Header
+import com.ucv.view.components.HeaderUCV;
 import javax.swing.*;
 import java.awt.*;
 
@@ -20,7 +20,6 @@ public class AdminUCV extends JFrame {
         setLayout(new BorderLayout());
 
         // --- 1. ENCABEZADO (USANDO EL COMPONENTE CORREGIDO) ---
-        // Eliminamos la llamada a crearEncabezadoDerecho() y usamos la clase HeaderUCV
         add(new HeaderUCV(), BorderLayout.NORTH);
 
         // --- 2. CONTENEDOR INFERIOR ---
@@ -49,7 +48,10 @@ public class AdminUCV extends JFrame {
         gbc.gridy = 1;
         panelCuerpo.add(crearBotonAdmin("Configurar Menus"), gbc);
         gbc.gridy = 2;
-        panelCuerpo.add(crearBotonAdmin("Inventario"), gbc);
+
+        // --- CAMBIO DE TEXTO DEL BOTÓN ---
+        panelCuerpo.add(crearBotonAdmin("Añadir Estatus (Estudiante)"), gbc);
+
         gbc.gridy = 3;
         panelCuerpo.add(crearBotonAdmin("Generar reporte"), gbc);
 
@@ -104,10 +106,15 @@ public class AdminUCV extends JFrame {
         btn.setPreferredSize(new Dimension(600, 80));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // --- NUEVA LÓGICA DE REDIRECCIÓN EN EL CONTROLADOR ---
         btn.addActionListener(e -> {
             if (texto.equals("Configurar Menus")) {
                 dispose();
                 new com.ucv.view.admin.FechaMenus().setVisible(true);
+            } else if (texto.equals("Añadir Estatus (Estudiante)")) {
+                // Instanciamos el controlador para hacer la redirección
+                com.ucv.controller.UserController controller = new com.ucv.controller.UserController();
+                controller.irAAnadirEstatus(this);
             } else {
                 JOptionPane.showMessageDialog(this, "Función '" + texto + "' en desarrollo.");
             }

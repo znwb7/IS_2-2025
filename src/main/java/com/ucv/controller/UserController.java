@@ -183,4 +183,55 @@ public void loginRequested(String id, String password, LoginUCV vista) {
             return message;
         }
     }
+
+    // --- NAVEGACIÓN DE VISTAS (AÑADIR ESTATUS) ---
+    public void irAAnadirEstatus(javax.swing.JFrame vistaActual) {
+        if (vistaActual != null) vistaActual.dispose();
+        // Llamamos a la nueva vista pasándole el controlador
+        new com.ucv.view.admin.AnadirEstatus(this).setVisible(true);
+    }
+
+    public void volverAAdmin(javax.swing.JFrame vistaActual) {
+        if (vistaActual != null) vistaActual.dispose();
+        new com.ucv.view.admin.AdminUCV("Administrador").setVisible(true);
+    }
+
+    // ------------------- GESTIÓN DE ESTATUS -------------------
+    public void actualizarEstatusEstudiante(String cedula, String nuevoEstatus, javax.swing.JFrame vistaActual) {
+        // 1. Validaciones de la interfaz
+        if (cedula == null || cedula.isEmpty() || cedula.equals("Cédula")) {
+            javax.swing.JOptionPane.showMessageDialog(vistaActual, "Por favor ingrese la cédula del estudiante.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!cedula.matches("\\d+")) {
+            javax.swing.JOptionPane.showMessageDialog(vistaActual, "La cédula solo debe contener números.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (nuevoEstatus == null || nuevoEstatus.equals("Estatus")) {
+            javax.swing.JOptionPane.showMessageDialog(vistaActual, "Por favor seleccione un estatus válido.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 2. Llamada a la lógica del Modelo de tu compañero
+        com.ucv.model.DataBase.RolUsuario resultado = dataBase.UpdateRol(cedula, nuevoEstatus);
+
+        // 3. Respuesta visual al Administrador
+        if (resultado == com.ucv.model.DataBase.RolUsuario.ERROR) {
+            javax.swing.JOptionPane.showMessageDialog(
+                    vistaActual,
+                    "No se pudo actualizar.\nVerifique que la cédula exista y que el usuario sea actualmente 'Estudiante'.",
+                    "Error de Actualización",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(
+                    vistaActual,
+                    "¡Éxito! El estudiante con cédula " + cedula + " ahora tiene el estatus de: " + resultado.name(),
+                    "Operación Exitosa",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE
+            );
+            // Regresamos al menú principal del Administrador
+            volverAAdmin(vistaActual);
+        }
+    }
 }
