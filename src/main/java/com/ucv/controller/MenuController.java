@@ -8,6 +8,8 @@ import com.ucv.view.admin.GestionMenus;
 import com.ucv.view.admin.FechaMenus;
 import com.ucv.view.user.ConfirmacionReserva;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -128,73 +130,174 @@ public class MenuController {
     }
 
     // --- LÓGICA DE PROCESAMIENTO DE RESERVAS---
-public boolean procesarReserva(String tipo, String usuarioID) {
+    public boolean procesarReserva(String tipo, String usuarioID) {
 
-    String fechaActual = java.time.LocalDate.now()
-            .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String fechaActual = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-    // 1. Verificar si ya reservó este menú hoy
-    if (yaReservoEsteMenu(usuarioID, fechaActual, tipo)) {
-        return false;
+        VerificarYCrearArchivoReservas(fechaActual);
+
+
+        // 2. Verificar cupos
+        if (menuDB.CantidadDisponible(tipo) <= 0) {
+            return false;
+        }
+
+        // 3. Aumentar contador del menú
+        MenuDB.ReWriteStatus status = menuDB.CountMenu(fechaActual, tipo);
+
+        if (status == MenuDB.ReWriteStatus.REWRITE_EXITOSO) {
+
+            registrarReservaLocal(usuarioID, fechaActual, tipo);
+
+            if (tipo.equalsIgnoreCase("desayuno")) {
+                dataBase.MenuDesayunoActive(usuarioID);
+            }
+
+            if (tipo.equalsIgnoreCase("almuerzo")) {
+                dataBase.MenuAlmuerzoActive(usuarioID);
+            }
+
+            // REGISTRAR PRECIO DE LA COMIDA EN LA BD
+            dataBase.PrecioComida(usuarioID, tipo);
+
+            return true;
+        }
+
+            return false;
     }
 
-    // 2. Verificar cupos
-    if (menuDB.CantidadDisponible(tipo) <= 0) {
-        return false;
+
+
+    public static void main(String[] args) {
+        System.out.println("=== INICIANDO DEBUG DE MENU_CONTROLLER ===");
+        MenuController controller = new MenuController();
+
+        // 1. CONFIGURACIÓN DEL ESCENARIO DE PRUEBA
+        String idPrueba = "31983764"; // El ID que usamos antes
+        String tipoComida = "almuerzo";
+        String fechaHoy = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+        System.out.println("Escenario: Reserva de " + tipoComida + " para el ID: " + idPrueba);
+
+        // 2. EJECUCIÓN DEL PROCESO
+        // Nota: Esto disparará VerificarYCrearArchivoReservas y registrarReservaLocal
+        boolean resultado = controller.procesarReserva(tipoComida, idPrueba);
+
+        // 3. VERIFICACIÓN DE RESULTADOS
+        if (resultado) {
+            System.out.println("✅ RESULTADO: Reserva procesada con éxito.");
+            System.out.println("Acciones realizadas:");
+            System.out.println("- Se verificó/creó ControlReservas.txt");
+            System.out.println("- Se aumentó el contador en MenuDB");
+            System.out.println("- Se registró la reserva local por Rol");
+            System.out.println("- Se activó la bandera de menú en DataBase");
+        } else {
+            System.out.println("❌ RESULTADO: La reserva falló.");
+            System.out.println("Causas posibles: No hay cupos en MenuDB o error al escribir archivos.");
+        }
+
+        System.out.println("=== FIN DEL DEBUG ===");
     }
-
-    // 3. Aumentar contador del menú
-    MenuDB.ReWriteStatus status = menuDB.CountMenu(fechaActual, tipo);
-
-if (status == MenuDB.ReWriteStatus.REWRITE_EXITOSO) {
-
-    registrarReservaLocal(usuarioID, fechaActual, tipo);
-
-    if (tipo.equalsIgnoreCase("desayuno")) {
-        dataBase.MenuDesayunoActive(usuarioID);
-    }
-
-    if (tipo.equalsIgnoreCase("almuerzo")) {
-        dataBase.MenuAlmuerzoActive(usuarioID);
-    }
-
-    // REGISTRAR PRECIO DE LA COMIDA EN LA BD
-    dataBase.PrecioComida(usuarioID, tipo);
-
-    return true;
-}
-
-    return false;
-}
 
     // --- MÉTODOS AUXILIARES DE CONTROL DE RESERVAS ---
-    private boolean yaReservoEsteMenu(String usuarioID, String fecha, String tipo) {
-        java.io.File archivo = new java.io.File(System.getProperty("user.dir") + java.io.File.separator + "target" + java.io.File.separator + "Output" + java.io.File.separator + "ControlReservas.txt");
-        if (!archivo.exists()) return false;
 
-        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(archivo))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                // Compara el ID, la fecha y el tipo de menú (ej. "12345678|09/03/2026|desayuno")
-                if (linea.equals(usuarioID + "|" + fecha + "|" + tipo.toLowerCase())) {
-                    return true;
+    private void VerificarYCrearArchivoReservas(String fechaActual) {
+        String ruta = System.getProperty("user.dir") + java.io.File.separator + "target" + java.io.File.separator + "Output" + java.io.File.separator + "ControlReservas.txt";
+        java.io.File archivo = new java.io.File(ruta);
+        boolean debeCrear = false;
+
+        // 1. Verificación: ¿Existe el archivo o es un día nuevo?
+        if (!archivo.exists()) {
+            debeCrear = true; 
+        } else {
+            try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(archivo))) {
+                String linea = br.readLine();
+                if (linea != null && linea.contains("|")) {
+                    String fechaEnArchivo = linea.split("\\|")[1].trim();
+                    if (!fechaEnArchivo.equals(fechaActual)) {
+                        debeCrear = true; 
+                    }
                 }
+            } catch (java.io.IOException e) {
+                debeCrear = true; 
             }
-        } catch (Exception ignored) {}
-        return false;
+        }
+
+        // 2. Creación/Sobreescritura con el formato solicitado
+        if (debeCrear) {
+            if (archivo.getParentFile() != null) {
+                archivo.getParentFile().mkdirs();
+            }
+
+            try (java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(archivo, false))) {
+                // Formato: Rol Tipo : Cantidad | Fecha
+                bw.write("estudiante Desayuno : 0 | " + fechaActual); bw.newLine();
+                bw.write("estudiante Almuerzo : 0 | " + fechaActual); bw.newLine();
+                bw.write("profesor Desayuno : 0 | " + fechaActual); bw.newLine();
+                bw.write("profesor Almuerzo : 0 | " + fechaActual); bw.newLine();
+                bw.write("empleado Desayuno : 0 | " + fechaActual); bw.newLine();
+                bw.write("empleado Almuerzo : 0 | " + fechaActual); bw.newLine();
+                bw.write("exonerado Desayuno : 0 | " + fechaActual); bw.newLine();
+                bw.write("exonerado Almuerzo : 0 | " + fechaActual); bw.newLine();
+                bw.write("becado Desayuno : 0 | " + fechaActual); bw.newLine();
+                bw.write("becado Almuerzo : 0 | " + fechaActual); bw.newLine();
+                
+                System.out.println("-> Archivo ControlReservas.txt actualizado para: " + fechaActual);
+            } catch (java.io.IOException e) {
+                System.err.println("Error al crear ControlReservas.txt: " + e.getMessage());
+            }
+        }
     }
 
     private void registrarReservaLocal(String usuarioID, String fecha, String tipo) {
-        java.io.File archivo = new java.io.File(System.getProperty("user.dir") + java.io.File.separator + "target" + java.io.File.separator + "Output" + java.io.File.separator + "ControlReservas.txt");
+        String ruta = System.getProperty("user.dir") + java.io.File.separator + "target" + java.io.File.separator + "Output" + java.io.File.separator + "ControlReservas.txt";
+        java.io.File archivo = new java.io.File(ruta);
+        
+        if (!archivo.exists()) return;
+
+        List<String> lineasActualizadas = new ArrayList<>();
+        DataBase db = new DataBase();
+        
         try {
-            if (!archivo.exists()) {
-                archivo.getParentFile().mkdirs();
-                archivo.createNewFile();
+            // 1. Obtenemos el rol del usuario desde la DB principal
+            // Nota: asumo que obtenerRol devuelve el Enum RolUsuario
+            String rolUsuario = db.obtenerRol(usuarioID).name().toLowerCase();
+            
+            // 2. Leemos el archivo de reservas para buscar la línea a modificar
+            try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(archivo))) {
+                String linea;
+                while ((linea = br.readLine()) != null) {
+                    if (linea.trim().isEmpty()) continue;
+
+                    // Separamos por el ":" y por el "|" para identificar los campos
+                    // Formato esperado: rol tipo : cantidad | fecha
+                    String[] partesPorPipe = linea.split("\\s*\\|\\s*");
+                    String[] partesPorDosPuntos = partesPorPipe[0].split("\\s*:\\s*");
+                    String encabezado = partesPorDosPuntos[0].trim().toLowerCase(); // "estudiante desayuno"
+
+                    // Verificamos si esta línea coincide con el Rol y el Tipo de comida buscado
+                    if (encabezado.equals(rolUsuario + " " + tipo.toLowerCase())) {
+                        int cantidadActual = Integer.parseInt(partesPorDosPuntos[1].trim());
+                        int nuevaCantidad = cantidadActual + 1;
+                        
+                        // Reconstruimos la línea con el nuevo valor
+                        linea = rolUsuario + " " + tipo.toLowerCase() + " : " + nuevaCantidad + " | " + partesPorPipe[1];
+                    }
+                    
+                    lineasActualizadas.add(linea);
+                }
             }
-            try (java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(archivo, true))) {
-                bw.write(usuarioID + "|" + fecha + "|" + tipo.toLowerCase());
-                bw.newLine();
+
+            // 3. Sobrescribimos el archivo con los nuevos conteos
+            try (java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(archivo, false))) {
+                for (String l : lineasActualizadas) {
+                    bw.write(l);
+                    bw.newLine();
+                }
             }
-        } catch (Exception ignored) {}
+            
+        } catch (Exception e) {
+            System.err.println("Error al registrar reserva local: " + e.getMessage());
+        }
     }
 }

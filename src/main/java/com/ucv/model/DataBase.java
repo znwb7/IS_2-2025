@@ -9,59 +9,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
-
-
-
-
-
-
 // Enums para los estados de login y registro
 public class DataBase {
-
-
-    public static void main(String[] args) {
-        // 1. Instanciamos la base de datos
-        DataBase db = new DataBase();
-
-        // 2. Datos para la prueba (ID que me pasaste)
-        String idEstudiante = "31983764";
-        String nuevoRol = "EXONERADO";
-
-        System.out.println("=== INICIANDO PRUEBA DE UPDATE ROL ===");
-        
-        // 3. Ejecución de la función
-        RolUsuario resultado = db.UpdateRol(idEstudiante, nuevoRol);
-
-        // 4. Verificación de resultados en consola
-        if (resultado == RolUsuario.EXONERADO) {
-            System.out.println("✅ ÉXITO: El usuario " + idEstudiante + " ahora es " + resultado);
-        } else {
-            System.out.println("❌ ERROR: No se pudo cambiar el rol.");
-            System.out.println("Asegúrate de que el ID exista y que el rol actual sea 'estudiante'.");
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+  
     //SECCION ENUMS
         public enum LoginStatus {
             EXITO, PASSWORD_INCORRECTO, USUARIO_NO_ENCONTRADO, ARCHIVO_NO_EXISTE
@@ -955,7 +905,30 @@ public class DataBase {
             }
         }
 
-    public double getPrecioDesayuno(String ID) {
+    //GET DE PRECIO DESAYUNO Y ALMUERZO
+        public double getPrecioDesayuno(String ID) {
+
+                try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+
+                    String line;
+
+                    while ((line = br.readLine()) != null) {
+
+                        String[] word = line.split("\\s*\\|\\s*");
+
+                        if (word[1].equals(ID)) {
+                            return Double.parseDouble(word[10]);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    return 0;
+                }
+
+                return 0;
+            }
+
+        public double getPrecioAlmuerzo(String ID) {
 
             try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
 
@@ -966,7 +939,7 @@ public class DataBase {
                     String[] word = line.split("\\s*\\|\\s*");
 
                     if (word[1].equals(ID)) {
-                        return Double.parseDouble(word[10]);
+                        return Double.parseDouble(word[9]);
                     }
                 }
 
@@ -976,29 +949,9 @@ public class DataBase {
 
             return 0;
         }
+    //FIN
 
-    public double getPrecioAlmuerzo(String ID) {
-
-        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
-
-            String line;
-
-            while ((line = br.readLine()) != null) {
-
-                String[] word = line.split("\\s*\\|\\s*");
-
-                if (word[1].equals(ID)) {
-                    return Double.parseDouble(word[9]);
-                }
-            }
-
-        } catch (Exception e) {
-            return 0;
-        }
-
-        return 0;
-    }
-
+    //Admin cambia rol de estudiante
     public RolUsuario UpdateRol(String ID, String tipo) {
         File file = new File(rutaArchivo);
         if (!file.exists()) return RolUsuario.ERROR;
@@ -1019,7 +972,7 @@ public class DataBase {
                 String[] Word = line.split("\\s*\\|\\s*");
 
                 // Solo modificamos si coincide el ID y el rol actual es "estudiante"
-                if (Word[1].equals(ID) && Word[3].equalsIgnoreCase("estudiante")) {
+                if (Word[1].equals(ID) && (Word[3].equalsIgnoreCase("estudiante") || Word[3].equalsIgnoreCase("becado") || Word[3].equalsIgnoreCase("exonerado"))) {
                     Word[3] = tipo.toLowerCase(); 
                     line = String.join(" | ", Word);
                     encontrado = true;
