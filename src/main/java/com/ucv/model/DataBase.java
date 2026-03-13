@@ -11,6 +11,7 @@ import java.util.List;
 
 // Enums para los estados de login y registro
 public class DataBase {
+  
     //SECCION ENUMS
         public enum LoginStatus {
             EXITO, PASSWORD_INCORRECTO, USUARIO_NO_ENCONTRADO, ARCHIVO_NO_EXISTE
@@ -31,6 +32,7 @@ public class DataBase {
         public enum RolUsuario {
             ADMIN, PROFESOR, EMPLEADO, ESTUDIANTE, ERROR, SECRETARIA, EXONERADO, BECADO
         }
+
     //FIN
 
     //CONSTRUCTORES Y VARIABLES PRIVADAS
@@ -907,7 +909,30 @@ public class DataBase {
             }
         }
 
-    public double getPrecioDesayuno(String ID) {
+    //GET DE PRECIO DESAYUNO Y ALMUERZO
+        public double getPrecioDesayuno(String ID) {
+
+                try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+
+                    String line;
+
+                    while ((line = br.readLine()) != null) {
+
+                        String[] word = line.split("\\s*\\|\\s*");
+
+                        if (word[1].equals(ID)) {
+                            return Double.parseDouble(word[10]);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    return 0;
+                }
+
+                return 0;
+            }
+
+        public double getPrecioAlmuerzo(String ID) {
 
             try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
 
@@ -918,7 +943,7 @@ public class DataBase {
                     String[] word = line.split("\\s*\\|\\s*");
 
                     if (word[1].equals(ID)) {
-                        return Double.parseDouble(word[10]);
+                        return Double.parseDouble(word[9]);
                     }
                 }
 
@@ -928,28 +953,67 @@ public class DataBase {
 
             return 0;
         }
+    //FIN
 
-    public double getPrecioAlmuerzo(String ID) {
+    //Admin cambia rol de estudiante
+    public RolUsuario UpdateRol(String ID, String tipo) {
+        File file = new File(rutaArchivo);
+        if (!file.exists()) return RolUsuario.ERROR;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+        List<String> lineasActualizadas = new ArrayList<>();
+        boolean encontrado = false;
+        RolUsuario nuevoRolEnum = RolUsuario.ERROR;
 
+        // 1. Fase de Lectura y Modificación
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
-
             while ((line = br.readLine()) != null) {
-
-                String[] word = line.split("\\s*\\|\\s*");
-
-                if (word[1].equals(ID)) {
-                    return Double.parseDouble(word[9]);
+                if (line.trim().isEmpty()) {
+                    lineasActualizadas.add(line);
+                    continue;
                 }
-            }
+                
+                String[] Word = line.split("\\s*\\|\\s*");
 
-        } catch (Exception e) {
-            return 0;
+                // Solo modificamos si coincide el ID y el rol actual es "estudiante"
+                if (Word[1].equals(ID) && (Word[3].equalsIgnoreCase("estudiante") || Word[3].equalsIgnoreCase("becado") || Word[3].equalsIgnoreCase("exonerado"))) {
+                    Word[3] = tipo.toLowerCase(); 
+                    line = String.join(" | ", Word);
+                    encontrado = true;
+                    
+                    // Convertimos el string 'tipo' al Enum para retornar el valor correcto
+                    try {
+                        nuevoRolEnum = RolUsuario.valueOf(tipo.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        nuevoRolEnum = RolUsuario.ESTUDIANTE; // Fallback
+                    }
+                }
+                
+                // IMPORTANTE: Agregamos todas las líneas, modificadas o no
+                lineasActualizadas.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer la base de datos: " + e.getMessage());
+            return RolUsuario.ERROR;
         }
 
-        return 0;
-    }
+        // Si terminamos de leer y no encontramos al usuario como estudiante, salimos
+        if (!encontrado) {
+            return RolUsuario.ERROR;
+        }
 
+        // 2. Fase de Escritura (Solo ocurre si 'encontrado' es true)
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+            for (String l : lineasActualizadas) {
+                bw.write(l);
+                bw.newLine();
+            }
+            System.out.println("-> Base de datos actualizada correctamente.");
+            return nuevoRolEnum; // Retornamos el nuevo rol asignado
+        } catch (IOException e) {
+            System.err.println("Error al escribir en la base de datos: " + e.getMessage());
+            return RolUsuario.ERROR;
+        }
+    }
 
 }
