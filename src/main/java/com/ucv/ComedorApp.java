@@ -6,7 +6,6 @@ import com.ucv.controller.UserController;
 import javax.swing.*;
 
 public class ComedorApp {
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             // Crear la vista

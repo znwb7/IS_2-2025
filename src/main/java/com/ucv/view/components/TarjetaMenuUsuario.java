@@ -93,7 +93,7 @@ public class TarjetaMenuUsuario extends JPanel {
 
         // Cálculo dinámico de raciones
         int disp = new MenuDB().CantidadDisponible(tipo.toLowerCase());
-        String maxCap = (datos.length > 9) ? datos[9] : "500";
+        String maxCap = (datos.length > 10) ? datos[10] : "500";
         String txtDisp = (disp >= 0 ? disp : 0) + " / " + maxCap + " comensales";
 
         JLabel lblDValor = new JLabel(txtDisp);
@@ -111,8 +111,10 @@ public class TarjetaMenuUsuario extends JPanel {
             if (rol == DataBase.RolUsuario.PROFESOR && datos.length > 6) precioFinal = datos[6];
             else if (rol == DataBase.RolUsuario.EMPLEADO && datos.length > 7) precioFinal = datos[7];
             else if (rol == DataBase.RolUsuario.BECADO && datos.length > 8) precioFinal = datos[8];
+            else if (rol == DataBase.RolUsuario.EXONERADO) precioFinal = "0,00";
             else if (datos.length > 5) precioFinal = datos[5]; // Por defecto cobra como Estudiante
         } catch (IOException ignored) {}
+        
 
         JLabel lblPrecio = new JLabel("Bs " + precioFinal);
         lblPrecio.setFont(new Font("Segoe UI", Font.BOLD, 26));

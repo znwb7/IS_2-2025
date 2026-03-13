@@ -106,24 +106,21 @@ public class AdminUCV extends JFrame {
         btn.setPreferredSize(new Dimension(600, 80));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // --- NUEVA LÓGICA DE REDIRECCIÓN EN EL CONTROLADOR ---
-        btn.addActionListener(e -> {
-            if (texto.equals("Configurar Menus")) {
-                dispose();
-                new com.ucv.view.admin.FechaMenus().setVisible(true);
-            } else if (texto.equals("Añadir Estatus (Estudiante)")) {
-                // Instanciamos el controlador para hacer la redirección
-                com.ucv.controller.UserController controller = new com.ucv.controller.UserController();
-                controller.irAAnadirEstatus(this);
-            } else {
-                JOptionPane.showMessageDialog(this, "Función '" + texto + "' en desarrollo.");
-            }
-        });
+btn.addActionListener(e -> {
+    if (texto.equals("Configurar Menus")) {
+        dispose();
+        new com.ucv.view.admin.FechaMenus().setVisible(true);
+    } else if (texto.equals("Añadir Estatus (Estudiante)")) {
+        com.ucv.controller.UserController controller = new com.ucv.controller.UserController();
+        controller.irAAnadirEstatus(this);
+    } else if (texto.equals("Generar reporte")) {
+        dispose(); // cerramos la ventana actual
+        new com.ucv.view.admin.Reporte().setVisible(true); // abrimos Reporte.java
+    } else {
+        JOptionPane.showMessageDialog(this, "Función '" + texto + "' en desarrollo.");
+    }
+});
 
         return btn;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AdminUCV("Administrador").setVisible(true));
     }
 }
